@@ -3,11 +3,11 @@
 var G = {};
 
 G.texturesToLoad = [
-  ['iri_red'  , 'img/iri/red.png'],
+  /*['iri_red'  , 'img/iri/red.png'],
   ['iri_gold' , 'img/iri/gold.png'],
   ['iri_blue' , 'img/iri/blue.png'],
 
-  ['norm_moss' , 'img/normals/moss_normal_map.jpg' ],
+  ['norm_moss' , 'img/normals/moss_normal_map.jpg' ],*/
 ]
 
 G.pages   = {};
