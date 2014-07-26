@@ -193,7 +193,7 @@ G.init = function(){
   this.text = new TextParticles({
     vertexShader:   this.shaders.vs.text,
     fragmentShader: this.shaders.fs.text,
-    lineLength:     50,
+    lineLength:     40,
     //letterWidth:    40,
     //lineHeight:     40
   });
