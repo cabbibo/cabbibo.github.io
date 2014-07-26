@@ -41,11 +41,11 @@ G.loader.onStart = function(){
   }
 
 }.bind( G );
-
+G.windowSize = new THREE.Vector2( window.innerWidth , window.innerHeight );
 G.w             = window.innerWidth;
 G.h             = window.innerHeight;
-
-G.camera        = new THREE.PerspectiveCamera( 45 , G.w / G.h , 10 , 100000 );
+G.ratio         = G.w / G.h
+G.camera        = new THREE.PerspectiveCamera( 45 * G.ratio , G.w / G.h , 10 , 100000 );
 G.scene         = new THREE.Scene();
 G.renderer      = new THREE.WebGLRenderer(); //autoclear:false\
 G.clock         = new THREE.Clock();
@@ -100,7 +100,7 @@ G.init = function(){
 
   */
 
-  this.textCreator = new TextCreator( 50 );
+  this.textCreator = new TextCreator( 40 );
   
   this.iPlane = new THREE.Mesh(
     new THREE.PlaneGeometry( 100000 , 100000 )
@@ -321,11 +321,15 @@ G.addToStartArray = function( callback ){
 
 
 G.onResize = function(){
+  G.windowSize.x = window.innerWidth;
+  G.windowSize.y = window.innerHeight;
 
   this.w = window.innerWidth;
   this.h = window.innerHeight;
+  this.ratio = this.w / this.h
  
-  this.camera.aspect = this.w / this.h ;
+  this.camera.aspect = this.ratio;
+  this.camera.fov   = 60 / Math.pow(this.ratio,.7); //* this.ratio;
   this.camera.updateProjectionMatrix();
   this.renderer.setSize( this.w , this.h );
 

@@ -23,8 +23,10 @@ function Link( id , params ){
   this.mesh.material.depthWrite = false;
   this.mesh.materialNeedsUpdate = true;
 
-  this.activeColor  = new THREE.Color( 0x00ccaa );
-  this.unactiveColor = new THREE.Color( 0xff5500 );
+ 
+  this.neutralColor = new THREE.Color( 0xff5500 );
+  this.focusColor   = new THREE.Color( 0x00ccaa );
+  this.hoveredColor = new THREE.Color( 0xaa55ff );
 
   G.objectControls.add( this.mesh );
 
@@ -42,7 +44,7 @@ Link.prototype.activate = function(){
     this.deathTween = undefined;
     this.text.live();
     this.tweenIn();
-    this.mesh.material.color = this.activeColor;
+    //this.mesh.material.color = this.activeColor;
     
     console.log('Dead should be false: '+ this.dead );
 
@@ -53,9 +55,8 @@ Link.prototype.activate = function(){
 
     this.text.live();
     this.tweenIn();
-    this.mesh.material.color = this.activeColor;
+    //this.mesh.material.color = this.activeColor;
     
-    console.log('Dead should be false: '+ this.dead );
 
   }
 
@@ -65,14 +66,18 @@ Link.prototype.activate = function(){
 
   }
 
+  if( !this.dead ){
+
+    //this.mesh.material.color = this.superColor;
+
+  }
 
 }
 
 Link.prototype.deactivate = function(){
- 
-  if( this.dead ){
 
-  }
+
+  this.mesh.material.color = this.neutralColor
 
   if( this.lifeTweening ){
 
@@ -82,7 +87,7 @@ Link.prototype.deactivate = function(){
     this.text.kill();
     this.tweenOut();
 
-      this.mesh.material.color = this.unactiveColor;
+      //this.mesh.material.color = this.unactiveColor;
 
 
   }
@@ -92,7 +97,7 @@ Link.prototype.deactivate = function(){
     this.text.kill();
     this.tweenOut();
 
-    this.mesh.material.color = this.unactiveColor;
+    //this.mesh.material.color = this.unactiveColor;
 
 
   }
@@ -177,10 +182,25 @@ Link.prototype.update = function(){
 }
 
 Link.prototype.hoverOver = function(){
+
+
+  this.mesh.material.color = this.hoveredColor;
+
   G.hoverOver( this.id );
 }
 
 Link.prototype.hoverOut = function(){
+
+  if( !this.dead ){
+
+    this.mesh.material.color = this.focusColor;
+
+
+  }else{
+
+    this.mesh.material.color = this.neutralColor;
+
+  }
   G.hoverOut( this.id );
 }
 

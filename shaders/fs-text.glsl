@@ -32,6 +32,7 @@ void main(){
   float wh = glyphWidth / glyphHeight;
 
 
+  float blah = vPos.x;
 
 
   float x = vTextCoord.x;
@@ -58,7 +59,6 @@ void main(){
   float yF = y + yO + glyphBelow - (1.-gl_PointCoord.y)* totalSize; 
 
 
-  float blah = (yO - h + glyphBelow)/totalSize;
  /* if(gl_PointCoord.x < xP ){
     discard;
   }
@@ -92,7 +92,9 @@ void main(){
     alpha = 0.; //discard;
   }
 
-  if( (1.-gl_PointCoord.y) < blah  ){
+  float lowerBound = (yO - h + glyphBelow)/totalSize;
+  
+  if( (1.-gl_PointCoord.y) < lowerBound  ){
     alpha = 0.; //discard;
   }
 
