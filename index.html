@@ -1,2 +1,135 @@
-HELLO WORLD
-<a href="teeps">needs</a>
+<html>
+
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <style>
+ #container{ position:absolute; left:0px; top:0px; z-index:0; width:100%; height:100%; display:block; overflow:hidden}
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+
+    <script src="lib/leap.js"></script>
+    <script src="lib/three.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/stats.min.js"></script>
+    <script src="lib/dat.gui.min.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="lib/Tween.js"></script>
+    
+    <script src="lib/ShaderLoader.js"></script>
+
+    <script src="lib/AudioController.js"></script>
+    <script src="lib/AudioTexture.js"></script>
+    <script src="lib/LoadedAudio.js"></script>
+
+    <script src="lib/TextCreator.js"></script>
+    <script src="lib/TextParticles.js"></script>
+
+    <script src="lib/ObjectControls.js"></script>
+    <script src="lib/RiggedSkeleton.js"></script>
+
+    <script src="lib/ParticleUtils.js"></script>
+    <script src="lib/PhysicsRenderer.js"></script>
+    
+    <script src="lib/Loader.js"></script>
+    
+
+
+    <!-- THESE ALWAYS GOES LAST -->
+    <script src="js/Global.js"></script>
+    <script src="js/Link.js"></script>
+    <script src="js/global/PhysicsText.js"></script>
+
+    <script src="js/links.js"></script>
+
+    <script>
+
+      // TODO: 
+      // Write shaders for hands
+
+     // G.audio.mute.gain.value = 0;
+
+      G.camera.position.z = 1000;
+
+      G.loader.addLoad();
+
+   
+      // For text
+      G.shaders.load( 'vs-text' , 'text' , 'vertex'    );
+      G.shaders.load( 'fs-text' , 'text' , 'fragment'  );
+      G.shaders.load( 'ss-text' , 'text' , 'simulation'  );
+
+      G.shaders.shaderSetLoaded = function(){
+        G.loader.onLoad();
+      }
+
+      G.loadTextures();
+
+      G.addToStartArray( function(){
+
+        console.log( 'Started' );
+
+        for( var i = 0; i < links.length; i++ ){
+
+          var p = i / links.length;
+          var link = new Link( i , links[i] );
+
+          link.text.activate();
+          G.scene.add( link.mesh );
+          G.links.push( link );
+
+          link.mesh.position.x = -500 + link.mesh.totalWidth/2;
+          link.mesh.position.y = 300 - p * 600;
+
+        }
+
+
+      
+      }.bind( G ) );
+
+      G.hoverOver = function( id ){
+
+        for( var i = 0; i < this.links.length; i++ ){
+
+
+          if( this.links[i].id === id ){
+
+            this.links[i].activate();
+
+          }else{
+
+            if( this.links[i].active ){
+
+              this.links[i].deactivate();
+
+            }
+
+          }
+
+        }
+
+      }
+
+      
+      G.hoverOut = function( id ){
+
+       
+      }
+
+      G.select = function( id ){
+
+       
+      }
+
+      G.deselect = function( id ){
+
+       
+      }
+
+    </script>
+
+  </body>
+</html>
