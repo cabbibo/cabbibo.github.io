@@ -77,8 +77,11 @@
           var link = new Link( i , links[i] );
 
           link.text.activate();
+          link.activate();
+          link.deactivate();
           G.scene.add( link.mesh );
           G.links.push( link );
+
 
           link.mesh.position.x = -500 + link.mesh.totalWidth/2;
           link.mesh.position.y = 300 - p * 600;
@@ -100,11 +103,7 @@
 
           }else{
 
-            if( this.links[i].active ){
-
-              this.links[i].deactivate();
-
-            }
+            this.links[i].deactivate();
 
           }
 

@@ -20,7 +20,7 @@ function Link( id , params ){
   this.mesh.material.opacity = .5;
   this.mesh.material.transparent = true;
   this.mesh.material.blending = THREE.AdditiveBlending;
-  this.mesh.material.depthwrite = false;
+  this.mesh.material.depthWrite = false;
   this.mesh.materialNeedsUpdate = true;
 
   this.activeColor  = new THREE.Color( 0x00ccaa );
@@ -35,35 +35,65 @@ Link.prototype.unFocus = function(){}
 
 Link.prototype.activate = function(){
 
-  this.active = true;
-  this.mesh.material.color = this.activeColor;
+  if( this.deathTweening ){
 
+    this.deathTween.stop();
+    this.deathTweening = false;
+    this.deathTween = undefined;
+    this.text.live();
+    this.tweenIn();
+    this.mesh.material.color = this.activeColor;
+    
+    console.log('Dead should be false: '+ this.dead );
+
+  }
+
+
+  if( this.dead == true ){
+
+    this.text.live();
+    this.tweenIn();
+    this.mesh.material.color = this.activeColor;
+    
+    console.log('Dead should be false: '+ this.dead );
+
+  }
+
+  if( this.active ){
+
+    console.log( 'already active' );
+
+  }
 
 
 }
 
 Link.prototype.deactivate = function(){
-  
+ 
+  if( this.dead ){
 
-  this.mesh.material.color = this.unactiveColor;
-
+  }
 
   if( this.lifeTweening ){
-    
+
     this.lifeTween.stop();
     this.lifeTweening = false;
     this.lifeTween = undefined;
     this.text.kill();
     this.tweenOut();
 
+      this.mesh.material.color = this.unactiveColor;
+
+
   }
-       
 
   if( this.active ){
 
-    this.active = false;
     this.text.kill();
     this.tweenOut();
+
+    this.mesh.material.color = this.unactiveColor;
+
 
   }
   
@@ -71,6 +101,8 @@ Link.prototype.deactivate = function(){
 }
 
 Link.prototype.tweenIn = function(){
+
+  this.dead = false;
 
   var v = this.text.uniforms.opacity.value
   var s = { o : v };
@@ -89,8 +121,10 @@ Link.prototype.tweenIn = function(){
 
   this.lifeTween.onComplete( function(){
 
-    this.lifeTweening = false;
-    this.lifeTween = undefined;
+    this.link.lifeTweening = false;
+    this.link.lifeTween = undefined;
+
+    this.link.active = true;
 
   });
 
@@ -101,13 +135,15 @@ Link.prototype.tweenIn = function(){
 
 
 Link.prototype.tweenOut = function(){
-  
+ 
+  this.active = false;
+
   var v = this.text.uniforms.opacity.value
   var s = { o : v };
   var e = { o : 0 };
 
   this.deathTween = new G.tween.Tween( s ).to( e , 3000 );
-  this.deathTweeing = true;
+  this.deathTweening = true;
  
   s.link = this;
 
@@ -119,11 +155,10 @@ Link.prototype.tweenOut = function(){
 
   this.deathTween.onComplete( function(){
 
-    this.deathTweening = false;
+    this.link.deathTweening = false;
 
-    this.dead = true;
+    this.link.dead = true;
 
-    this.link.active = false;
     this.link.deathTween = undefined;
 
   });
