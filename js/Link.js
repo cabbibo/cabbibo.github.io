@@ -11,7 +11,19 @@ function Link( id , params ){
   this.active = false;
   this.dead   = true;
 
-  this.mesh = G.textCreator.createMesh( this.params.name );
+  if( this.params.name === 'TITLE' ){
+
+    this.mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry( 50 , 50 ),
+      new THREE.MeshBasicMaterial({
+        map: G.TEXTURES['cabbibo']
+      })
+    );
+  }else{
+  
+    this.mesh = G.textCreator.createMesh( this.params.name );
+
+  }
 
   this.mesh.hoverOver = this.hoverOver.bind( this );
   this.mesh.hoverOut  = this.hoverOut.bind( this );

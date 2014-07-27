@@ -4,6 +4,7 @@ var G = {};
 
 G.texturesToLoad = [
   ['ubuntuMono'  , 'img/extras/ubuntuMono.png'],
+  ['cabbibo' , 'img/icons/cabbibo.png' ],
   
 ]
 
@@ -111,7 +112,7 @@ G.init = function(){
   this.iObj.position.set( l , l , l );
 
   this.iPointMarker = new THREE.Mesh(
-    new THREE.BoxGeometry( 500 , 500 , 100 ),
+    new THREE.BoxGeometry( 3, 3 , 100 ),
     new THREE.MeshBasicMaterial({color:0x9aae07})
   );
 
@@ -218,6 +219,7 @@ G.init = function(){
 
 G.updateIntersection = function(){
 
+  
   this.iPlane.position.copy( this.camera.position );
   var vector = new THREE.Vector3( 0 , 0 , -this.iPlaneDistance );
   vector.applyQuaternion( this.camera.quaternion );
@@ -244,6 +246,8 @@ G.updateIntersection = function(){
 
     var intersects = this.raycaster.intersectObject( this.iPlane );
 
+  if( this.objectControls.mouseMoved === true ){
+
   if( intersects.length > 0 ){
   
     this.iPoint.copy( intersects[0].point );
@@ -255,6 +259,12 @@ G.updateIntersection = function(){
     //console.log('NOT HITTING IPLANE!');
   }
 
+
+  }else{
+
+    this.iPoint.set( 100000 , 100000 , 10000 );
+
+  }
 
 }
 
@@ -274,7 +284,9 @@ G.animate = function(){
 
     this.tween.update();
 
-    this.objectControls.update();
+   // if( this.objectControls.mouseMoved === true ){
+      this.objectControls.update();
+   // }
     this.updateIntersection();
 
     this.audio.update();

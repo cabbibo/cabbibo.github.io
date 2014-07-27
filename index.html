@@ -103,19 +103,25 @@
 
           G.links.push( link );
 
+          G.scene.add( link.mesh );
+
 
           if( i !== 0 ){
 
-          G.scene.add( link.mesh );
+            link.mesh.position.y = 200;
+            link.mesh.position.x = totalX + link.mesh.totalWidth/2;
+            totalX += link.mesh.totalWidth + 35;
 
-          link.mesh.position.y = 200;
-          link.mesh.position.x = totalX + link.mesh.totalWidth/2;
-          totalX += link.mesh.totalWidth + 35;
+            var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
 
-          var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
-
-          var pTexture = ParticleUtils.createPositionsTexture( link.text.size , mesh );
+            var s = link.text.size;
+            var pTexture = ParticleUtils.createPositionsTexture( s , mesh );
             link.text.physics.reset( pTexture );
+
+          }else{
+
+          link.mesh.position.y = -200;
+          link.mesh.position.x = 400;
 
           }
 

@@ -4,14 +4,16 @@ var links = [
  {
 
     name:'TITLE',
-   // link:'http://cabbibo.com/recursion',
+    link:'http://twitter.com/cabbibo',
     note:'c2',
     text:[
-     
+    
+      "",
+      "",
       "This perhaps is the most striking effect; the artist renders an interactive virtual space in deference to the material one in which we live. Instead of consuming something new, playing in it feels a return to the roots, or at least inspires a deeper appreciation of them.",
     "",
     "",
-    "                                     - The Wild Magazine"
+    "                                        - The Wild Magazine","","",
 
 
     ].join("\n")
@@ -29,7 +31,8 @@ var links = [
       "",
       "",
       "Recursion functions on a very interesting and original concept, namely merging the areas of thematic wikipedia facts, musical remixing and ‘point and click’ immersion.",
-      "","                               - WebGL.com","","",
+      "",
+      "                                              - WebGL.com","","",
       "Tech: WebGL , Web Audio API "
 
 
@@ -64,7 +67,7 @@ var links = [
       "","",
       "In the Universe of Sound ... visitors fly through a galactic expanse into and out of songs, denoted visually by fictional planets that twitch to the rhythm of their corresponding anthems. It’s a virtual reality if ever there was one.",
       "",
-      "                                - The Wild Magazine","","",
+      "                                        - The Wild Magazine","","",
       "Tech: WebGL , Web Audio API "
 
       ].join("\n")
@@ -82,7 +85,7 @@ var links = [
       "","",
       "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
       "",
-      "                            - The Wild Magazine","","",
+      "                                        - The Wild Magazine","","",
       "Tech: WebGL , Web Audio API "
 
 
@@ -103,8 +106,7 @@ var links = [
       "","",
       "As the strutting house tune jaunts along, the viewer can explore a suspended landscape filled with a multitude of orbiting objects, images which unfold to resemble glowing sprites or fractals gathering outside of a celestial body.",
       "",
-
-      "                                    - xlr8r","","",
+      "                                                  - xlr8r","","",
       "Tech: WebGL , Web Audio API "
 
     ].join("\n")
@@ -124,7 +126,7 @@ var links = [
       "","",
       "Each song has its own color palette, movement pattern, or, for lack of a better term, multi-sensory soul—sucking the environment's visitors into an orbital EP that looks like it has its own sonic solar system. ",
       "",
-      "                                - Creators Project","","",
+      "                                         - Creators Project","","",
       "Tech: WebGL , Web Audio API "
       
       

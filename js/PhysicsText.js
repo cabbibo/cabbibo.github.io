@@ -7,7 +7,7 @@ function PhysicsText( string , params ){
 
     repelPositions: [],
     gRepelPositions: [],
-    offset: new THREE.Vector3( -420 , 100 , 0 ),
+    offset: new THREE.Vector3( -420 , 130 , 0 ),
     distToCam: 1000,
     repelForce: 200000
 
@@ -56,6 +56,7 @@ function PhysicsText( string , params ){
   gRepelPos.push( G.iPoint );
 
   //TODO: add something cool for this
+  //gRepelPos.push( new THREE.Vector3( 10000000000000 , 0 , 0 ) );
   gRepelPos.push( new THREE.Vector3( 10000000000000 , 0 , 0 ) );
 
   var uGRepelPos = {
