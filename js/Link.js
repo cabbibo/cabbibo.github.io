@@ -97,6 +97,8 @@ Link.prototype.activate = function(){
 
   if( this.dead == true ){
 
+    var t = ParticleUtils.createPositionsTexture( this.text.size , G.links[0].mesh );
+    this.text.physics.reset( t );
     this.text.live();
     this.tweenIn();
     //this.mesh.material.color = this.activeColor;
@@ -290,5 +292,9 @@ Link.prototype.deselect = function(){
   G.deselect( this.id );
 }
 
+Link.prototype.instant = function(){
 
+
+
+}
 
