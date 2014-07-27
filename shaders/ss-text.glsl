@@ -29,7 +29,7 @@ void main(){
   vec4 pos  = texture2D( t_pos  , vUv );
   vec4 to   = texture2D( t_to   , vUv );
 
-  vec2 offset = vec2( timer * 40. , timer * 40.  );
+  vec2 offset = vec2( timer * 100. , timer * 10.  );
   float displace =  1. * snoise( (to.xy + offset ) * .001 );
   //float displace = snoise( to.xy * .1 );
 
@@ -44,7 +44,7 @@ void main(){
 
   normalize( newDir );
   vec3 newTo1 = ( cameraMat * vec4( to.xyz , 0. )  ).xyz;
-  vec3 newTo = newTo1 + (cameraPos+offsetPos) - newDir * distToCam; 
+  vec3 newTo = newTo1 + (cameraPos+offsetPos) - newDir * distToCam -  20.  * newDir * displace; 
  /* vec3 newP = cameraPos - offsetPos;
   newTo = -(normalize(cameraPos.xyz) * distToCam ) + (cameraMat * vec4( to.xyz + newP , 1. )).xyz;*/
 

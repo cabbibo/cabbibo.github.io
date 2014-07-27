@@ -75,9 +75,9 @@ void main(){
   float lum = smoothstep( 0.5 - smoothing , 0.5 + smoothing , distance );
   float alpha = lum; //1. - lum;
 
-  float simplex = abs(vLookup.w);
+  float simplex = vLookup.w; //abs(vLookup.w);
   //float mult = .1 + simplex * 3.7;
-  float mult = .5 + simplex * .05;
+  float mult = .7 + simplex * .02;
   gl_FragColor = vec4( vec3( 1. , 1. , 1. )*mult, alpha * opacity );
 
 

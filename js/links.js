@@ -5,7 +5,7 @@ var links = [
 
     name:'TITLE',
     link:'http://twitter.com/cabbibo',
-    note:'c2',
+    note:'c6',
     text:[
     
       "",
