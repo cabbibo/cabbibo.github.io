@@ -1,10 +1,11 @@
-// TODO: Global Loki Character
-
 var G = {};
 
 G.texturesToLoad = [
   ['ubuntuMono'  , 'img/extras/ubuntuMono.png'],
   ['cabbibo' , 'img/icons/cabbibo.png' ],
+  ['twitter' , 'img/icons/twitter_1.png' ],
+  ['facebook' , 'img/icons/facebook_1.png' ],
+  ['soundcloud' , 'img/icons/soundcloud_1.png' ],
   
 ]
 G.loader  = new Loader();
@@ -111,14 +112,14 @@ G.init = function(){
   var l = 1000000000;
 
   this.iObj = new THREE.Object3D();
-  this.iObj.position.set( l , l , l );
+  this.iObj.position.set( l , l , -l*300 );
 
   this.iPointMarker = new THREE.Mesh(
     new THREE.BoxGeometry( 3, 3 , 100 ),
     new THREE.MeshBasicMaterial({color:0x9aae07})
   );
 
- // this.iObj.add( this.iPointMarker );
+  this.iObj.add( this.iPointMarker );
   this.scene.add( this.iObj );
 
   this.iPoint = this.iObj.position;
@@ -246,24 +247,25 @@ G.updateIntersection = function(){
   
   this.raycaster.set( this.camera.position , dir);
 
-    var intersects = this.raycaster.intersectObject( this.iPlane );
+  var intersects = this.raycaster.intersectObject( this.iPlane );
 
   if( this.objectControls.mouseMoved === true ){
 
-  if( intersects.length > 0 ){
-  
-    this.iPoint.copy( intersects[0].point );
-    this.iPoint.relative.copy( this.iPoint );
-    this.iPoint.relative.sub( this.position );
-    this.iDir = dir;
-   // bait.position.copy( intersects[0].point );
-  }else{
-    //console.log('NOT HITTING IPLANE!');
-  }
+    if( intersects.length > 0 ){
+    
+      this.iPoint.copy( intersects[0].point );
+      this.iPoint.relative.copy( this.iPoint );
+      this.iPoint.relative.sub( this.position );
+      this.iDir = dir;
+     // bait.position.copy( intersects[0].point );
+    }else{
+      //console.log('NOT HITTING IPLANE!');
+    }
 
 
   }else{
 
+    console.log('not set set' );
     this.iPoint.set( 100000 , 100000 , 10000 );
 
   }

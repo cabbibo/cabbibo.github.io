@@ -129,7 +129,7 @@
           G.scene.add( link.mesh );
 
 
-          if( i !== 0 ){
+          if( i > 3 ){
 
             link.mesh.position.y = 200;
             link.mesh.position.x = totalX + link.mesh.totalWidth/2;
@@ -143,8 +143,36 @@
 
           }else{
 
-          link.mesh.position.y = -200;
-          link.mesh.position.x = 400;
+          if( i == 0 ){
+            link.mesh.position.y = -200;
+            link.mesh.position.x = 400;
+          }
+
+          if( i == 0 ){
+            link.mesh.position.y = 280;
+            link.mesh.position.x = 0;
+          }
+          if( i == 1 ){
+
+            link.mesh.position.y = -225;
+            link.mesh.position.x = 370;
+
+          }
+          if( i == 2 ){
+
+            link.mesh.position.y = -225;
+            link.mesh.position.x = 410;
+
+          }
+          if( i == 3 ){
+
+            link.mesh.position.y = -225;
+            link.mesh.position.x = 450;
+
+          }
+
+
+
 
           }
 

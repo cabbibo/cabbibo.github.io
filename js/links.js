@@ -20,6 +20,64 @@ var links = [
 
   },
 
+   {
+
+    name:'TWITTER',
+    link:'http://twitter.com/cabbibo',
+    note:'c1',
+    text:[
+    
+      "",
+      "",
+      "",
+      "",
+      "",
+      "                       Share on Twitter",
+
+
+
+
+    ].join("\n")
+
+  },
+
+  
+   {
+
+    name:'FACEBOOK',
+    link:'https://www.facebook.com/Cabbibo',
+    note:'c3',
+    text:[
+    
+      "",
+      "",
+      "",
+      "",
+      "",
+      "                      Share on Facebook",
+
+
+    ].join("\n")
+
+  },
+   {
+
+    name:'SOUNDCLOUD',
+    link:'http://soundcloud.com/cabbibo',
+    note:'c3',
+    text:[
+    
+      "",
+      "",
+      "",
+      "",     
+      "",
+      "                    Cabbibo on Soundcloud",
+    ].join("\n")
+
+  },
+
+
     {
 
     name:'Cabbibo',
@@ -64,9 +122,9 @@ var links = [
       
       "A Universe Of Sound",
       "","",
-      "In the Universe of Sound ... visitors fly through a galactic expanse into and out of songs, denoted visually by fictional planets that twitch to the rhythm of their corresponding anthems. It’s a virtual reality if ever there was one.",
+      "An immersive landscape for art and music lovers, Cabibbo has proved that a story need not have a cohesive narrative in order to pack a powerful emotional punch. ",
       "",
-      "                                        - The Wild Magazine","","",
+      "                            - The Future Of Storytelling","","",
       "Tech: WebGL , Web Audio API "
 
       ].join("\n")
