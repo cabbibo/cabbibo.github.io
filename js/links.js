@@ -23,7 +23,7 @@ var links = [
    {
 
     name:'TWITTER',
-    link:"http://twitter.com/share?text=God%20bless%20@cabbibo%20the%20once%20and%20future%20king:%20&url=http://cabbi.bo",
+    link:"http://twitter.com/share?text=God%20bless%20@cabbibo,%20the%20once%20and%20future%20king:%20&url=http://cabbi.bo",
     note:'c1',
     text:[
     
