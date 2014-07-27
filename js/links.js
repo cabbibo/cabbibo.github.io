@@ -23,7 +23,7 @@ var links = [
    {
 
     name:'TWITTER',
-    link:"http://twitter.com/share?text=Long%20Live%20Synesthesia%20:%20&url=http://cabbi.bo",
+    link:"http://twitter.com/share?text=God%20save%20the%20@cabbibo%20:%20&url=http://cabbi.bo",
     note:'c1',
     text:[
     
