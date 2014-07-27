@@ -95,7 +95,7 @@
       
       G.addToStartArray( function(){
 
-        var totalX = -360;
+        var totalX = -435;
         for( var i = 0; i < links.length; i++ ){
 
           var p = (i+.5) / links.length// (i+.5) / links.length;
@@ -109,8 +109,8 @@
           G.scene.add( link.mesh );
 
           link.mesh.position.y = 200;
-          link.mesh.position.x = totalX;
-          totalX += link.mesh.totalWidth + 25;
+          link.mesh.position.x = totalX + link.mesh.totalWidth/2;
+          totalX += link.mesh.totalWidth + 35;
 
           var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
 

@@ -36,26 +36,7 @@ var links = [
     ].join("\n")
 
   },
-  {
-
-    name:'Cabbibo',
-    link:'http://cabbibo.com/',
-    note:'c1',
-    text:[
-      
-      "Organic Play Space",
-      "","",
-      "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
-      "",
-      "                            - The Wild Magazine","","",
-      "Tech: WebGL , Web Audio API "
-
-
-
-    ].join("\n")
-
-  },
- /*{
+  /*{
     
     name:'Needs',
     link:'needs',
@@ -89,7 +70,26 @@ var links = [
       ].join("\n")
 
   },
-  
+ 
+  {
+
+    name:'Cabbibo',
+    link:'http://cabbibo.com/',
+    note:'c1',
+    text:[
+      
+      "Organic Play Space",
+      "","",
+      "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
+      "",
+      "                            - The Wild Magazine","","",
+      "Tech: WebGL , Web Audio API "
+
+
+
+    ].join("\n")
+
+  },
   {
 
     name:'Quoi',

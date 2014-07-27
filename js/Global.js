@@ -111,8 +111,8 @@ G.init = function(){
   this.iObj.position.set( l , l , l );
 
   this.iPointMarker = new THREE.Mesh(
-    new THREE.BoxGeometry( 50 , 50 , 100 ),
-    new THREE.MeshBasicMaterial({color:0xffff00})
+    new THREE.BoxGeometry( 500 , 500 , 100 ),
+    new THREE.MeshBasicMaterial({color:0x9aae07})
   );
 
   this.iObj.add( this.iPointMarker );
