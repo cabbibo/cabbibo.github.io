@@ -7,7 +7,7 @@ function PhysicsText( string , params ){
 
     repelPositions: [],
     gRepelPositions: [],
-    offset: new THREE.Vector3( -420 , 130 , 0 ),
+    offset: new THREE.Vector3( -350 , 130 , 0 ),
     distToCam: 1000,
     repelForce: 200000
 
