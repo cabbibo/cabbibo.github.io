@@ -101,7 +101,10 @@ void main(){
   }
 
 
-  vec3 red  = vec3( 1. , 1. , .6 );
+  float r = abs( cos( simplex * 4. ));
+  float g = abs( cos( simplex * 20. ));
+  float b = abs( sin( simplex * 8. ));
+  vec3 red  = vec3( r , g , b);
   vec3 blue = vec3( 0. , -.2 , .4 ) * gl_PointCoord.y;
    gl_FragColor = vec4((red + blue )*mult , alpha * opacity );
 
