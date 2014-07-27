@@ -7,6 +7,8 @@ G.texturesToLoad = [
   ['cabbibo' , 'img/icons/cabbibo.png' ],
   
 ]
+G.loader  = new Loader();
+
 
 G.pages   = {};
 
@@ -21,7 +23,7 @@ G.audio   = new AudioController();
 G.shaders = new ShaderLoader( 'shaders' );
 G.leap    = new Leap.Controller();
 //G.gui     = new dat.GUI({});
-G.loader  = new Loader();
+//G.loader  = new Loader();
 G.stats   = new Stats();
 
 
