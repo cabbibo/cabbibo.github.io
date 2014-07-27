@@ -31,7 +31,7 @@ var links = [
       "",
       "",
       "",
-      "                   Share on Twitter",
+      "                     Share on Twitter",
 
 
 
@@ -52,7 +52,7 @@ var links = [
       "",
       "",
       "",
-      "                   Share on Facebook",
+      "                     Share on Facebook",
 
 
     ].join("\n")
@@ -69,7 +69,7 @@ var links = [
       "",
       "",
       "",     
-      "                Cabbibo on Soundcloud",
+      "                    Cabbibo on Soundcloud",
     ].join("\n")
 
   },
