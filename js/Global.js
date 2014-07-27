@@ -3,11 +3,8 @@
 var G = {};
 
 G.texturesToLoad = [
-  /*['iri_red'  , 'img/iri/red.png'],
-  ['iri_gold' , 'img/iri/gold.png'],
-  ['iri_blue' , 'img/iri/blue.png'],
-
-  ['norm_moss' , 'img/normals/moss_normal_map.jpg' ],*/
+  ['ubuntuMono'  , 'img/extras/ubuntuMono.png'],
+  
 ]
 
 G.pages   = {};
@@ -114,7 +111,7 @@ G.init = function(){
   this.iObj.position.set( l , l , l );
 
   this.iPointMarker = new THREE.Mesh(
-    new THREE.BoxGeometry( 5 , 5 , 100 ),
+    new THREE.BoxGeometry( 50 , 50 , 100 ),
     new THREE.MeshBasicMaterial({color:0xffff00})
   );
 

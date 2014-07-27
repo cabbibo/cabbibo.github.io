@@ -100,10 +100,6 @@ function PhysicsText( string , params ){
 
   var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
 
-  var pTexture = ParticleUtils.createPositionsTexture( this.size , mesh );
-
-  this.physics.reset( pTexture );
-  
 
 }
 

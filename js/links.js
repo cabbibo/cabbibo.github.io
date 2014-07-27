@@ -1,6 +1,22 @@
 var links = [
 
 
+ {
+
+    name:'TITLE',
+   // link:'http://cabbibo.com/recursion',
+    note:'c2',
+    text:[
+     
+      "This perhaps is the most striking effect; the artist renders an interactive virtual space in deference to the material one in which we live. Instead of consuming something new, playing in it feels a return to the roots, or at least inspires a deeper appreciation of them.",
+    "",
+    "",
+    "                                     - The Wild Magazine"
+
+
+    ].join("\n")
+
+  },
   {
 
     name:'Recursion',
@@ -24,8 +40,6 @@ var links = [
 
     name:'Cabbibo',
     link:'http://cabbibo.com/',
-        img:['cabbibo','recursion','bees'],
-
     note:'c1',
     text:[
       
