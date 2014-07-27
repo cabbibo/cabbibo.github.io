@@ -77,7 +77,7 @@ void main(){
 
   float simplex = abs(vLookup.w);
   //float mult = .1 + simplex * 3.7;
-  float mult = .5 + simplex * .5;
+  float mult = .5 + simplex * .05;
   gl_FragColor = vec4( vec3( 1. , 1. , 1. )*mult, alpha * opacity );
 
 
@@ -101,12 +101,12 @@ void main(){
   }
 
 
-  float r = abs( cos( simplex * 4. ));
-  float g = abs( cos( simplex * 20. ));
-  float b = abs( sin( simplex * 8. ));
+  float r = abs( cos( simplex * 1. ));
+  float g = abs( cos( simplex * 2. ));
+  float b = abs( sin( simplex * 1. ));
   vec3 red  = vec3( r , g , b);
   vec3 blue = vec3( 0. , -.2 , .4 ) * gl_PointCoord.y;
-   gl_FragColor = vec4((red + blue )*mult , alpha * opacity );
+   gl_FragColor = vec4(vec3( 1.)*mult , alpha * opacity );
 
 /*
   

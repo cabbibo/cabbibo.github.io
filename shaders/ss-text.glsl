@@ -29,8 +29,8 @@ void main(){
   vec4 pos  = texture2D( t_pos  , vUv );
   vec4 to   = texture2D( t_to   , vUv );
 
-  vec2 offset = vec2( timer * 10. , timer * 10.  );
-  float displace = snoise( (to.xy + offset ) * .01 );
+  vec2 offset = vec2( timer * 40. , timer * 40.  );
+  float displace =  1. * snoise( (to.xy + offset ) * .001 );
   //float displace = snoise( to.xy * .1 );
 
 //  vec4 rotPos = vec4( to.x , to.y , -5. 
@@ -108,6 +108,6 @@ void main(){
   }
   //newPos.z = displace * 5.;
 
-  gl_FragColor= vec4( newPos , displace );
+  gl_FragColor= vec4( newPos , displace * 10. );
 
 }
