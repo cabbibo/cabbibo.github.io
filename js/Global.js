@@ -236,7 +236,7 @@ G.updateIntersection = function(){
 
   if( this.objectControls.leap === true ){
 
-    console.log('YRP');
+    //console.log('YRP');
     dir = this.rHand.hand.position.clone();
  
   }

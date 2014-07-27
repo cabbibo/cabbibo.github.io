@@ -23,7 +23,7 @@ var links = [
    {
 
     name:'TWITTER',
-    link:"http://twitter.com/share?text=God%20save%20the%20@cabbibo%20:%20&url=http://cabbi.bo",
+    link:"http://twitter.com/share?text=God%20bless%20@cabbibo%20the%20once%20and%20future%20king:%20&url=http://cabbi.bo",
     note:'c1',
     text:[
     
@@ -131,6 +131,21 @@ var links = [
 
    {
     
+    name:'Fall',
+    link:'FallSketches',
+    note:'c2',
+    text:[
+      "Fall Sketches",
+      "","",
+      "After the release of 'Fall Sketches' in 2013, this experiment was created to answer the question: 'What does a space jukebox look like?' Cabbibo's answer is, of course, a lonely alien stonehenge, and a pulsating space puppy.",
+      "","",
+      "Tech: WebGL , Web Audio API "
+    ].join("\n")
+
+  },
+
+    /* {
+    
     name:'Skull',
     link:'Skull',
     note:'c2',
@@ -142,7 +157,8 @@ var links = [
       "Tech: WebGL , Web Audio API "
     ].join("\n")
 
-  },
+  },*/
+
 
 
   {
