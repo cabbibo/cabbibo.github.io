@@ -7,7 +7,7 @@ function PhysicsText( string , params ){
 
     repelPositions: [],
     gRepelPositions: [],
-    offset: new THREE.Vector3( -100 , 250 , 0 ),
+    offset: new THREE.Vector3( -420 , 100 , 0 ),
     distToCam: 1000,
     repelForce: 200000
 
@@ -79,7 +79,7 @@ function PhysicsText( string , params ){
   this.repelForce    = { type:"f"  , value: this.params.repelForce }
   this.pagePos       = { type:"v3" , value: G.position }
 
-  var noiseSize = .002 + (Math.random() -.5)*.001;
+  var noiseSize = .002 + (Math.random() -.5)*.003;
 
   this.noiseSize     = { type:"f"  , value: noiseSize };
 

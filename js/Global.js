@@ -22,7 +22,7 @@ G.MATS      = {};
 G.audio   = new AudioController();
 G.shaders = new ShaderLoader( 'shaders' );
 G.leap    = new Leap.Controller();
-G.gui     = new dat.GUI({});
+//G.gui     = new dat.GUI({});
 G.loader  = new Loader();
 G.stats   = new Stats();
 
@@ -78,10 +78,10 @@ G.renderer.setSize( G.w , G.h );
 G.container.appendChild( G.renderer.domElement );
   
 G.stats.domElement.id = 'stats';
-document.body.appendChild( G.stats.domElement );
+//document.body.appendChild( G.stats.domElement );
 
 G.leap.connect();
-G.gui.close();
+//G.gui.close();
 G.scene.add( G.camera );
 //G.onResize();
 
@@ -193,7 +193,7 @@ G.init = function(){
   this.text = new TextParticles({
     vertexShader:   this.shaders.vs.text,
     fragmentShader: this.shaders.fs.text,
-    lineLength:     40,
+    lineLength:     60,
     //letterWidth:    40,
     //lineHeight:     40
   });

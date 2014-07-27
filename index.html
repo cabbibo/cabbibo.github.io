@@ -46,10 +46,11 @@
 
     <script>
 
+
       // TODO: 
       // Write shaders for hands
 
-     // G.audio.mute.gain.value = 0;
+      G.audio.mute.gain.value = .05;
 
       G.camera.position.z = 1000;
 
@@ -67,24 +68,106 @@
 
       G.loadTextures();
 
+
+
+      for( var i = 0; i < links.length; i++ ){
+
+        var name = links[i].note;
+        var file = "audio/"+name+".mp3"
+
+        if( !G.AUDIO[ name ] ){
+
+          G.loader.addLoad();
+
+          var file = "audio/"+name+".mp3"
+
+          G.AUDIO[ name ]= new LoadedAudio( G.audio , file );
+
+          G.AUDIO[ name ].onLoad = function(){
+             
+            G.loader.onLoad();
+
+          }.bind( this );
+
+        }
+
+        for( var j = 0; j < links[i].img.length; j++ ){
+
+          var name = links[i].img[j];
+          var file = "img/"+name+".png"
+
+          if( !G.TEXTURES[ name ] ){
+
+            var cb = function(){
+              G.loader.onLoad(); 
+            };
+
+            var m = THREE.UVMapping;
+
+            var l = THREE.ImageUtils.loadTexture;
+
+            G.loader.addLoad();
+            G.TEXTURES[ name ] = l( file , m , cb );
+            G.TEXTURES[ name ].wrapS = THREE.RepeatWrapping;
+            G.TEXTURES[ name ].wrapT = THREE.RepeatWrapping;
+
+          }
+
+
+
+        }
+
+
+
+
+      }
+
+      
       G.addToStartArray( function(){
 
         console.log( 'Started' );
+        G.spinner = new THREE.Object3D();
 
+        G.spinner.position.z = -5;
+        G.spinner.position.y = 200;
+        G.spinner.position.x = 200;
+
+        var totalX = -360;
+        //G.scene.add( G.spinner );
         for( var i = 0; i < links.length; i++ ){
 
-          var p = i / links.length;
-          var link = new Link( i , links[i] );
+          var p = (i+.5) / links.length// (i+.5) / links.length;
+          var t = p * 2 * Math.PI;
+
+          var link = new Link( i ,  t , links[i] );
 
           link.text.activate();
           link.activate();
           link.deactivate();
+          G.scene.add( link.image );
           G.scene.add( link.mesh );
           G.links.push( link );
 
 
-          link.mesh.position.x = -550 + link.mesh.totalWidth/2;
-          link.mesh.position.y = 300 - p * 600;
+          var x = 800 * Math.cos( t );
+          var z = 800 * Math.sin( t );
+
+          console.log( x , z );
+
+          //link.image.position.x = x;
+          //link.image.position.z = z;
+
+          //link.image.lookAt( link.image.position.clone().multiplyScalar( 1.1) );
+          G.spinner.add( link.image );
+
+          
+          //link.mesh.position.x = -550 + link.mesh.totalWidth/2;
+          //link.mesh.position.y = 300 - p * 600;
+         
+          link.mesh.position.y = 200;
+          link.mesh.position.x = totalX;
+          totalX += link.mesh.totalWidth + 25;
+
 
         }
 
