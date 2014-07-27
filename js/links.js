@@ -19,27 +19,27 @@ var links = [
     ].join("\n")
 
   },
-  {
 
-    name:'Recursion',
-    link:'http://cabbibo.com/recursion',
-        img:['cabbibo','recursion','bees'],
-    note:'c2',
+    {
+
+    name:'Cabbibo',
+    link:'http://cabbibo.com/',
+    note:'c1',
     text:[
       
-      "Recursion EP",
+      "Organic Play Space",
+      "","",
+      "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
       "",
-      "",
-      "Recursion functions on a very interesting and original concept, namely merging the areas of thematic wikipedia facts, musical remixing and ‘point and click’ immersion.",
-      "",
-      "                                              - WebGL.com","","",
+      "                                        - The Wild Magazine","","",
       "Tech: WebGL , Web Audio API "
+
 
 
     ].join("\n")
 
   },
-  /*{
+   /*{
     
     name:'Needs',
     link:'needs',
@@ -59,7 +59,6 @@ var links = [
 
     name:'UOS',
     link:'http://cabbibo.com/uOS',
-    img:['cabbibo','recursion','bees'],
     note:'c3',
     text:[
       
@@ -74,31 +73,27 @@ var links = [
 
   },
  
-  {
 
-    name:'Cabbibo',
-    link:'http://cabbibo.com/',
-    note:'c1',
+   {
+    
+    name:'Skull',
+    link:'Skull',
+    note:'c2',
     text:[
-      
-      "Organic Play Space",
+      "Hetkonen - Vladislav Delay",
       "","",
-      "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
-      "",
-      "                                        - The Wild Magazine","","",
+      "Saying too much about this experience would ruin it, but just know that it involves beautiful models made by Steve Teeps, powerful audio by Vladislav Delay, and spacial depth. Make sure you scroll out.",
+      "","",
       "Tech: WebGL , Web Audio API "
-
-
-
     ].join("\n")
 
   },
+
+
   {
 
     name:'Quoi',
     link:'http://wom.bs/quoi',
-        img:['cabbibo','recursion','bees'],
-
     note:'c3',
     text:[
       
@@ -118,7 +113,6 @@ var links = [
     
     name:'Flow',
     link:'Flow',
-        img:['cabbibo','recursion','bees'],
     note:'c2',
     text:[
     
@@ -133,28 +127,49 @@ var links = [
     ].join("\n")
 
   },
-
-  {
+   {
     
-    name:'Skull',
-    link:'Skull',
-        img:['cabbibo','recursion','bees'],
+    name:'Needs',
+    link:'Needs',
     note:'c2',
     text:[
-      "Hetkonen - Vladislav Delay",
+    
+      "Needs - JJ Verne",
       "","",
-      "Saying too much about this experience would ruin it, but just know that it involves beautiful models made by Steve Teeps, powerful audio by Vladislav Delay, and spacial depth. Make sure you scroll out.",
+      "JJ Verne's debut EP 'Needs' is unbelievably lucious. Each shimmer and sparkle serenades the listener with unparalleled kindness. The interactive synesthetic enviornment pairs with this emotion, bringing to the table a hint of both nostalgia and frisson.",
       "","",
       "Tech: WebGL , Web Audio API "
+
+        
     ].join("\n")
 
   },
 
    {
+
+    name:'Recursion',
+    link:'http://cabbibo.com/recursion',
+    note:'c2',
+    text:[
+      
+      "Recursion EP",
+      "",
+      "",
+      "Recursion functions on a very interesting and original concept, namely merging the areas of thematic wikipedia facts, musical remixing and ‘point and click’ immersion.",
+      "",
+      "                                              - WebGL.com","","",
+      "Tech: WebGL , Web Audio API "
+
+
+    ].join("\n")
+
+  },
+
+
+  /* {
     
     name:'Bees',
     link:'Bees',
-        img:['cabbibo','recursion','bees'],
     note:'c2',
     text:[
     
@@ -167,7 +182,7 @@ var links = [
         
     ].join("\n")
 
-  },
+  },*/
 
 
 
