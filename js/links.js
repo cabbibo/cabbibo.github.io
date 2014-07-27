@@ -23,7 +23,7 @@ var links = [
    {
 
     name:'TWITTER',
-    link:'http://twitter.com/cabbibo',
+    link:"http://twitter.com/share?text=Long%20Live%20Synesthesia%20:%20&url=http://cabbi.bo",
     note:'c1',
     text:[
     
@@ -45,7 +45,7 @@ var links = [
    {
 
     name:'FACEBOOK',
-    link:'https://www.facebook.com/Cabbibo',
+    link:'http://www.facebook.com/sharer.php?u=http://cabbi.bo',
     note:'c3',
     text:[
     
