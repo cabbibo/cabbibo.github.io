@@ -88,12 +88,23 @@ void main(){
 
   vec3 newPos = vec3(1.);
   
-  if( alive > .5 ){
-    newPos = pos.xyz + vel * (( displace *displace+ 2.)/10.);
+  if( alive < 1.5){
+    
+    if( alive > .5 ){
+     
+      newPos = pos.xyz + vel * (( displace *displace+ 2.)/10.);
+    
+    }else{
+
+      vec3 curlForce = curlNoise( pos.xyz * noiseSize );
+      newPos = pos.xyz - curlForce * 10.;
+
+    }
+  
   }else{
 
-    vec3 curlForce = curlNoise( pos.xyz * noiseSize );
-    newPos = pos.xyz - curlForce * 10.;
+    newPos = newTo.xyz;
+
   }
   //newPos.z = displace * 5.;
 

@@ -92,8 +92,6 @@ Link.prototype.activate = function(){
     this.tweenIn();
     //this.mesh.material.color = this.activeColor;
     
-    console.log('Dead should be false: '+ this.dead );
-
   }
 
 
@@ -257,10 +255,12 @@ Link.prototype.update = function(){
 Link.prototype.hoverOver = function(){
 
 
+  console.log( this.params.name );
   G.AUDIO[ this.params.note ].play();
   this.mesh.material.color = this.hoveredColor;
 
   G.hoverOver( this.id );
+
 }
 
 Link.prototype.hoverOut = function(){

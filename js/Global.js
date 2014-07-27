@@ -119,7 +119,7 @@ G.init = function(){
     new THREE.MeshBasicMaterial({color:0x9aae07})
   );
 
-  this.iObj.add( this.iPointMarker );
+  //this.iObj.add( this.iPointMarker );
   this.scene.add( this.iObj );
 
   this.iPoint = this.iObj.position;
@@ -265,7 +265,6 @@ G.updateIntersection = function(){
 
   }else{
 
-    console.log('not set set' );
     this.iPoint.set( 100000 , 100000 , 10000 );
 
   }

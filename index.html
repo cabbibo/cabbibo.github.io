@@ -128,6 +128,9 @@
 
           G.scene.add( link.mesh );
 
+          link.deactivate();
+
+
 
           if( i > 3 ){
 
@@ -146,6 +149,11 @@
           if( i == 0 ){
             link.mesh.position.y = -200;
             link.mesh.position.x = 400;
+
+            link.text.instant();
+           /* var t = link.text.particles.material.uniforms.t_lookup.value;
+            link.text.physics.reset( t );*/
+
           }
 
           if( i == 0 ){
@@ -177,7 +185,6 @@
           }
 
         }
-
 
       
       }.bind( G ) );

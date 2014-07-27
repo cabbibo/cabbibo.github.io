@@ -101,7 +101,6 @@ function PhysicsText( string , params ){
 
   var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
 
-
 }
 
 PhysicsText.prototype.kill = function(){
@@ -112,6 +111,25 @@ PhysicsText.prototype.kill = function(){
 
 PhysicsText.prototype.live = function(){
 
+  this.alive.value = 1;
+
+}
+
+
+PhysicsText.prototype.instant = function(){
+
+  console.log('HELLO');
+  this.alive.value = 2;
+
+ // for( var i = 0; i < 50; i++ ){
+
+  this.physics.update();
+  this.physics.update();
+  this.physics.update();
+
+  //this.physics.reset( this.physics.output );
+
+//  }
   this.alive.value = 1;
 
 }
