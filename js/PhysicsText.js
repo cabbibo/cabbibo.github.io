@@ -99,7 +99,6 @@ function PhysicsText( string , params ){
 
   this.physics.addBoundTexture( this.particles , 't_lookup' , 'output' );
 
-  var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
 
 }
 

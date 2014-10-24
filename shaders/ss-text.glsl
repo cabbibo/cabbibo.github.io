@@ -97,7 +97,7 @@ void main(){
     }else{
 
       vec3 curlForce = curlNoise( pos.xyz * noiseSize );
-      newPos = pos.xyz - curlForce * 10.;
+      newPos = pos.xyz - curlForce * 1.1;
 
     }
   
