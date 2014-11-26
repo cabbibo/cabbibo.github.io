@@ -81,7 +81,7 @@
 
       G.camera.position.z = 1000;
 
-      var SIZE = 200
+      var SIZE = 220
       /*G.loader.addLoad();
 
       // For text
@@ -93,10 +93,11 @@
         G.loader.onLoad();
       }*/
 
+      var notes = [ "c1", "c2", "c3", "c4", "c5", "c6" ]
 
-      for( var i = 0; i < links.length; i++ ){
+      for( var i = 0; i < notes.length; i++ ){
 
-        var name = links[i].note;
+        var name = notes[i];
         var file = "audio/"+name+".mp3"
 
         if( !G.AUDIO[ name ] ){

@@ -12,8 +12,8 @@ function Link( id , params ){
   this.mesh.select    = this.select.bind( this );
   this.mesh.deselect  = this.deselect.bind( this );
 
-  this.mesh.position.y = -50;
-  this.mesh.position.z = 30;
+  this.mesh.position.y = 50;
+  this.mesh.position.z = 50;
 
   this.mesh.material.opacity = .5;
   this.mesh.material.transparent = true;
@@ -60,7 +60,7 @@ function Link( id , params ){
   this.hoveredColor = new THREE.Color( 0xffffff );
 
   G.objectControls.add( this.img );
-  G.objectControls.add( this.mesh );
+  //G.objectControls.add( this.mesh );
 
   this.scene = new THREE.Object3D();
   this.scene.add( this.img );
@@ -95,7 +95,7 @@ Link.prototype.update = function(){
 
    // this.scene.position.y %= G.maxPos /2;
 
-    this.scene.lookAt( G.camera.position );
+   // this.scene.lookAt( G.camera.position );
   //console.log( 'hello' );
   //
   }
@@ -129,8 +129,9 @@ Link.prototype.tweenOut = function(){
 Link.prototype.hoverOver = function(){
 
 
+  var n = notes[ Math.floor( Math.random() * notes.length) ];
  // console.log( this.params.name );
-  G.AUDIO[ this.params.note ].play();
+  G.AUDIO[ n ].play();
 
   this.mesh.material.opacity = 1;
   this.img.material.opacity = 1;
