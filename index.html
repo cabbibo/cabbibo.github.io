@@ -75,11 +75,15 @@
 
 //      G.audio.mute.gain.value = .05;
 
+
+      G.scrollPos = 0;
+      G.scrollSpeed = 0;
+
       G.camera.position.z = 1000;
 
-      G.loader.addLoad();
+      var SIZE = 200
+      /*G.loader.addLoad();
 
-   
       // For text
       G.shaders.load( 'vs-text' , 'text' , 'vertex'    );
       G.shaders.load( 'fs-text' , 'text' , 'fragment'  );
@@ -87,7 +91,7 @@
 
       G.shaders.shaderSetLoaded = function(){
         G.loader.onLoad();
-      }
+      }*/
 
 
       for( var i = 0; i < links.length; i++ ){
@@ -104,120 +108,78 @@
           G.AUDIO[ name ]= new LoadedAudio( G.audio , file );
 
           G.AUDIO[ name ].onLoad = function(){
-             
             G.loader.onLoad();
-
           }.bind( this );
 
         }
         
       }
 
+
       G.loadTextures();
 
-      
+
       G.addToStartArray( function(){
 
-      G.audio.mute.gain.value = .05;
+        G.audio.mute.gain.value = .05;
         
-        var totalX = -435;
         for( var i = 0; i < links.length; i++ ){
 
-          var p = (i+.5) / links.length// (i+.5) / links.length;
           var link = new Link( i , links[i] );
-
           G.links.push( link );
 
-          G.scene.add( link.mesh );
+          link.scrollPos =  i * SIZE ;
+          link.activate();
 
-          link.deactivate();
+          link.scene.position.x = -400;
+          link.scene.position.y = i * SIZE * 2 ;
+        }
 
+        for( var i = 0; i < sm.length; i++ ){
 
+          sm[i].sm = true;
+          var link = new Link( i , sm[i] );
 
-          if( i > 3 ){
+          link.scrollPos =  i * SIZE ;
+          link.activate();
 
-            link.mesh.position.y = 200;
-            link.mesh.position.x = totalX + link.mesh.totalWidth/2;
-            totalX += link.mesh.totalWidth + 35;
+          link.scene.position.x = 200 +( i * 100);
 
-            var mesh = new THREE.Mesh( new THREE.IcosahedronGeometry( 100 , 4 ) );
+          link.scene.position.y = -300 ;
+          link.mesh.scale.multiplyScalar( .0001 );
 
-            var s = link.text.size;
-            var pTexture = ParticleUtils.createPositionsTexture( s , mesh );
-            link.text.physics.reset( pTexture );
-
-          }else{
-
-          if( i == 0 ){
-            link.mesh.position.y = -200;
-            link.mesh.position.x = 400;
-
-            link.text.instant();
-           /* var t = link.text.particles.material.uniforms.t_lookup.value;
-            link.text.physics.reset( t );*/
-
-          }
-
-          if( i == 0 ){
-            link.mesh.position.y = 280;
-            link.mesh.position.x = 0;
-          }
-          if( i == 1 ){
-
-            link.mesh.position.y = -225;
-            link.mesh.position.x = 370;
-
-          }
-          if( i == 2 ){
-
-            link.mesh.position.y = -225;
-            link.mesh.position.x = 410;
-
-          }
-          if( i == 3 ){
-
-            link.mesh.position.y = -225;
-            link.mesh.position.x = 450;
-
-          }
-
-
-
-
-          }
 
         }
 
-      
+        G.maxPos = links.length * (SIZE);
+
+        G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
+
+
       }.bind( G ) );
 
+
+      G.updateScroll = function(){
+
+
+        this.scrollPos += this.scrollSpeed;
+        //this.scrollPos = Math.max( - this.maxPos , this.scrollPos );
+
+        //this.scrollPos = Math.min( this.maxPos , this.scrollPos );
+        this.scrollSpeed *= .95;
+
+      }
+
       G.hoverOver = function( id ){
-
-        for( var i = 0; i < this.links.length; i++ ){
-
-
-          if( this.links[i].id === id ){
-
-            this.links[i].activate();
-
-          }else{
-
-            this.links[i].deactivate();
-
-          }
-
-        }
 
       }
 
       
       G.hoverOut = function( id ){
 
-       
       }
 
       G.select = function( id ){
-
        
       }
 
@@ -226,6 +188,11 @@
        
       }
 
+      function mousewheel( e ){
+
+        G.scrollSpeed -= e.wheelDelta / 200;
+  
+      }
     </script>
 
   </body>

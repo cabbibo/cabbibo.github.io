@@ -5,261 +5,135 @@ function Link( id , params ){
   this.params = params;
   this.started = false;
 
-  this.text = new PhysicsText( this.params.text );
-  this.text.kill();
-
-  this.active = false;
-  this.dead   = true;
-
-  if( this.params.name === 'TITLE' ){
-
-    this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry( 40 , 40 ),
-      new THREE.MeshBasicMaterial({
-        map: G.TEXTURES['cabbibo']
-      })
-    );
-
-  }else if( this.params.name === 'FACEBOOK' ){
-
-    this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry( 30 , 30 ),
-      new THREE.MeshBasicMaterial({
-        map: G.TEXTURES['facebook']
-      })
-    );
-
-  }else if( this.params.name === 'TWITTER' ){
-
-    this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry( 30 , 30 ),
-      new THREE.MeshBasicMaterial({
-        map: G.TEXTURES['twitter']
-      })
-    );
-
-  }else if( this.params.name === 'SOUNDCLOUD' ){
-
-    this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry( 30 , 30 ),
-      new THREE.MeshBasicMaterial({
-        map: G.TEXTURES['soundcloud']
-      })
-    );
-
-  }else{
-  
-    this.mesh = G.textCreator.createMesh( this.params.name );
-
-  }
+  this.mesh = G.textCreator.createMesh( this.params.name );
 
   this.mesh.hoverOver = this.hoverOver.bind( this );
   this.mesh.hoverOut  = this.hoverOut.bind( this );
   this.mesh.select    = this.select.bind( this );
   this.mesh.deselect  = this.deselect.bind( this );
 
-  this.mesh.material.opacity = 1;
+  this.mesh.position.y = -50;
+  this.mesh.position.z = 30;
+
+  this.mesh.material.opacity = .5;
   this.mesh.material.transparent = true;
   this.mesh.material.blending = THREE.AdditiveBlending;
   this.mesh.material.depthWrite = false;
-  this.mesh.materialNeedsUpdate = true;
+  this.mesh.materialNeedsUpdate = true; 
+  
+
+  if( !this.params.sm ){
+    this.img = new THREE.Mesh(  
+      new THREE.PlaneGeometry( 200 * 1.618 , 200 ),
+      new THREE.MeshBasicMaterial({
+        map: THREE.ImageUtils.loadTexture( this.params.img )
+      })
+    );
+ 
+  }else{
+
+    this.img = new THREE.Mesh(  
+      new THREE.PlaneGeometry( 50 , 50 ),
+      new THREE.MeshBasicMaterial({
+        map: THREE.ImageUtils.loadTexture( this.params.img )
+      })
+    );
+
+
+  }
+
+  this.img.material.opacity = .5;
+  this.img.material.transparent = true;
+  this.img.material.blending = THREE.AdditiveBlending;
+  this.img.material.depthWrite = false;
+  this.img.materialNeedsUpdate = true; 
+
+
+  this.img.hoverOver = this.hoverOver.bind( this );
+  this.img.hoverOut  = this.hoverOut.bind( this );
+  this.img.select    = this.select.bind( this );
+  this.img.deselect  = this.deselect.bind( this );
+
 
   this.neutralColor = new THREE.Color( 0x444444 );
   this.focusColor   = new THREE.Color( 0xbbbbbb );
   this.hoveredColor = new THREE.Color( 0xffffff );
 
+  G.objectControls.add( this.img );
   G.objectControls.add( this.mesh );
+
+  this.scene = new THREE.Object3D();
+  this.scene.add( this.img );
+  this.scene.add( this.mesh );
+
+  // G.objectControls.add( this.img );
+  //G.objectControls.add( this.mesh );
+
+
 
 }
 
+
+Link.prototype.update = function(){
+
+  if( !this.params.sm ){
+    
+    this.scene.position.y = this.scrollPos + G.scrollPos;
+    if( this.scene.position.y > G.maxPos/2 ){
+      this.scene.position.y -= G.maxPos
+        this.scrollPos-= G.maxPos
+    }
+
+    if( this.scene.position.y < -G.maxPos/2 ){
+      this.scene.position.y += G.maxPos
+       this.scrollPos += G.maxPos
+    }
+
+    
+
+
+
+   // this.scene.position.y %= G.maxPos /2;
+
+    this.scene.lookAt( G.camera.position );
+  //console.log( 'hello' );
+  //
+  }
+
+}
 Link.prototype.focus = function(){}
 Link.prototype.unFocus = function(){}
-
 Link.prototype.activate = function(){
 
-  if( this.started === false ){
-
-    this.text.activate();
-    this.started = true;
-  }
-
-  if( this.deathTweening ){
-
-    this.deathTween.stop();
-    this.deathTweening = false;
-    this.deathTween = undefined;
-    this.text.live();
-    this.tweenIn();
-    //this.mesh.material.color = this.activeColor;
-    
-  }
-
-
-  if( this.dead == true ){
-
-   // var t = ParticleUtils.createPositionsTexture( this.text.size , G.links[0].mesh );
-   // this.text.physics.reset( t );
-    this.text.live();
-    this.tweenIn();
-    //this.mesh.material.color = this.activeColor;
-    
-
-  }
-
-  if( this.active ){
-
-    console.log( 'already active' );
-
-  }
-
-  if( !this.dead ){
-
-    //this.mesh.material.color = this.superColor;
-
-  }
-
+  G.scene.add( this.scene );
+ 
 }
 
 Link.prototype.deactivate = function(){
 
 
-  this.mesh.material.color = this.neutralColor
-
-  if( this.lifeTweening ){
-
-    this.lifeTween.stop();
-    this.lifeTweening = false;
-    this.lifeTween = undefined;
-    this.text.kill();
-    this.tweenOut();
-
-      //this.mesh.material.color = this.unactiveColor;
-
-
-  }
-
-  if( this.active ){
-
-    this.text.kill();
-    this.tweenOut();
-
-    //this.mesh.material.color = this.unactiveColor;
-
-
-  }
-  
-
 }
 
 Link.prototype.tweenIn = function(){
-
-  this.dead = false;
-
-  var v = this.text.uniforms.opacity.value
-  var s = {
-    
-    o : v, 
-    
-
-
-  };
- 
-  var e = {
-    o : 1,
-
-
-  
-  };
-    
-  this.lifeTween = new G.tween.Tween( s ).to( e , 1000 );
-
-  this.lifeTweening = true;
-  s.link = this;
-  
-  s.random = [];
-  
-  this.lifeTween.onUpdate( function(t){
-
-    this.link.text.uniforms.opacity.value = this.o;
-
-  });
-
-  this.lifeTween.onComplete( function(){
-
-    this.link.lifeTweening = false;
-    this.link.lifeTween = undefined;
-
-    this.link.active = true;
-
-  });
-
-  this.lifeTween.start();
-
 
 }
 
 
 Link.prototype.tweenOut = function(){
  
-  this.active = false;
-
-  var v = this.text.uniforms.opacity.value
-
-   var s = {
-    
-    o : v, 
-    
-  };
  
-  var e = {
-    
-    o : 0,
-
-  
-  };
-
-
-  this.deathTween = new G.tween.Tween( s ).to( e , 3000 );
-  this.deathTweening = true;
- 
-  s.link = this;
-
-  this.deathTween.onUpdate( function(){
-
-    this.link.text.uniforms.opacity.value = this.o * this.o*this.o*this.o*this.o;
-
-
-  });
-
-  this.deathTween.onComplete( function(){
-
-    this.link.deathTweening = false;
-
-    this.link.dead = true;
-
-    this.link.deathTween = undefined;
-
-  });
-
-  this.deathTween.start();
-
 }
 
-Link.prototype.update = function(){
 
-  if( !this.dead ){
-    this.text.update();
-  }
-
-
-}
 
 Link.prototype.hoverOver = function(){
 
 
-  console.log( this.params.name );
+ // console.log( this.params.name );
   G.AUDIO[ this.params.note ].play();
-  this.mesh.material.color = this.hoveredColor;
+
+  this.mesh.material.opacity = 1;
+  this.img.material.opacity = 1;
 
   G.hoverOver( this.id );
 
@@ -267,24 +141,22 @@ Link.prototype.hoverOver = function(){
 
 Link.prototype.hoverOut = function(){
 
-  if( !this.dead ){
+  this.mesh.material.opacity = .5;
+  this.img.material.opacity = .5;
 
-    this.mesh.material.color = this.focusColor;
 
-
-  }else{
-
-    this.mesh.material.color = this.neutralColor;
-
-  }
   G.hoverOut( this.id );
+
 }
 
 Link.prototype.select = function(){
+  
   if( this.params.link ){
     window.location = this.params.link
   }
+
   G.select( this.id );
+
 }
 
 
@@ -292,9 +164,5 @@ Link.prototype.deselect = function(){
   G.deselect( this.id );
 }
 
-Link.prototype.instant = function(){
 
-
-
-}
 

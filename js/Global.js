@@ -316,6 +316,9 @@ G.animate = function(){
 
     }
 
+    this.updateScroll();
+
+
   }
 
   this.stats.update();

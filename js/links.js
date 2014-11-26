@@ -1,261 +1,291 @@
 var links = [
 
 
- {
-
-    name:'TITLE',
-    link:'http://twitter.com/cabbibo',
-    note:'c6',
-    text:[
-    
-      "",
-      "",
-      "This perhaps is the most striking effect; the artist renders an interactive virtual space in deference to the material one in which we live. Instead of consuming something new, playing in it feels a return to the roots, or at least inspires a deeper appreciation of them.",
-    "",
-    "",
-    "                                        - The Wild Magazine","","",
-
-
-    ].join("\n")
-
+  {
+    name: 'Hood Rich',
+    note: 'c6',
+    img:  'img/sites/hoodRich.png',
+    link: 'http://cabbi.bo/hoodRich/',
   },
 
-   {
+  {
+    name: 'Skull',
+    note: 'c4',
+    img:  'img/sites/Skull.png',
+    link: 'http://cabbi.bo/Skull/',
+  },
 
-    name:'TWITTER',
-    link:"http://twitter.com/share?text=God%20bless%20@cabbibo,%20the%20once%20and%20future%20king:%20&url=http://cabbi.bo",
-    note:'c1',
-    text:[
-    
-      "",
-      "",
-      "",
-      "",
-      "                     Share on Twitter",
+  {
+    name: 'Bees',
+    note: 'c2',
+    img:  'img/sites/Bees.png',
+    link: 'http://cabbi.bo/Bees/',
+  },
+
+  {
+    name: 'Hueboy',
+    note: 'c2',
+    img:  'img/sites/hueboy.png',
+    link: 'http://cabbi.bo/hueboy/',
+  },
+
+  {
+    name: 'Magical',
+    note: 'c2',
+    img:  'img/sites/MagicalBoy.png',
+    link: 'http://cabbi.bo/MagicalBoy/',
+  },
+
+  {
+    name: 'Weirdkids',
+    note: 'c2',
+    img:  'img/sites/weirdkids.png',
+    link: 'http://cabbi.bo/weirdkids/',
+  },
+
+  {
+    name: 'Drive',
+    note: 'c2',
+    img:  'img/sites/drive.png',
+    link: 'http://cabbi.bo/drive/',
+  },
+
+  {
+    name: 'Sparkle Spheres',
+    note: 'c2',
+    img:  'img/sites/SparkleSpheres.png',
+    link: 'http://cabbi.bo/SparkleSpheres/',
+  },
+
+  {
+    name: 'c418',
+    note: 'c2',
+    img:  'img/sites/c418.png',
+    link: 'http://cabbi.bo/c418/',
+  },
 
 
+  {
+    name: 'Beacon',
+    note: 'c2',
+    img:  'img/sites/beacon.png',
+    link: 'http://cabbi.bo/beacon/',
+  },
 
-
-    ].join("\n")
-
+  {
+    name: 'Snog',
+    note: 'c2',
+    img:  'img/sites/snog.png',
+    link: 'http://data.pcmusic.info/xcvvvx/',
   },
 
   
-   {
-
-    name:'FACEBOOK',
-    link:'http://www.facebook.com/sharer.php?u=http://cabbi.bo',
-    note:'c3',
-    text:[
-    
-      "",
-      "",
-      "",
-      "",
-      "                     Share on Facebook",
-
-
-    ].join("\n")
-
-  },
-   {
-
-    name:'SOUNDCLOUD',
-    link:'http://soundcloud.com/cabbibo',
-    note:'c3',
-    text:[
-    
-      "",
-      "",
-      "",
-      "",     
-      "                    Cabbibo on Soundcloud",
-    ].join("\n")
-
-  },
-
-
-    {
-
-    name:'Cabbibo',
-    link:'http://cabbibo.com/',
-    note:'c1',
-    text:[
-      
-      "Organic Play Space",
-      "","",
-      "Though the project is far from perfected, it’s a harbinger of digital art, and digital space in general. It’s a relief, really, a triumph that nature’s fragility can be imposed on instead of usurped by digitalism’s precision.",
-      "",
-      "                                        - The Wild Magazine","","",
-      "Tech: WebGL , Web Audio API "
-
-
-
-    ].join("\n")
-
-  },
-   /*{
-    
-    name:'Needs',
-    link:'needs',
-    img:'recursion',
-    note:'c2',
-    text:[
-    
-      "This project was made after I found an unbelievable track by Rioux ( 'Lucifer' I think it was ), and hit him up to see if he wanted to collaborate.",
-      "","",
-      " I was very excited with the way that project came out, mostly because alot of it was so difficult to pull off. Doing per particle collision testing with the spheres, for example, was quite more complex than I imagined it to be, but in the end, it seemed to at least pretend like it worked."
-
-    ].join("\n")
-
-  },*/
-
   {
-
-    name:'UOS',
-    link:'http://cabbibo.com/uOS',
-    note:'c3',
-    text:[
-      
-      "A Universe Of Sound",
-      "","",
-      "An immersive landscape for art and music lovers, Cabibbo has proved that a story need not have a cohesive narrative in order to pack a powerful emotional punch. ",
-      "",
-      "                            - The Future Of Storytelling","","",
-      "Tech: WebGL , Web Audio API "
-
-      ].join("\n")
-
-  },
- 
-
-   {
-    
-    name:'Fall',
-    link:'FallSketches',
-    note:'c2',
-    text:[
-      "Fall Sketches",
-      "","",
-      "After the release of 'Fall Sketches' in 2013, this experiment was created to answer the question: 'What does a space jukebox look like?' Cabbibo's answer is, of course, a lonely alien stonehenge, and a pulsating space puppy.",
-      "","",
-      "Tech: WebGL , Web Audio API "
-    ].join("\n")
-
+    name: 'Huldra',
+    note: 'c2',
+    img:  'img/sites/huldra.png',
+    link: 'http://cabbi.bo/huldra/',
   },
 
-    /* {
-    
-    name:'Skull',
-    link:'Skull',
-    note:'c2',
-    text:[
-      "Hetkonen - Vladislav Delay",
-      "","",
-      "Saying too much about this experience would ruin it, but just know that it involves beautiful models made by Steve Teeps, powerful audio by Vladislav Delay, and spacial depth. Make sure you scroll out.",
-      "","",
-      "Tech: WebGL , Web Audio API "
-    ].join("\n")
-
-  },*/
-
+  
+  {
+    name: 'Diamonds',
+    note: 'c2',
+    img:  'img/sites/diamonds.png',
+    link: 'http://cabbi.bo/diamonds/',
+  },
 
 
   {
+    name: 'Center',
+    note: 'c2',
+    img:  'img/sites/CenterYourLove.png',
+    link: 'http://cabbi.bo/CenterYourLove/',
+  },
 
-    name:'Quoi',
-    link:'http://wom.bs/quoi',
-    note:'c3',
-    text:[
-      
-      "Quoi - Avalon Emerson",
-      "","",
-      "As the strutting house tune jaunts along, the viewer can explore a suspended landscape filled with a multitude of orbiting objects, images which unfold to resemble glowing sprites or fractals gathering outside of a celestial body.",
-      "",
-      "                                                  - xlr8r","","",
-      "Tech: WebGL , Web Audio API "
 
-    ].join("\n")
+  
+  {
+    name: 'Bronze',
+    note: 'c2',
+    img:  'img/sites/bronze.png',
+    link: 'http://cabbi.bo/bronze/',
+  },
 
+  
+  {
+    name: 'Apart',
+    note: 'c2',
+    img:  'img/sites/apart.png',
+    link: 'http://cabbi.bo/apart/',
+  },
+
+
+  
+  {
+    name: 'Dotter',
+    note: 'c2',
+    img:  'img/sites/dotter.png',
+    link: 'http://cabbi.bo/dotter/',
+  },
+
+  {
+    name: 'Autograf',
+    note: 'c2',
+    img:  'img/sites/autograf.png',
+    link: 'http://cabbi.bo/autograf/',
+  },
+
+  
+  {
+    name: 'Coral',
+    note: 'c2',
+    img:  'img/sites/coral.png',
+    link: 'http://cabbi.bo/coral/',
+  },
+
+  {
+    name: 'NVS',
+    note: 'c2',
+    img:  'img/sites/nvs.png',
+    link: 'http://cabbi.bo/nvs/',
+  },
+
+
+  {
+    name: 'Graph',
+    note: 'c2',
+    img:  'img/sites/Leap-Object-Controls.png',
+    link: 'http://cabbi.bo/Leap-Object-Controls/',
+  },
+
+  {
+    name: 'Rosetta',
+    note: 'c2',
+    img:  'img/sites/rosetta.png',
+    link: 'http://cabbi.bo/rosetta/',
+  },
+
+
+  {
+    name: 'Flow',
+    note: 'c2',
+    img:  'img/sites/Flow.png',
+    link: 'http://cabbi.bo/Flow/',
+  },
+
+  {
+    name: 'Needs',
+    note: 'c2',
+    img:  'img/sites/Needs.png',
+    link: 'http://cabbi.bo/Needs/',
+  },
+
+  {
+    name: 'Fall Sketches',
+    note: 'c2',
+    img:  'img/sites/FallSketches.png',
+    link: 'http://cabbi.bo/FallSketches/',
+  },
+
+
+
+  
+  {
+    name: 'Wombs',
+    note: 'c2',
+    img:  'img/sites/wombs.png',
+    link: 'http://wom.bs/',
+  },
+
+  {
+    name: 'We Over',
+    note: 'c2',
+    img:  'img/sites/weOver.png',
+    link: 'http://wom.bs/audioSketches/weOver/',
+  },
+
+  
+  {
+    name: 'Thing',
+    note: 'c2',
+    img:  'img/sites/thing.png',
+    link: 'http://wom.bs/audioSketches/thing/',
   },
 
     
   {
-    
-    name:'Flow',
-    link:'Flow',
-    note:'c2',
-    text:[
-    
-      "System Preferences - Rioux",
-      "","",
-      "Each song has its own color palette, movement pattern, or, for lack of a better term, multi-sensory soul—sucking the environment's visitors into an orbital EP that looks like it has its own sonic solar system. ",
-      "",
-      "                                         - Creators Project","","",
-      "Tech: WebGL , Web Audio API "
-      
-      
-    ].join("\n")
-
-  },
-   {
-    
-    name:'Needs',
-    link:'Needs',
-    note:'c2',
-    text:[
-    
-      "Needs - JJ Verne",
-      "","",
-      "JJ Verne's debut EP 'Needs' is unbelievably lucious. Each shimmer and sparkle serenades the listener with unparalleled kindness. The interactive synesthetic enviornment pairs with this emotion, bringing to the table a hint of both nostalgia and frisson.",
-      "","",
-      "Tech: WebGL , Web Audio API "
-
-        
-    ].join("\n")
-
-  },
-
-   {
-
-    name:'Recursion',
-    link:'http://cabbibo.com/recursion',
-    note:'c2',
-    text:[
-      
-      "Recursion EP",
-      "",
-      "",
-      "Recursion functions on a very interesting and original concept, namely merging the areas of thematic wikipedia facts, musical remixing and ‘point and click’ immersion.",
-      "",
-      "                                              - WebGL.com","","",
-      "Tech: WebGL , Web Audio API "
-
-
-    ].join("\n")
-
+    name: 'Quoi',
+    note: 'c2',
+    img:  'img/sites/quoi.png',
+    link: 'http://wom.bs/quoi/',
   },
 
 
-  /* {
-    
-    name:'Bees',
-    link:'Bees',
-    note:'c2',
-    text:[
-    
-      "Saturn Strobe - Pantha Du Prince",
-      "","",
-      "'Bees' is an homage to a magnificent performance by Pantha Du Prince. His truly transcendent beats take the listeners on a journey through space and time. 'Bees' is an attempt at capturing a miniscule fraction of this potent emotion.",
-      "","",
-      "Tech: WebGL , Web Audio API "
+  
+  {
+    name: 'Cabbibo.com',
+    note: 'c2',
+    img:  'img/sites/cabbibo.png',
+    link: 'http://cabbibo.com',
+  },
 
-        
-    ].join("\n")
+  {
+    name: 'Recursion',
+    note: 'c2',
+    img:  'img/sites/recursion.png',
+    link: 'http://cabbibo.com/recursion',
+  },
 
-  },*/
+  {
+    name: 'Universe Of Sound',
+    note: 'c2',
+    img:  'img/sites/uOS.png',
+    link: 'http://cabbibo.com/uOS',
+  },
 
 
+
+  
+  {
+    name: 'Shader Loader',
+    note: 'c2',
+    img:  'img/sites/ShaderLoader.png',
+    link: 'http://cabbi.bo/ShaderLoader/',
+  },
+
+
+
+
+
+
+]
+
+
+var sm = [
+
+  {
+    name: 'Twitter',
+    note: 'c5',
+    img:  'img/icons/twitter_1.png',
+    link: 'http://twitter.com/cabbibo',
+  },
+
+
+  {
+    name: 'Facebook',
+    note: 'c5',
+    img:  'img/icons/facebook_1.png',
+    link: 'https://www.facebook.com/Cabbibo',
+  },
+
+
+  {
+    name: 'Soundcloud',
+    note: 'c5',
+    img:  'img/icons/soundcloud_1.png',
+    link: 'https://www.soundcloud.com/Cabbibo',
+  },
 
 
 
