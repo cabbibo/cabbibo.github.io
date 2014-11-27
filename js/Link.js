@@ -5,6 +5,9 @@ function Link( id , params ){
   this.params = params;
   this.started = false;
 
+  this.weight = Math.random() * .3 + .2;
+  //this.weight = .1;
+
   this.mesh = G.textCreator.createMesh( this.params.name );
 
   this.mesh.hoverOver = this.hoverOver.bind( this );
@@ -12,7 +15,7 @@ function Link( id , params ){
   this.mesh.select    = this.select.bind( this );
   this.mesh.deselect  = this.deselect.bind( this );
 
-  this.mesh.position.y = 50;
+  //this.mesh.position.y = 50;
   this.mesh.position.z = 50;
 
   this.mesh.material.opacity = .5;
@@ -77,8 +80,12 @@ function Link( id , params ){
 Link.prototype.update = function(){
 
   if( !this.params.sm ){
-    
-    this.scene.position.y = this.scrollPos + G.scrollPos;
+   
+    this.targetPos = this.scrollPos + G.scrollPos;
+
+    var p = this.scene.position.y;
+    this.scene.position.y += (this.targetPos - p) / (10*this.weight);
+
     if( this.scene.position.y > G.maxPos/2 ){
       this.scene.position.y -= G.maxPos
         this.scrollPos-= G.maxPos
@@ -89,13 +96,26 @@ Link.prototype.update = function(){
        this.scrollPos += G.maxPos
     }
 
-    
+     if( this.targetPos> G.maxPos/2 ){
+      this.targetPos -= G.maxPos
+       this.scrollPos -= G.maxPos
+      this.scene.position.y = this.targetPos
+    }
+
+    if( this.targetPos < -G.maxPos/2 ){
+       this.targetPos += G.maxPos
+       this.scrollPos += G.maxPos
+      this.scene.position.y = this.targetPos
+    }
 
 
+    G.tv1.copy( this.scene.position );
+    G.tv1.y -= (this.targetPos- this.scene.position.y );
+    G.tv1.z += 300;
 
    // this.scene.position.y %= G.maxPos /2;
 
-   // this.scene.lookAt( G.camera.position );
+   this.scene.lookAt( G.tv1);
   //console.log( 'hello' );
   //
   }

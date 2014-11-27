@@ -64,6 +64,7 @@
     <!-- THESE ALWAYS GOES LAST -->
     <script src="js/Global.js"></script>
     <script src="js/Link.js"></script>
+    <script src="js/Section.js"></script>
     <script src="js/PhysicsText.js"></script>
     <script src="js/links.js"></script>
 
@@ -74,9 +75,10 @@
       // Write shaders for hands
 
 //      G.audio.mute.gain.value = .05;
+  
+      var LOGO;
 
-
-      G.scrollPos = 0;
+      G.scrollPos = 300;
       G.scrollSpeed = 0;
 
       G.camera.position.z = 1000;
@@ -123,19 +125,82 @@
       G.addToStartArray( function(){
 
         G.audio.mute.gain.value = .05;
-        
-        for( var i = 0; i < links.length; i++ ){
 
-          var link = new Link( i , links[i] );
-          G.links.push( link );
+        var totalHeight = 0;
+        var totalLinks = 0;
 
-          link.scrollPos =  i * SIZE ;
-          link.activate();
+        LOGO = new THREE.Mesh( 
+          new THREE.PlaneGeometry( 100 , 100 ),
+          new THREE.MeshBasicMaterial({
+            map: THREE.ImageUtils.loadTexture('img/cabbibo.png'),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            opacity: .5
+          })
+        );
+        LOGO.scrollPos = 0;
+        LOGO.position.x = -400;
+        LOGO.position.z = 200;
+        totalHeight -= 200;
+        G.scene.add(LOGO );
 
-          link.scene.position.x = -400;
-          link.scene.position.y = i * SIZE * 2 ;
+        var m = G.textCreator.createMesh( 'CABBIBO' );
+        LOGO.add( m );
+        m.position.z = 100;
+        m.position.x = 50;
+        m.position.y = -100;
+
+
+        LOGO.update = function(){
+          this.position.y = this.scrollPos + G.scrollPos;
+
+          if( this.position.y > G.maxPos/2 ){
+            this.position.y -= G.maxPos
+              this.scrollPos-= G.maxPos
+          }
+
+          if( this.position.y < -G.maxPos/2 ){
+             this.position.y += G.maxPos
+             this.scrollPos += G.maxPos
+          }
+        }.bind( LOGO );
+
+        for( var i =0; i < sections.length; i++ ){
+
+          var s = sections[i];
+
+          var section = new Section( s );
+          G.sections.push( section );
+          section.activate();
+          section.scrollPos = totalHeight;
+          section.scene.position.x = -400;
+
+          totalHeight -= 150;
+
+          for( var j = 0; j < s.links.length; j++ ){
+
+            // totalLinks ++;
+            var link = new Link( totalLinks , s.links[j] );
+            G.links.push( link );
+
+            link.scrollPos =  totalHeight ;
+            link.activate();
+
+            link.scene.position.x = -400;
+          //  link.scene.position.y = -totalLinks * SIZE * 2 ;
+
+            totalLinks ++;
+            totalHeight -= SIZE;
+
+
+          }
+
+
+
         }
+        
 
+        totalHeight -= SIZE;
         for( var i = 0; i < sm.length; i++ ){
 
           sm[i].sm = true;
@@ -152,7 +217,7 @@
 
         }
 
-        G.maxPos = links.length * (SIZE);
+        G.maxPos = Math.abs( totalHeight );//links.length * (SIZE);
 
         G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
 

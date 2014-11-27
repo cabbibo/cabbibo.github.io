@@ -27,7 +27,7 @@ G.leap    = new Leap.Controller();
 //G.loader  = new Loader();
 G.stats   = new Stats();
 
-
+G.tv1 = new THREE.Vector3();
 
 G.loader.onStart = function(){
 
@@ -91,7 +91,8 @@ G.tween = TWEEN;
 // Need something to call when started
 G.startArray = [];
 
-G.links = [];
+G.links     = [];
+G.sections  = [];
 
 G.init = function(){
 
@@ -139,49 +140,6 @@ G.init = function(){
   this.attracting = false;
   this.attractionTimer = 0;
  
-  /*
-  
-     Leap Hands!
-
-  */
-
-
-  var rHandMesh = new THREE.Mesh( 
-    new THREE.BoxGeometry( 10 , 10, 100 ),
-    new THREE.MeshBasicMaterial( 0xff0000 )
-  );
- 
-  this.rHand = new RiggedSkeleton( this.leap , this.camera , {
-  
-    movementSize: 1000,
-    handSize:     100,
-
-  });
-  
-  this.rHand.addScaledMeshToAll( rHandMesh );
-
-  this.rHand.addToScene( this.scene );
-
-  this.rHand.relative = new THREE.Vector3();
-
-
-  var lHandMesh = new THREE.Mesh( 
-    new THREE.BoxGeometry( 10 , 10, 100 ),
-    new THREE.MeshBasicMaterial( 0xff0000 )
-  );
- 
-  this.lHand = new RiggedSkeleton( this.leap , this.camera ,  {
-  
-    movementSize: 1000,
-    handSize:     100,
-
-  });
-  
-  this.lHand.addScaledMeshToAll( rHandMesh );
-
-  this.lHand.addToScene( this.scene );
-
-  this.lHand.relative = new THREE.Vector3();
 
  
 
@@ -208,11 +166,7 @@ G.init = function(){
   */
 
     
-  this.objectControls = new ObjectControls( 
-    this.camera , 
-    this.rHand.hand , 
-    this.leap  
-  );
+  this.objectControls = new ObjectControls( this.camera );
 
   this.mouse = this.objectControls.unprojectedMouse;
   this.raycaster = this.objectControls.raycaster;
@@ -294,19 +248,6 @@ G.animate = function(){
 
     this.audio.update();
 
-    this.rHand.update( 0 );
-    this.lHand.update( 1 );
-
-
-    this.rHand.relative.copy( this.rHand.hand.position );
-    this.rHand.relative.sub( this.position );
-    
-    this.lHand.relative.copy( this.lHand.hand.position );
-    this.lHand.relative.sub( this.position );
-
-    this.iPoint.relative.copy( this.iPoint );
-    this.iPoint.relative.sub( this.position );
-   
     this.camera.position.relative.copy( this.camera.position );
     this.camera.position.relative.sub( this.position );
 
@@ -315,6 +256,18 @@ G.animate = function(){
       this.links[i].update();
 
     }
+
+    for( var i = 0; i < this.sections.length; i++ ){
+
+      this.sections[i].update();
+
+    }
+
+    if( LOGO ){
+      LOGO.update();
+    }
+
+
 
     this.updateScroll();
 
