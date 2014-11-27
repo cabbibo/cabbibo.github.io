@@ -58,6 +58,10 @@
     <script src="lib/PhysicsRenderer.js"></script>
     
     <script src="lib/Loader.js"></script>
+
+    <script src="js/SnowflakeGeometry.js"></script>
+    <script src="js/initSnowflake.js"></script>
+    
     
 
 
@@ -84,16 +88,15 @@
       G.camera.position.z = 1000;
 
       var SIZE = 220
-      /*G.loader.addLoad();
+      G.loader.addLoad();
 
       // For text
-      G.shaders.load( 'vs-text' , 'text' , 'vertex'    );
-      G.shaders.load( 'fs-text' , 'text' , 'fragment'  );
-      G.shaders.load( 'ss-text' , 'text' , 'simulation'  );
+      G.shaders.load( 'vs-snow' , 'snow' , 'vertex'    );
+      G.shaders.load( 'fs-snow' , 'snow' , 'fragment'  );
 
       G.shaders.shaderSetLoaded = function(){
         G.loader.onLoad();
-      }*/
+      }
 
       var notes = [ "c1", "c2", "c3", "c4", "c5", "c6" ]
 
@@ -137,18 +140,22 @@
             blending: THREE.AdditiveBlending,
             opacity: .5
           })
-        );
+          );
+
+        LOGO = initSnowflake();
         LOGO.scrollPos = 0;
-        LOGO.position.x = -400;
-        LOGO.position.z = 200;
+        LOGO.position.x = -500;
+        LOGO.position.z = -200;
+        LOGO.scale.multiplyScalar( 1 );
         totalHeight -= 200;
         G.scene.add(LOGO );
+
 
         var m = G.textCreator.createMesh( 'CABBIBO' );
         LOGO.add( m );
         m.position.z = 100;
-        m.position.x = 50;
-        m.position.y = -100;
+        m.position.x = 00;
+       // m.position.y = -100;
 
 
         LOGO.update = function(){

@@ -6,6 +6,7 @@ G.texturesToLoad = [
   ['twitter' , 'img/icons/twitter_1.png' ],
   ['facebook' , 'img/icons/facebook_1.png' ],
   ['soundcloud' , 'img/icons/soundcloud_1.png' ],
+  ['matcap' ,'img/rough-aluminium.jpg' ]
   
 ]
 G.loader  = new Loader();
