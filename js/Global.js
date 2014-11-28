@@ -29,6 +29,12 @@ G.shaders = new ShaderLoader( 'shaders' );
 G.stats   = new Stats();
 
 G.tv1 = new THREE.Vector3();
+G.tv2 = new THREE.Vector3();
+
+G.springLength = 400;
+G.maxVel = 10;
+G.ballCenter = new THREE.Vector3( 300 , 0 , 0 );
+
 
 G.loader.onStart = function(){
 
@@ -94,6 +100,7 @@ G.startArray = [];
 
 G.links     = [];
 G.sections  = [];
+G.balls     = [];
 
 G.init = function(){
 
@@ -257,6 +264,8 @@ G.animate = function(){
 
     }
 
+    this.updateBalls();
+
     if( LOGO ){
       LOGO.update();
     }
@@ -338,6 +347,82 @@ G.loadTexture = function( name , file ){
 
 }
 
+G.updateBalls = function(){
+
+
+  // Updating Forces --> Velocity
+  for( var i = 0; i < this.balls.length; i++ ){
+
+    var b1 = this.balls[i];
+    
+    this.tv1.copy( G.ballCenter );
+
+    this.tv1.sub( b1.position );
+    this.tv1.multiplyScalar( .01 );
+    b1.velocity.add( this.tv1 );
+
+    for( var j = i+1; j < this.balls.length; j++ ){
+
+      var b2 = this.balls[j];
+
+
+      this.tv1.copy( b1.position );
+      this.tv1.sub( b2.position );
+
+      var l = this.tv1.length();
+      this.tv1.normalize();
+      //console.log( b1.position.x );
+      //console.log( b1.velocity.x );
+
+      //if( l < (b1.importance + b2.importance) ){
+        
+        this.tv1.multiplyScalar( l - this.springLength );
+
+        this.tv1.multiplyScalar( .001 );
+        b1.velocity.sub( this.tv1 ); 
+        b2.velocity.add( this.tv1 ); 
+
+      /*}else{
+
+        //console.log('n');
+        this.tv1.multiplyScalar( 1000 );
+        b1.velocity.add( this.tv1 ); 
+        b2.velocity.sub( this.tv1 ); */
+
+     // }
+
+    }
+  }
+
+
+  // Updating Positions
+  for( var i = 0; i < this.balls.length; i++ ){
+
+    var b1 = this.balls[i];
+
+    if( !b1.hovered ){
+
+      if( b1.velocity.length() > this.maxVel ){
+
+        b1.velocity.normalize().multiplyScalar( this.maxVel );
+
+      }
+
+      
+      this.tv1.copy( b1.position );
+
+      b1.position.add( b1.velocity );
+
+      b1.mesh.lookAt( this.tv1 );
+      b1.velocity.multiplyScalar( .98 );
+
+
+    }
+
+
+  }
+
+}
 //G.createNextPage
 
 // Some Event Listeners

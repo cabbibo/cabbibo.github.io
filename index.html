@@ -68,6 +68,7 @@
     <script src="js/Global.js"></script>
     <script src="js/Link.js"></script>
     <script src="js/Section.js"></script>
+    <script src="js/Ball.js"></script>
     <script src="js/PhysicsText.js"></script>
     <script src="js/links.js"></script>
 
@@ -194,6 +195,14 @@
 
             link.scene.position.x = -400;
           //  link.scene.position.y = -totalLinks * SIZE * 2 ;
+            var ball = new Ball( totalLinks , s.links[j] );
+            G.scene.add( ball.mesh );
+            G.balls.push( ball );
+
+            ball.position.x = (Math.random() -.5) * 200;
+            ball.position.y = (Math.random() -.5) * 200;
+            ball.position.z = (Math.random() -.5) * 200;
+
 
             totalLinks ++;
             totalHeight -= SIZE;
@@ -231,23 +240,83 @@
       }.bind( G ) );
 
 
-      
+
+      G.scrollingToPos = false;
       G.updateScroll = function(){
 
-        this.scrollPos += this.scrollSpeed;
-        //this.scrollPos = Math.max( - this.maxPos , this.scrollPos );
+        if( this.scrollingToPos !== false ){
 
-        //this.scrollPos = Math.min( this.maxPos , this.scrollPos );
+          this.scrollToPos( this.scrollingToPos );
+
+        }
+
+
+        this.scrollPos += this.scrollSpeed;  
         this.scrollSpeed *= .95;
 
       }
 
-      G.hoverOver = function( id ){
+      G.beginScroll = function( id ){
 
+        console.log( this.links[ id ].params );
+        this.scrollingToPos = id
+
+      };
+
+      G.scrollToPos = function( id ){
+
+        var p = this.links[ id ].scrollPos;
+        var p1 = -this.scrollPos + 200;
+
+        console.log( p1 - p );
+        if( Math.abs((p1 - p )) < 1. ){
+          console.log('whoa');
+          this.scrollingToPos = false;
+        }else{
+          this.scrollSpeed = -(p - p1 ) / 10;
+        }
+       // G.links.scrollToPos
+
+
+     }
+
+      G.hoverOver = function( id, ball){
+
+        for(var i = 0; i < G.balls.length; i++ ){
+
+          G.tv1.set(
+            Math.random() -.5 ,  
+            Math.random() -.5 ,  
+            Math.random() -.5  
+            );
+
+          G.tv1.multiplyScalar( 5 );
+
+          G.balls[i].velocity.add( G.tv1 );
+
+        }
+
+        if( !ball ){
+          var cb = G.balls[id].hoverOver.bind( G.balls[id] );
+          cb(); 
+        }else{
+          console.log( id );
+          var cb = G.links[id].hoverOver.bind( G.links[id] );
+          cb();
+        }
+      
       }
 
       
-      G.hoverOut = function( id ){
+      G.hoverOut = function( id , ball ){
+        
+        if( !ball ){
+          var cb = G.balls[id].hoverOut.bind( G.balls[id] );
+          cb(); 
+        }else{
+          var cb = G.links[id].hoverOut.bind( G.links[id] );
+          cb();
+        }
 
       }
 

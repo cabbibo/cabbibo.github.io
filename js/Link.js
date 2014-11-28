@@ -54,8 +54,8 @@ function Link( id , params ){
   this.img.materialNeedsUpdate = true; 
 
 
-  this.img.hoverOver = this.hoverOver.bind( this );
-  this.img.hoverOut  = this.hoverOut.bind( this );
+  this.img.hoverOver = this._hoverOver.bind( this );
+  this.img.hoverOut  = this._hoverOut.bind( this );
   this.img.select    = this.select.bind( this );
   this.img.deselect  = this.deselect.bind( this );
 
@@ -147,8 +147,14 @@ Link.prototype.tweenOut = function(){
 }
 
 
+Link.prototype._hoverOver = function(){
 
-Link.prototype.hoverOver = function(){
+  this.hoverOver();
+  G.hoverOver( this.id , false );
+
+}
+
+Link.prototype.hoverOver = function( recursed ){
 
 
   var n = notes[ Math.floor( Math.random() * notes.length) ];
@@ -158,17 +164,19 @@ Link.prototype.hoverOver = function(){
   this.mesh.material.opacity = 1;
   this.img.material.opacity = 1;
 
-  G.hoverOver( this.id );
+}
+
+Link.prototype._hoverOut = function(){
+
+  this.hoverOut();
+  G.hoverOut( this.id , false );
 
 }
 
-Link.prototype.hoverOut = function(){
+Link.prototype.hoverOut = function( recursed ){
 
   this.mesh.material.opacity = .5;
   this.img.material.opacity = .5;
-
-
-  G.hoverOut( this.id );
 
 }
 
