@@ -87,7 +87,8 @@
 
       G.camera.position.z = 1000;
 
-      var SIZE = 220
+      var SIZE = 220;
+      var LINES;
       G.loader.addLoad();
 
       // For text
@@ -209,11 +210,25 @@
 
 
           }
-
-
-
         }
         
+
+        var lineGeo = new THREE.Geometry();
+        for( var i = 0; i < G.balls.length; i++ ){
+          for( var j = i; j < G.balls.length; j++ ){
+
+            lineGeo.vertices.push( G.balls[i].position );
+            lineGeo.vertices.push( G.balls[j].position );
+
+          }
+        }
+
+
+        var mat = new THREE.LineBasicMaterial();
+
+        LINES = new THREE.Line( lineGeo , mat );
+        G.scene.add( LINES );
+
 
         totalHeight -= SIZE;
         for( var i = 0; i < sm.length; i++ ){
@@ -235,6 +250,13 @@
         G.maxPos = Math.abs( totalHeight );//links.length * (SIZE);
 
         G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
+
+
+        for( var i = 0; i < G.balls.length; i++ ){
+
+          G.balls[i]._hoverOut();
+
+        }
 
 
       }.bind( G ) );

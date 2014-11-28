@@ -270,8 +270,12 @@ G.animate = function(){
       LOGO.update();
     }
 
+    if( LINES ){
 
+      LINES.geometry.verticesNeedUpdate = true;
 
+    }
+ 
     this.updateScroll();
 
 
@@ -409,11 +413,11 @@ G.updateBalls = function(){
       }
 
       
-      this.tv1.copy( b1.position );
+     // this.tv1.copy( b1.position );
 
       b1.position.add( b1.velocity );
 
-      b1.mesh.lookAt( this.tv1 );
+     // b1.mesh.lookAt( this.tv1 );
       b1.velocity.multiplyScalar( .98 );
 
 

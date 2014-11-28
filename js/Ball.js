@@ -5,11 +5,15 @@ function Ball(id , params){
   this.params = params;
   this.hovered = false;
 
-  this.importance  = this.params.importance || 40
+  this.importance  = this.params.importance || 20
 
   this.mat = new THREE.MeshBasicMaterial({
+    color: 0x333333,
     map: THREE.ImageUtils.loadTexture( this.params.img )
   });
+  /*this.mat = new THREE.MeshNormalMaterial({
+    //map: THREE.ImageUtils.loadTexture( this.params.img )
+  });*/
   this.mesh = new THREE.Mesh( 
       new THREE.IcosahedronGeometry( this.importance , 3 ) ,  
       this.mat
@@ -20,8 +24,8 @@ function Ball(id , params){
   this.mesh.deselect  = this.deselect.bind( this );
 
   
-  this.mesh.material.opacity = .5;
-  this.mesh.material.transparent = true;
+  //this.mesh.material.opacity = .5;
+  //this.mesh.material.transparent = true;
  // this.mesh.material.blending = THREE.AdditiveBlending;
  // this.mesh.material.depthWrite = false;
   this.mesh.materialNeedsUpdate = true; 
@@ -49,7 +53,8 @@ Ball.prototype.hoverOver = function(){
  // console.log( this.params.name );
   G.AUDIO[ n ].play();
 
-  this.mesh.material.opacity = 1;
+  this.mesh.material.color.setRGB( 1 , 1 , 1 );
+  //this.mesh.material.opacity = 1;
 
 }
 
@@ -61,14 +66,16 @@ Ball.prototype._hoverOut = function(){
 }
 Ball.prototype.hoverOut = function(){
   this.hovered = false;
-  this.mesh.material.opacity = .5;
+  this.mesh.material.color.setRGB( .2 , .2 , .2 );
+  
+ // this.mesh.material.opacity = .5;
 }
 
 Ball.prototype.select = function(){
   
- /* if( this.params.link ){
+  if( this.params.link ){
     window.location = this.params.link
-  }*/
+  }
 
   G.select( this.id );
 
