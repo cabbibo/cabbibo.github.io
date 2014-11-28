@@ -18,6 +18,8 @@ function Link( id , params ){
   //this.mesh.position.y = 50;
   this.mesh.position.z = 50;
 
+
+
   this.mesh.material.opacity = .5;
   this.mesh.material.transparent = true;
   this.mesh.material.blending = THREE.AdditiveBlending;

@@ -23,7 +23,7 @@ G.MATS      = {};
 
 G.audio   = new AudioController();
 G.shaders = new ShaderLoader( 'shaders' );
-G.leap    = new Leap.Controller();
+//G.leap    = new Leap.Controller();
 //G.gui     = new dat.GUI({});
 //G.loader  = new Loader();
 G.stats   = new Stats();
@@ -82,7 +82,7 @@ G.container.appendChild( G.renderer.domElement );
 G.stats.domElement.id = 'stats';
 //document.body.appendChild( G.stats.domElement );
 
-G.leap.connect();
+//G.leap.connect();
 //G.gui.close();
 G.scene.add( G.camera );
 //G.onResize();
@@ -189,14 +189,7 @@ G.updateIntersection = function(){
 
   var dir = this.mouse.clone();
 
-  if( this.objectControls.leap === true ){
-
-    //console.log('YRP');
-    dir = this.rHand.hand.position.clone();
- 
-  }
-  
-  dir.sub( this.camera.position );
+   dir.sub( this.camera.position );
   dir.normalize();
 
   

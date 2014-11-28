@@ -34,7 +34,6 @@
   <body>
     <div id="container"></div>
 
-    <script src="lib/leap.js"></script>
     <script src="lib/three.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/stats.min.js"></script>
@@ -82,7 +81,7 @@
   
       var LOGO;
 
-      G.scrollPos = 300;
+      G.scrollPos = 200;
       G.scrollSpeed = 0;
 
       G.camera.position.z = 1000;
@@ -144,17 +143,17 @@
 
         LOGO = initSnowflake();
         LOGO.scrollPos = 0;
-        LOGO.position.x = -500;
-        LOGO.position.z = -200;
-        LOGO.scale.multiplyScalar( 1 );
-        totalHeight -= 200;
+        LOGO.position.x = -800;
+        LOGO.position.z = -1000;
+        LOGO.scale.multiplyScalar( 2 );
+        totalHeight -= 500;
         G.scene.add(LOGO );
 
 
-        var m = G.textCreator.createMesh( 'CABBIBO' );
+        /*var m = G.textCreator.createMesh( 'CABBIBO' );
         LOGO.add( m );
         m.position.z = 100;
-        m.position.x = 00;
+        m.position.x = 00;*/
        // m.position.y = -100;
 
 
@@ -232,8 +231,8 @@
       }.bind( G ) );
 
 
+      
       G.updateScroll = function(){
-
 
         this.scrollPos += this.scrollSpeed;
         //this.scrollPos = Math.max( - this.maxPos , this.scrollPos );

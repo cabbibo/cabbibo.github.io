@@ -3,7 +3,7 @@ function Section( params ){
 
    this.mesh = G.textCreator.createMesh( params.title );
    this.mesh.position.z = 20;
-   this.mesh.position.y = 20;
+   this.mesh.position.y = 40;
    //this.mesh.position.x = 300;
 
    var geo = new THREE.Geometry();
