@@ -98,7 +98,9 @@
       G.scrollPos = 700;
       G.scrollSpeed = 0;
 
-      G.camera.position.z = 1000;
+      G.camera.position.z = 600;
+      if( !G.mobile ) G.camera.position.z = 1000;
+      
 
       var SIZE = 220;
       var LINES;
@@ -224,7 +226,7 @@
             if( !G.mobile ) link.scene.position.x = -400;
           //  link.scene.position.y = -totalLinks * SIZE * 2 ;
             var ball = new Ball( totalLinks , s.links[j] );
-            G.scene.add( ball.mesh );
+            if( !G.mobile )  G.scene.add( ball.mesh );
             G.balls.push( ball );
 
             ball.position.x = (Math.random() -.5) * 200;
