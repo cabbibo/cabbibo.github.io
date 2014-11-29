@@ -454,6 +454,7 @@
 
         OTOUCH = e.touches[0].pageY;
         TOUCH_DOWN = true;
+        G.objectControls.touchStart( e );
         //alert( e.touches[ 0 ].pageX );
        // G.scrollSpeed += 100;//e.wheelDelta / 100;
   
@@ -462,11 +463,15 @@
       function touchend( e ){
 
         TOUCH_DOWN = false;
+        G.objectControls.touchEnd( e );
+
 
 
       }
 
       function touchmove( e ){
+
+        G.objectControls.touchMove( e );
 
         if( TOUCH_DOWN ){
 
