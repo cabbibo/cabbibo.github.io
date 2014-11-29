@@ -98,7 +98,7 @@
       G.scrollPos = 700;
       G.scrollSpeed = 0;
 
-      G.camera.position.z = 600;
+      G.camera.position.z = 1000;
       if( !G.mobile ) G.camera.position.z = 1000;
       
 
@@ -216,6 +216,7 @@
 
           for( var j = 0; j < s.links.length; j++ ){
 
+            s.links[j].sm = false;
             // totalLinks ++;
             var link = new Link( totalLinks , s.links[j] );
             G.links.push( link );
@@ -401,6 +402,7 @@
         }
 
         if( !ball ){
+          console.log('ss');
           var cb = G.balls[id].hoverOver.bind( G.balls[id] );
           cb(); 
         }else{

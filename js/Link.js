@@ -18,6 +18,7 @@ function Link( id , params ){
   //this.mesh.position.y = 50;
   this.mesh.position.z = 50;
 
+  this.sm =this.params.sm;
 
 
   this.mesh.material.opacity = .5;
@@ -150,8 +151,13 @@ Link.prototype.tweenOut = function(){
 Link.prototype._hoverOver = function(){
 
   this.hoverOver();
-  if( this.sm == false ){
+  if( this.sm === false ){
+    console.log('YASSS');
     G.hoverOver( this.id , false );
+  }else{
+
+    console.log('NOO');
+
   }
 
 }
@@ -173,7 +179,7 @@ Link.prototype._hoverOut = function(){
   this.hoverOut();
   if( this.sm == false ){
 
-  G.hoverOut( this.id , false );
+    G.hoverOut( this.id , false );
   }
 
 }

@@ -58,12 +58,12 @@ Ball.prototype.hoverOver = function(){
 
   G.tv1.copy( this.position );
 
+  console.log( 'hes;s' );
   G.tv1.sub( G.camera.position );
   G.tv1.normalize();
   G.tv1.multiplyScalar( -500);
   this.position.copy(  G.camera.position );
   this.position.sub( G.tv1 );
-
 
   var n = notes[ Math.floor( Math.random() * notes.length) ];
  // console.log( this.params.name );
