@@ -279,7 +279,7 @@ G.animate = function(){
 
     }
 
-    this.updateBalls();
+    if( !G.mobile ) this.updateBalls();
 
       if( LOGO ){
         LOGO.update();
