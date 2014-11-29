@@ -399,11 +399,8 @@ G.updateBalls = function(){
     this.tv1.sub( G.ballCenter );
 
     var l = this.tv1.length();
-    this.tv1.normalize();
-    this.tv2.set(1 ,0, 0 ); 
+    this.tv2.set( 
     this.tv1.cross( this.tv2 );
-
-    b1.velocity.add( this.tv1.multiplyScalar( l * this.scrollSpeed * .00003) );
     
 
     for( var j = i+1; j < this.balls.length; j++ ){

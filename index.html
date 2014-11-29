@@ -92,7 +92,7 @@
   
       var LOGO;
 
-      G.scrollPos = 200;
+      G.scrollPos = 700;
       G.scrollSpeed = 0;
 
       G.camera.position.z = 1000;
@@ -101,6 +101,7 @@
       var LINES;
       var CONVEX, CONVEX_MAT;
       var CONVEX_POINTS=[];
+      var CONVEX_COLORS=[];
     
       G.loader.addLoad();
 
@@ -140,7 +141,8 @@
 
 
       G.loadTextures();
-
+  
+      G.t_audio = { type:"t" , value: G.audio.texture }
 
       G.addToStartArray( function(){
 
@@ -151,7 +153,7 @@
 
 
         LOGO = new THREE.Mesh( 
-          new THREE.PlaneGeometry( 100 , 100 ),
+          new THREE.PlaneGeometry( 300 , 300 ),
           new THREE.MeshBasicMaterial({
             map: THREE.ImageUtils.loadTexture('img/cabbibo.png'),
             transparent: true,
@@ -242,7 +244,15 @@
 
     
         for( var i = 0; i < G.balls.length; i++ ){
+          
+          G.balls[i].position.bID = i;
           CONVEX_POINTS.push( G.balls[i].position );
+
+          var c = new THREE.Color( G.balls[i].params.color);//links[i].color );
+          CONVEX_COLORS.push( 
+            new THREE.Vector3( c.r , c.g , c.b )
+          );
+
         }
 
 
@@ -251,10 +261,18 @@
           vertexShader: G.shaders.vs.rainbow,
           fragmentShader: G.shaders.fs.rainbow,
           shading: THREE.FlatShading,
-          uniforms:{
-            t_matcap:{type:"t" , value:G.TEXTURES['matcap']}
+
+          attributes:{
+
+            vertColor:{ type:"v3" , value: CONVEX_COLORS },
+
           },
-          //wireframe:true
+          uniforms:{
+            t_matcap:{type:"t" , value:G.TEXTURES['matcap']},
+            scrollPos:{type:"f" , value: G.scrollPos },
+            t_audio: G.t_audio
+          },
+          side: THREE.DoubleSide
         });
         CONVEX = new THREE.Mesh( 
           new THREE.ConvexGeometry( CONVEX_POINTS ),
@@ -282,7 +300,7 @@
           link.scrollPos =  i * SIZE ;
           link.activate();
 
-          link.scene.position.x = 200 +( i * 100);
+          link.scene.position.x = 100 +( i * 80);
 
           link.scene.position.y = -300 ;
           link.mesh.scale.multiplyScalar( .0001 );
@@ -301,6 +319,9 @@
 
         }
 
+        setTimeout(function(){
+          G.balls[0]._hoverOut();
+        },500 );
 
       }.bind( G ) );
 
@@ -319,6 +340,9 @@
         this.scrollPos += this.scrollSpeed;  
         this.scrollSpeed *= .95;
 
+        if( CONVEX_MAT ){
+          CONVEX_MAT.uniforms.scrollPos.value = this.scrollPos;
+        }
       }
 
       G.beginScroll = function( id ){

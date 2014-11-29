@@ -150,7 +150,9 @@ Link.prototype.tweenOut = function(){
 Link.prototype._hoverOver = function(){
 
   this.hoverOver();
-  G.hoverOver( this.id , false );
+  if( this.sm == false ){
+    G.hoverOver( this.id , false );
+  }
 
 }
 
@@ -169,7 +171,10 @@ Link.prototype.hoverOver = function( recursed ){
 Link.prototype._hoverOut = function(){
 
   this.hoverOut();
+  if( this.sm == false ){
+
   G.hoverOut( this.id , false );
+  }
 
 }
 

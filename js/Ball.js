@@ -8,8 +8,8 @@ function Ball(id , params){
   this.importance  = this.params.importance || 4
 
   this.mat = new THREE.MeshBasicMaterial({
-    color: 0x333333,
-    map: THREE.ImageUtils.loadTexture( this.params.img )
+    color: new THREE.Color( this.params.color ),
+   // map: THREE.ImageUtils.loadTexture( this.params.img )
   });
   /*this.mat = new THREE.MeshNormalMaterial({
     //map: THREE.ImageUtils.loadTexture( this.params.img )
@@ -18,6 +18,13 @@ function Ball(id , params){
       new THREE.IcosahedronGeometry( this.importance * 3 , 3 ) ,  
       this.mat
   );
+
+ /* this.mesh = new THREE.Mesh( 
+      new THREE.BoxGeometry( this.importance * 3 , this.importance* 3 , this.importance* 20 ) ,  
+      this.mat
+  );
+*/
+   
   this.mesh.hoverOver = this._hoverOver.bind( this );
   this.mesh.hoverOut  = this._hoverOut.bind( this );
   this.mesh.select    = this.select.bind( this );
@@ -40,10 +47,6 @@ function Ball(id , params){
 Ball.prototype._hoverOver = function(){
 
   this.hoverOver();
-/*  G.tv1.copy( this.position );
-  G.tv1.sub( G.camera.position );
-  G.tv1.multiplyScalar( .3 );
-  this.position.sub( G.tv1 );*/
   G.beginScroll( this.id );
 
    G.hoverOver( this.id , true );
@@ -53,11 +56,20 @@ Ball.prototype.hoverOver = function(){
 
   this.hovered = true;
 
+  G.tv1.copy( this.position );
+
+  G.tv1.sub( G.camera.position );
+  G.tv1.normalize();
+  G.tv1.multiplyScalar( -500);
+  this.position.copy(  G.camera.position );
+  this.position.sub( G.tv1 );
+
+
   var n = notes[ Math.floor( Math.random() * notes.length) ];
  // console.log( this.params.name );
   G.AUDIO[ n ].play();
 
-  this.mesh.material.color.setRGB( 1 , 1 , 1 );
+ // this.mesh.material.color.setRGB( 1 , 1 , 1 );
   //this.mesh.material.opacity = 1;
 
 }
@@ -70,7 +82,7 @@ Ball.prototype._hoverOut = function(){
 }
 Ball.prototype.hoverOut = function(){
   this.hovered = false;
-  this.mesh.material.color.setRGB( .2 , .2 , .2 );
+ ////////////////// this.mesh.material.color.setRGB( .2 , .2 , .2 );
   
  // this.mesh.material.opacity = .5;
 }
