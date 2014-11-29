@@ -1,4 +1,13 @@
 <html>
+  <!--
+
+  PLEASE DEAR GOD DONT LOOK AT THIS SOURCE ITS HIDEOUS!!!!!!!
+
+  If you have any specific questions, or theres any of it you want to know how to use, hit me up on twitter: @cabbibo
+
+
+
+  -->
 
   <head>
     <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -55,6 +64,7 @@
 
     <script src="lib/ParticleUtils.js"></script>
     <script src="lib/PhysicsRenderer.js"></script>
+    <script src="lib/ConvexGeometry.js"></script>
     
     <script src="lib/Loader.js"></script>
 
@@ -89,11 +99,17 @@
 
       var SIZE = 220;
       var LINES;
+      var CONVEX, CONVEX_MAT;
+      var CONVEX_POINTS=[];
+    
       G.loader.addLoad();
 
       // For text
       G.shaders.load( 'vs-snow' , 'snow' , 'vertex'    );
       G.shaders.load( 'fs-snow' , 'snow' , 'fragment'  );
+
+      G.shaders.load( 'vs-rainbow' , 'rainbow' , 'vertex'    );
+      G.shaders.load( 'fs-rainbow' , 'rainbow' , 'fragment'  );
 
       G.shaders.shaderSetLoaded = function(){
         G.loader.onLoad();
@@ -132,6 +148,7 @@
 
         var totalHeight = 0;
         var totalLinks = 0;
+
 
         LOGO = new THREE.Mesh( 
           new THREE.PlaneGeometry( 100 , 100 ),
@@ -213,7 +230,7 @@
         }
         
 
-        var lineGeo = new THREE.Geometry();
+       /* var lineGeo = new THREE.Geometry();
         for( var i = 0; i < G.balls.length; i++ ){
           for( var j = i; j < G.balls.length; j++ ){
 
@@ -221,13 +238,39 @@
             lineGeo.vertices.push( G.balls[j].position );
 
           }
+        }*/
+
+    
+        for( var i = 0; i < G.balls.length; i++ ){
+          CONVEX_POINTS.push( G.balls[i].position );
         }
 
 
-        var mat = new THREE.LineBasicMaterial();
+        CONVEX_MAT = new THREE.ShaderMaterial({
+  
+          vertexShader: G.shaders.vs.rainbow,
+          fragmentShader: G.shaders.fs.rainbow,
+          shading: THREE.FlatShading,
+          uniforms:{
+            t_matcap:{type:"t" , value:G.TEXTURES['matcap']}
+          },
+          //wireframe:true
+        });
+        CONVEX = new THREE.Mesh( 
+          new THREE.ConvexGeometry( CONVEX_POINTS ),
+          CONVEX_MAT
+        );
+        G.objectControls.add( CONVEX );
+        G.scene.add( CONVEX );
 
-        LINES = new THREE.Line( lineGeo , mat );
-        G.scene.add( LINES );
+
+
+        /*var mat = new THREE.LineBasicMaterial({
+         linewidth:3 
+        });
+
+        LINES = new THREE.Line( lineGeo , CONVEX_MAT);
+        G.scene.add( LINES );*/
 
 
         totalHeight -= SIZE;
@@ -290,7 +333,7 @@
         var p = this.links[ id ].scrollPos;
         var p1 = -this.scrollPos + 200;
 
-        console.log( p1 - p );
+        //console.log( p1 - p );
         if( Math.abs((p1 - p )) < 1. ){
           console.log('whoa');
           this.scrollingToPos = false;
@@ -312,7 +355,7 @@
             Math.random() -.5  
             );
 
-          G.tv1.multiplyScalar( 5 );
+          G.tv1.multiplyScalar( 10 );
 
           G.balls[i].velocity.add( G.tv1 );
 

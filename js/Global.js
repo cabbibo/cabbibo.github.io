@@ -32,7 +32,7 @@ G.tv1 = new THREE.Vector3();
 G.tv2 = new THREE.Vector3();
 
 G.springLength = 400;
-G.maxVel = 10;
+G.maxVel = 30;
 G.ballCenter = new THREE.Vector3( 300 , 0 , 0 );
 
 
@@ -274,6 +274,24 @@ G.animate = function(){
 
       LINES.geometry.verticesNeedUpdate = true;
 
+    }
+
+    if( CONVEX && CONVEX_POINTS ){
+
+        G.objectControls.remove( CONVEX );
+      
+      G.scene.remove( CONVEX );
+      var geo = new THREE.ConvexGeometry( CONVEX_POINTS );
+      geo.computeVertexNormals();
+      CONVEX = new THREE.Mesh( 
+        geo,
+        CONVEX_MAT 
+      );
+      G.scene.add( CONVEX );
+        G.objectControls.add( CONVEX );
+      
+      //CONVEX.geometryNeedsUpdate = true;
+   
     }
  
     this.updateScroll();

@@ -5,7 +5,7 @@ function Ball(id , params){
   this.params = params;
   this.hovered = false;
 
-  this.importance  = this.params.importance || 20
+  this.importance  = this.params.importance || 4
 
   this.mat = new THREE.MeshBasicMaterial({
     color: 0x333333,
@@ -15,7 +15,7 @@ function Ball(id , params){
     //map: THREE.ImageUtils.loadTexture( this.params.img )
   });*/
   this.mesh = new THREE.Mesh( 
-      new THREE.IcosahedronGeometry( this.importance , 3 ) ,  
+      new THREE.IcosahedronGeometry( this.importance * 3 , 3 ) ,  
       this.mat
   );
   this.mesh.hoverOver = this._hoverOver.bind( this );
@@ -40,6 +40,10 @@ function Ball(id , params){
 Ball.prototype._hoverOver = function(){
 
   this.hoverOver();
+/*  G.tv1.copy( this.position );
+  G.tv1.sub( G.camera.position );
+  G.tv1.multiplyScalar( .3 );
+  this.position.sub( G.tv1 );*/
   G.beginScroll( this.id );
 
    G.hoverOver( this.id , true );
