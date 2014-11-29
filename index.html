@@ -455,7 +455,7 @@
 
         if( TOUCH_DOWN ){
 
-          G.scrollSpeed -= (OTOUCH - e.touches[0].pageY);
+          G.scrollSpeed += (OTOUCH - e.touches[0].pageY);
           OTOUCH = e.touches[0].pageY;
 
         }
