@@ -38,7 +38,7 @@ function Link( id , params ){
   }else{
 
     this.img = new THREE.Mesh(  
-      new THREE.PlaneGeometry( 80 , 80 ),
+      new THREE.PlaneGeometry( 50 , 50 ),
       new THREE.MeshBasicMaterial({
         map: THREE.ImageUtils.loadTexture( this.params.img )
       })
