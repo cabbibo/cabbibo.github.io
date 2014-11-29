@@ -24,7 +24,7 @@ G.mobile = function () {
     return false;
   }
 }();
-
+//G.mobile = true;
 G.loader  = new Loader();
 
 
@@ -51,7 +51,7 @@ G.springLength = 400;
 G.maxVel = 30;
 G.ballCenter = new THREE.Vector3( 400 , 0 , 0 );
 
-//if( !G.mobile ){ G.ballCenter = new THREE.Vector3( 200 , 0 , 0); }
+if( !G.mobile ){ G.ballCenter.set( 200 , 0 , 0); }
 
 
 
