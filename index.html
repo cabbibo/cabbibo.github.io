@@ -105,7 +105,8 @@
       var CONVEX, CONVEX_MAT;
       var CONVEX_POINTS=[];
       var CONVEX_COLORS=[];
-    
+
+      var TOUCH_DOWN = false;
       G.loader.addLoad();
 
       // For text
@@ -156,7 +157,7 @@
 
 
         LOGO = new THREE.Mesh( 
-          new THREE.PlaneGeometry( 300 , 300 ),
+          new THREE.PlaneGeometry( 100 , 100 ),
           new THREE.MeshBasicMaterial({
             map: THREE.ImageUtils.loadTexture('img/cabbibo.png'),
             transparent: true,
@@ -165,7 +166,11 @@
           })
           );
 
-        LOGO = initSnowflake();
+          
+        if( !G.mobile ){
+          LOGO = initSnowflake();
+        }
+
         LOGO.scrollPos = 0;
         LOGO.position.x = -800;
         LOGO.position.z = -1000;
@@ -432,17 +437,28 @@
 
       function touchstart( e ){
 
+        OTOUCH = e.touches[0].pageY;
+        TOUCH_DOWN = true;
         alert( e.touches[ 0 ].pageX );
         G.scrollSpeed += 100;//e.wheelDelta / 100;
   
       }
+
       function touchend( e ){
+
+        TOUCH_DOWN = false;
 
 
       }
 
       function touchmove( e ){
 
+        if( TOUCH_DOWN ){
+
+          G.scrollSpeed -= (OTOUCH - e.touches[0].pageY);
+          OTOUCH = e.touches[0].pageY;
+
+        }
 
       }
     </script>
