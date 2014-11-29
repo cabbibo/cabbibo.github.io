@@ -402,15 +402,15 @@ var sm = [
   {
     name: 'Twitter',
     note: 'c5',
-    img:  'img/icons/twitter_1.png',
-    link: 'http://twitter.com/share?text=God%20bless%20@cabbibo,%20the%20once%20and%20future%20king:%20&url=http://cabbi.bo',
+    img:  'img/icons/twitter_2.png',
+    link: 'http://twitter.com/share?text=Long%20Live%20Synesthesia%20(%20by%20@cabbibo%20)%20:%20&url=http://cabbi.bo',
   },
 
 
   {
     name: 'Facebook',
     note: 'c5',
-    img:  'img/icons/facebook_1.png',
+    img:  'img/icons/facebook_2.png',
     link: 'http://www.facebook.com/sharer.php?u=http://cabbi.bo',
   },
 
@@ -418,14 +418,14 @@ var sm = [
   {
     name: 'Soundcloud',
     note: 'c5',
-    img:  'img/icons/soundcloud_1.png',
+    img:  'img/icons/soundcloud_2.png',
     link: 'https://www.soundcloud.com/Cabbibo',
   },
 
     {
     name: 'Twitter',
     note: 'c5',
-    img:  'img/icons/cabbibo_1.png',
+    img:  'img/icons/cabbibo_2.png',
     link: 'http://twitter.com/cabbibo',
   },
 
