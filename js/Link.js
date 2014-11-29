@@ -21,12 +21,13 @@ function Link( id , params ){
   this.sm =this.params.sm;
 
 
-  this.mesh.material.opacity = .5;
-  this.mesh.material.transparent = true;
-  this.mesh.material.blending = THREE.AdditiveBlending;
-  this.mesh.material.depthWrite = false;
-  this.mesh.materialNeedsUpdate = true; 
-  
+  if( !G.mobile ){
+    this.mesh.material.opacity = .5;
+    this.mesh.material.transparent = true;
+    this.mesh.material.blending = THREE.AdditiveBlending;
+    this.mesh.material.depthWrite = false;
+    this.mesh.materialNeedsUpdate = true; 
+  }
 
   if( !this.params.sm ){
     this.img = new THREE.Mesh(  
@@ -48,12 +49,14 @@ function Link( id , params ){
 
   }
 
-  this.img.material.opacity = .5;
-  this.img.material.transparent = true;
-  this.img.material.blending = THREE.AdditiveBlending;
-  this.img.material.depthWrite = false;
-  this.img.materialNeedsUpdate = true; 
+  if( !G.mobile || this.params.sm === true ){
 
+    this.img.material.opacity = .5;
+    this.img.material.transparent = true;
+    this.img.material.blending = THREE.AdditiveBlending;
+    this.img.material.depthWrite = false;
+    this.img.materialNeedsUpdate = true; 
+  }
 
   this.img.hoverOver = this._hoverOver.bind( this );
   this.img.hoverOut  = this._hoverOut.bind( this );
@@ -178,7 +181,6 @@ Link.prototype._hoverOut = function(){
 
   this.hoverOut();
   if( this.sm == false ){
-
     G.hoverOut( this.id , false );
   }
 

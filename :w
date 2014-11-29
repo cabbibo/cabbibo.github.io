@@ -24,7 +24,6 @@ G.mobile = function () {
     return false;
   }
 }();
-
 G.loader  = new Loader();
 
 
@@ -49,10 +48,8 @@ G.tv2 = new THREE.Vector3();
 
 G.springLength = 400;
 G.maxVel = 30;
-G.ballCenter = new THREE.Vector3( 400 , 0 , 0 );
-
-//if( !G.mobile ){ G.ballCenter = new THREE.Vector3( 200 , 0 , 0); }
-
+G.ballCenter = new THREE.Vector3( 0 , 0 , -1000 );
+if( !G.mobile ) G.ballCenter = new THREE.Vector3( 200 , 0 , 0);
 
 
 

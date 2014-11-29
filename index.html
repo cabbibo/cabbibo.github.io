@@ -228,7 +228,7 @@
             if( !G.mobile ) link.scene.position.x = -400;
           //  link.scene.position.y = -totalLinks * SIZE * 2 ;
             var ball = new Ball( totalLinks , s.links[j] );
-            if( !G.mobile )  G.scene.add( ball.mesh );
+            G.scene.add( ball.mesh );
             G.balls.push( ball );
 
             ball.position.x = (Math.random() -.5) * 200;
@@ -254,7 +254,7 @@
           }
         }*/
 
-        if( !G.mobile ){
+        //if( !G.mobile ){
     
         for( var i = 0; i < G.balls.length; i++ ){
           
@@ -294,7 +294,7 @@
         G.objectControls.add( CONVEX );
         G.scene.add( CONVEX );
 
-      }
+      //}
 
 
         /*var mat = new THREE.LineBasicMaterial({
@@ -314,15 +314,17 @@
           link.scrollPos =  i * SIZE ;
           link.activate();
 
-          link.scene.position.x = -150 + (i * 100 );
+          link.scene.position.x = -250;
+          link.scene.position.y = -150 + (i * 100 );
           link.scene.position.z = 100;
           if( !G.mobile ){
             link.scene.position.x = 100 +( i * 80);
             link.scene.position.z = 0;
+            link.scene.position.y = -300 ;
+
           }
     
 
-          link.scene.position.y = -300 ;
           link.mesh.scale.multiplyScalar( .0001 );
 
 
