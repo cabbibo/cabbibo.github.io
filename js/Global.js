@@ -281,46 +281,48 @@ G.animate = function(){
 
     this.updateBalls();
 
-    if( LOGO ){
-      LOGO.update();
-    }
+      if( LOGO ){
+        LOGO.update();
+      }
 
-    if( LINES ){
+      if( LINES ){
 
-      LINES.geometry.verticesNeedUpdate = true;
-
-    }
-
-    if( CONVEX && CONVEX_POINTS ){
-
-        G.objectControls.remove( CONVEX );
-      
-      G.scene.remove( CONVEX );
-
-      var geo = new THREE.ConvexGeometry( CONVEX_POINTS );
-      geo.computeVertexNormals();
-      
-      var aColor = [];
-
-      for( var i = 0; i < geo.vertices.length; i++ ){
-
-        var v = geo.vertices[i];
-        aColor.push( CONVEX_COLORS[ v.bID ] );
+        LINES.geometry.verticesNeedUpdate = true;
 
       }
-      CONVEX_MAT.attributes.vertColor.value = aColor;
+    if( !G.mobile ){
 
-      CONVEX = new THREE.Mesh( 
-        geo,
-        CONVEX_MAT 
-      );
-      G.scene.add( CONVEX );
-        G.objectControls.add( CONVEX );
-      
-      //CONVEX.geometryNeedsUpdate = true;
+      if( CONVEX && CONVEX_POINTS ){
+
+          G.objectControls.remove( CONVEX );
+        
+        G.scene.remove( CONVEX );
+
+        var geo = new THREE.ConvexGeometry( CONVEX_POINTS );
+        geo.computeVertexNormals();
+        
+        var aColor = [];
+
+        for( var i = 0; i < geo.vertices.length; i++ ){
+
+          var v = geo.vertices[i];
+          aColor.push( CONVEX_COLORS[ v.bID ] );
+
+        }
+        CONVEX_MAT.attributes.vertColor.value = aColor;
+
+        CONVEX = new THREE.Mesh( 
+          geo,
+          CONVEX_MAT 
+        );
+        G.scene.add( CONVEX );
+          G.objectControls.add( CONVEX );
+        
+        //CONVEX.geometryNeedsUpdate = true;
+     
+      }
    
     }
- 
     this.updateScroll();
 
 
