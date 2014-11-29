@@ -180,7 +180,7 @@
         LOGO.position.z = -1000;
         LOGO.scale.multiplyScalar( 2 );
         totalHeight -= 500;
-        G.scene.add(LOGO );
+        if(!G.mobile)G.scene.add(LOGO );
 
 
         /*var m = G.textCreator.createMesh( 'CABBIBO' );
@@ -315,9 +315,9 @@
           link.scrollPos =  i * SIZE ;
           link.activate();
 
-          link.scene.position.x = -250;
-          link.scene.position.y = -150 + (i * 100 );
-          link.scene.position.z = 100;
+          link.scene.position.x = -120;
+          link.scene.position.y = -150 + (i * 80 );
+          link.scene.position.z = 600;
           if( !G.mobile ){
             link.scene.position.x = 100 +( i * 80);
             link.scene.position.z = 0;

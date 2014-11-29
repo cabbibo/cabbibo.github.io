@@ -400,7 +400,7 @@ var sections = [
 var sm = [
 
   {
-    name: 'Twitter',
+    name: 'Twitter Share',
     note: 'c5',
     img:  'img/icons/twitter_2.png',
     link: 'http://twitter.com/share?text=Long%20Live%20Synesthesia%20(%20by%20@cabbibo%20)%20:%20&url=http://cabbi.bo',
@@ -415,6 +415,13 @@ var sm = [
   },
 
 
+   {
+    name: 'Vimeo',
+    note: 'c5',
+    img:  'img/icons/vimeo_2.png',
+    link: 'https://vimeo.com/cabbibo',
+  },
+
   {
     name: 'Soundcloud',
     note: 'c5',
@@ -422,7 +429,7 @@ var sm = [
     link: 'https://www.soundcloud.com/Cabbibo',
   },
 
-    {
+  {
     name: 'Twitter',
     note: 'c5',
     img:  'img/icons/cabbibo_2.png',
