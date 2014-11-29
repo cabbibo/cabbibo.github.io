@@ -314,9 +314,9 @@
         G.maxPos = Math.abs( totalHeight );//links.length * (SIZE);
 
         G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
-	   /* G.renderer.domElement.addEventListener( 'touchstart', touchstart, false );
+	    G.renderer.domElement.addEventListener( 'touchstart', touchstart, false );
         G.renderer.domElement.addEventListener( 'touchend', touchend, false );
-	    G.renderer.domElement.addEventListener( 'touchmove', touchmove, false );*/
+	    G.renderer.domElement.addEventListener( 'touchmove', touchmove, false );
 
 
         for( var i = 0; i < G.balls.length; i++ ){
@@ -428,6 +428,22 @@
 
         G.scrollSpeed -= e.wheelDelta / 100;
   
+      }
+
+      function touchstart( e ){
+
+        alert( e.touches[ 0 ].pageX );
+        G.scrollSpeed += 100;//e.wheelDelta / 100;
+  
+      }
+      function touchend( e ){
+
+
+      }
+
+      function touchmove( e ){
+
+
       }
     </script>
 
