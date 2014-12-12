@@ -391,7 +391,34 @@ var sections = [
 
     ]
 
+  },
+
+    {
+    title:"Leap",
+    links:[
+
+    
+      {
+        name: 'Paintball',
+        importance: 9,
+        color:0x92ED6B,
+        img:  'img/sites/paintball.png',
+        link: 'http://cabbi.bo/paintball',
+      },
+
+      {
+        name: 'Sky Sphere',
+        importance: 6,
+        color:0xffd700,
+        img:  'img/sites/skySphere.png',
+        link: 'http://cabbi.bo/SKY-SPHERE',
+      },
+
+    ]
+
   }
+
+
 
 
 
