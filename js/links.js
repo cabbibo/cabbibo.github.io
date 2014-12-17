@@ -4,6 +4,13 @@ var sections = [
     title:"NEW PROJECTS",
     links:[
       {
+        name: 'DRAGONFISH',
+        color:0x6600FF,
+        importance: 10,
+        img:  'img/sites/DRAGONFISH.png',
+        link: 'http://cabbi.bo/DRAGONFISH/',
+      },
+      {
         name: 'Needs',
         color:0x6600FF,
         importance: 10,
@@ -76,6 +83,29 @@ var sections = [
     ]
   },
 
+  {
+    title:"Games",
+    links:[
+
+      {
+        name: 'DRAGONFISH',
+        color:0x6600FF,
+        importance: 10,
+        img:  'img/sites/DRAGONFISH.png',
+        link: 'http://cabbi.bo/DRAGONFISH/',
+      },
+
+      {
+        name: 'Recursion',
+        importance: 8,
+        color:0xFFCC00,
+        img:  'img/sites/recursion.png',
+        link: 'http://cabbibo.com/recursion',
+      },
+
+    ]
+
+  },
   {
     title:"Demoscene",
     links:[
