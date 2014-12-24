@@ -4,6 +4,22 @@ var sections = [
     title:"NEW PROJECTS",
     links:[
       {
+        name: 'B E Y O N D',
+        color:0xFFFFFF,
+        importance: 10,
+        img:  'img/sites/beyond.png',
+        link: 'http://b-e-y-o-n-d.com/',
+      },
+
+      {
+        name: 'Growing Boy',
+        color:0x6600FF,
+        importance: 4,
+        img:  'img/sites/growingBoy.png',
+        link: 'http://cabbi.bo/growingBoy/',
+      },
+
+      {
         name: 'DRAGONFISH',
         color:0x6600FF,
         importance: 10,
@@ -111,6 +127,14 @@ var sections = [
     links:[
 
       {
+        name: 'B E Y O N D',
+        color:0xFFFFFF,
+        importance: 10,
+        img:  'img/sites/beyond.png',
+        link: 'http://b-e-y-o-n-d.com/',
+      },
+
+      {
         name: 'NVS',
         color:0x9999FF,
         importance: 8,
@@ -125,7 +149,16 @@ var sections = [
   {
     title:"Audio Sketches",
     links:[
- 
+
+      {
+        name: 'Growing Boy',
+        color:0x6600FF,
+        importance: 4,
+        img:  'img/sites/growingBoy.png',
+        link: 'http://cabbi.bo/growingBoy/',
+      },
+
+
       {
         name: 'Drive',
         importance: 5,
