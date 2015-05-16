@@ -3,20 +3,59 @@ var sections = [
   {
     title:"NEW PROJECTS",
     links:[
+
+
+      
+      {
+        name: 'FTD',
+        color:0x000000,
+        importance: 9,
+        img:  'img/sites/ftd.png',
+        link: 'http://cabbi.bo/Text/',
+      },
+
+      {
+        name: 'Shiny Text',
+        color:0xff5500,
+        importance: 9,
+        img:  'img/sites/shinyText.png',
+        link: 'http://cabbi.bo/ShinyText/',
+      },
+      {
+        name: 'Physics Renderer',
+        color:0xc0ffee,
+        importance: 7,
+        img:  'img/sites/physicsRenderer.png',
+        link: 'http://cabbi.bo/PhysicsRenderer/',
+      },
+      {
+        name: 'Difference',
+        color:0xff3333,
+        importance: 9,
+        img:  'img/sites/difference.png',
+        link: 'http://cabbi.bo/difference',
+      },
+      {
+        name: 'Laplander',
+        color:0x6600FF,
+        importance: 7,
+        img:  'img/sites/laplander.png',
+        link: 'http://cabbi.bo/laplander/',
+      },
+      
+      {
+        name: 'AudioTemplate',
+        color:0x5599ff,
+        importance: 5,
+        img:  'img/sites/audioTemplate.png',
+        link: 'http://cabbi.bo/AudioTemplate/',
+      },
       {
         name: 'B E Y O N D',
         color:0xFFFFFF,
         importance: 10,
         img:  'img/sites/beyond.png',
         link: 'http://b-e-y-o-n-d.com/',
-      },
-
-      {
-        name: 'Growing Boy',
-        color:0x6600FF,
-        importance: 4,
-        img:  'img/sites/growingBoy.png',
-        link: 'http://cabbi.bo/growingBoy/',
       },
 
       {
@@ -34,29 +73,7 @@ var sections = [
         link: 'http://cabbi.bo/Needs/',
       },
          
-      {
-        name: 'Dotter',
-        color:0xFFFFCC,
-        importance: 3,
-        img:  'img/sites/dotter.png',
-        link: 'http://cabbi.bo/dotter/',
-      },
-
-      {
-        name: 'Drive',
-        color:0xFF5050,
-        importance: 5,
-        img:  'img/sites/drive.png',
-        link: 'http://cabbi.bo/drive/',
-      },
-
-      {
-        name: 'c418',
-        color: 0x00CC99,
-        importance: 3,
-        img:  'img/sites/c418.png',
-        link: 'http://cabbi.bo/c418/',
-      },
+     
 
     ]
 
@@ -151,6 +168,30 @@ var sections = [
     links:[
 
       {
+        name: 'Bees',
+        importance: 5,
+        color:0xFF5500,
+        img:  'img/sites/Bees.png',
+        link: 'http://cabbi.bo/Bees/',
+      },
+
+      {
+        name: 'c418',
+        importance: 3,
+        color: 0x00CC99,
+        img:  'img/sites/c418.png',
+        link: 'http://cabbi.bo/c418/',
+      },
+
+      {
+        name: 'Laplander',
+        color:0x6600FF,
+        importance: 7,
+        img:  'img/sites/laplander.png',
+        link: 'http://cabbi.bo/laplander/',
+      },
+
+      {
         name: 'Growing Boy',
         color:0x6600FF,
         importance: 4,
@@ -166,15 +207,6 @@ var sections = [
         img:  'img/sites/drive.png',
         link: 'http://cabbi.bo/drive/',
       },
-
-      {
-        name: 'c418',
-        importance: 3,
-        color: 0x00CC99,
-        img:  'img/sites/c418.png',
-        link: 'http://cabbi.bo/c418/',
-      },
-
 
 
       {
@@ -194,13 +226,7 @@ var sections = [
         link: 'http://cabbi.bo/Skull/',
       },
 
-      {
-        name: 'Bees',
-        importance: 5,
-        color:0xFF5500,
-        img:  'img/sites/Bees.png',
-        link: 'http://cabbi.bo/Bees/',
-      },
+
 
       {
         name: 'Hueboy',
@@ -235,6 +261,13 @@ var sections = [
     title:"G.E.M.S",
     links:[
 
+      {
+        name: 'Difference',
+        color:0xff3333,
+        importance: 9,
+        img:  'img/sites/difference.png',
+        link: 'http://cabbi.bo/difference',
+      },
       {
         name: 'Beacon',
         importance: 7,
@@ -319,6 +352,13 @@ var sections = [
     links:[
 
       {
+        name: 'Shiny Text',
+        color:0xff5500,
+        importance: 9,
+        img:  'img/sites/shinyText.png',
+        link: 'http://cabbi.bo/ShinyText/',
+      },
+      {
         name: 'Snog',
         importance: 1,
         color:0xFF33CC,
@@ -370,8 +410,30 @@ var sections = [
         color:0x006699,
         img:  'img/sites/ShaderLoader.png',
         link: 'http://cabbi.bo/ShaderLoader/',
-      }
+      },
 
+      {
+        name: 'FTD',
+        color:0x000000,
+        importance: 9,
+        img:  'img/sites/ftd.png',
+        link: 'http://cabbi.bo/Text/',
+      },
+      {
+        name: 'Physics Renderer',
+        color:0xc0ffee,
+        importance: 7,
+        img:  'img/sites/physicsRenderer.png',
+        link: 'http://cabbi.bo/PhysicsRenderer/',
+      },
+
+      {
+        name: 'AudioTemplate',
+        color:0x5599ff,
+        importance: 5,
+        img:  'img/sites/audioTemplate.png',
+        link: 'http://cabbi.bo/AudioTemplate/',
+      },
 
 
 
