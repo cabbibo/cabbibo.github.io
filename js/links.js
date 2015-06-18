@@ -4,52 +4,16 @@ var sections = [
     title:"NEW PROJECTS",
     links:[
 
-
-      
       {
-        name: 'FTD',
-        color:0x000000,
-        importance: 9,
-        img:  'img/sites/ftd.png',
-        link: 'http://cabbi.bo/Text/',
+        name: 'ENOUGH',
+        color:0xffaa11,
+        importance: 12,
+        img:  'img/sites/enough.png',
+        link: 'http://cabbi.bo/enough/',
       },
 
-      {
-        name: 'Shiny Text',
-        color:0xff5500,
-        importance: 9,
-        img:  'img/sites/shinyText.png',
-        link: 'http://cabbi.bo/ShinyText/',
-      },
-      {
-        name: 'Physics Renderer',
-        color:0xc0ffee,
-        importance: 7,
-        img:  'img/sites/physicsRenderer.png',
-        link: 'http://cabbi.bo/PhysicsRenderer/',
-      },
-      {
-        name: 'Difference',
-        color:0xff3333,
-        importance: 9,
-        img:  'img/sites/difference.png',
-        link: 'http://cabbi.bo/difference',
-      },
-      {
-        name: 'Laplander',
-        color:0x6600FF,
-        importance: 7,
-        img:  'img/sites/laplander.png',
-        link: 'http://cabbi.bo/laplander/',
-      },
+
       
-      {
-        name: 'AudioTemplate',
-        color:0x5599ff,
-        importance: 5,
-        img:  'img/sites/audioTemplate.png',
-        link: 'http://cabbi.bo/AudioTemplate/',
-      },
       {
         name: 'B E Y O N D',
         color:0xFFFFFF,
@@ -72,6 +36,16 @@ var sections = [
         img:  'img/sites/Needs.png',
         link: 'http://cabbi.bo/Needs/',
       },
+
+
+      {
+        name: 'FTD',
+        color:0x000000,
+        importance: 9,
+        img:  'img/sites/ftd.png',
+        link: 'http://cabbi.bo/Text/',
+      },
+
          
      
 
@@ -119,6 +93,14 @@ var sections = [
   {
     title:"Games",
     links:[
+
+      {
+        name: 'ENOUGH',
+        color:0xffaa11,
+        importance: 12,
+        img:  'img/sites/enough.png',
+        link: 'http://cabbi.bo/enough/',
+      },
 
       {
         name: 'DRAGONFISH',
