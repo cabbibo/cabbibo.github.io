@@ -12,6 +12,14 @@ var sections = [
         link: 'http://cabbi.bo/enough/',
       },
 
+    {
+        name: 'Pulse',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/pulse.png',
+        link: 'http://cabbi.bo/pulse/',
+      },
+
 
       
       {
@@ -48,6 +56,46 @@ var sections = [
 
          
      
+
+    ]
+
+  },
+
+  {
+    title:"Games",
+    links:[
+
+      {
+        name: 'ENOUGH',
+        color:0xffaa11,
+        importance: 12,
+        img:  'img/sites/enough.png',
+        link: 'http://cabbi.bo/enough/',
+      },
+
+     {
+        name: 'Pulse',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/pulse.png',
+        link: 'http://cabbi.bo/pulse/',
+      },
+
+      {
+        name: 'DRAGONFISH',
+        color:0x6600FF,
+        importance: 10,
+        img:  'img/sites/DRAGONFISH.png',
+        link: 'http://cabbi.bo/DRAGONFISH/',
+      },
+
+      {
+        name: 'Recursion',
+        importance: 8,
+        color:0xFFCC00,
+        img:  'img/sites/recursion.png',
+        link: 'http://cabbibo.com/recursion',
+      },
 
     ]
 
@@ -90,37 +138,6 @@ var sections = [
     ]
   },
 
-  {
-    title:"Games",
-    links:[
-
-      {
-        name: 'ENOUGH',
-        color:0xffaa11,
-        importance: 12,
-        img:  'img/sites/enough.png',
-        link: 'http://cabbi.bo/enough/',
-      },
-
-      {
-        name: 'DRAGONFISH',
-        color:0x6600FF,
-        importance: 10,
-        img:  'img/sites/DRAGONFISH.png',
-        link: 'http://cabbi.bo/DRAGONFISH/',
-      },
-
-      {
-        name: 'Recursion',
-        importance: 8,
-        color:0xFFCC00,
-        img:  'img/sites/recursion.png',
-        link: 'http://cabbibo.com/recursion',
-      },
-
-    ]
-
-  },
   {
     title:"Demoscene",
     links:[
