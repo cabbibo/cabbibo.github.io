@@ -12,49 +12,39 @@ var sections = [
         link: 'http://cabbi.bo/enough/',
       },
 
-    {
+      {
+        name: 'Growth',
+        color:0xaa00ff,
+        importance: 8,
+        img:  'img/sites/growth.png',
+        link: 'http://cabbi.bo/growth/',
+      },
+
+      
+      {
+        name: 'L U N E',
+        color:0x000000,
+        importance: 8,
+        img:  'img/sites/lune.png',
+        link: 'http://l-u-n-e.com',
+      },
+
+      {
+        name: 'Bernie',
+        color:0xff88ee,
+        importance: 4,
+        img:  'img/sites/bernie.png',
+        link: 'http://cabbi.bo/bernie/',
+      },
+
+      {
         name: 'Pulse',
         color:0xffffff,
         importance: 10,
         img:  'img/sites/pulse.png',
         link: 'http://cabbi.bo/pulse/',
       },
-
-
-      
-      {
-        name: 'B E Y O N D',
-        color:0xFFFFFF,
-        importance: 10,
-        img:  'img/sites/beyond.png',
-        link: 'http://b-e-y-o-n-d.com/',
-      },
-
-      {
-        name: 'DRAGONFISH',
-        color:0x6600FF,
-        importance: 10,
-        img:  'img/sites/DRAGONFISH.png',
-        link: 'http://cabbi.bo/DRAGONFISH/',
-      },
-      {
-        name: 'Needs',
-        color:0x6600FF,
-        importance: 10,
-        img:  'img/sites/Needs.png',
-        link: 'http://cabbi.bo/Needs/',
-      },
-
-
-      {
-        name: 'FTD',
-        color:0x000000,
-        importance: 9,
-        img:  'img/sites/ftd.png',
-        link: 'http://cabbi.bo/Text/',
-      },
-
-         
+    
      
 
     ]
@@ -73,6 +63,15 @@ var sections = [
         link: 'http://cabbi.bo/enough/',
       },
 
+
+      {
+        name: 'Growth',
+        color:0xaa00ff,
+        importance: 8,
+        img:  'img/sites/growth.png',
+        link: 'http://cabbi.bo/growth/',
+      },
+      
      {
         name: 'Pulse',
         color:0xffffff,
@@ -141,6 +140,14 @@ var sections = [
   {
     title:"Demoscene",
     links:[
+
+      {
+        name: 'L U N E',
+        color:0x000000,
+        importance: 8,
+        img:  'img/sites/lune.png',
+        link: 'http://l-u-n-e.com',
+      },
 
       {
         name: 'B E Y O N D',
@@ -357,6 +364,14 @@ var sections = [
         img:  'img/sites/shinyText.png',
         link: 'http://cabbi.bo/ShinyText/',
       },
+      {
+        name: 'Bernie',
+        color:0xffffff,
+        importance: 8,
+        img:  'img/sites/bernie.png',
+        link: 'http://cabbi.bo/bernie/',
+      },
+
       {
         name: 'Snog',
         importance: 1,
