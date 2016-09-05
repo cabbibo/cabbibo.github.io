@@ -13,6 +13,32 @@ var sections = [
       },
 
       {
+        name: 'cabbibo.is',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/cabbibois.png',
+        link: 'https://cabbibo.is',
+      },
+
+      {
+        name: 'The Digging Remedy',
+        color:0xffffff,
+        importance: 6,
+        img:  'img/sites/plaid.png',
+        link: 'https://www.thediggingremedy.com',
+      },
+
+
+
+      {
+        name: 'The Bee',
+        color:0xffaa11,
+        importance: 4,
+        img:  'img/sites/plaidpup.png',
+        link: 'https://dig.thediggingremedy.com',
+      },
+
+      {
         name: 'Growth',
         color:0xaa00ff,
         importance: 8,
@@ -28,28 +54,47 @@ var sections = [
         img:  'img/sites/lune.png',
         link: 'http://l-u-n-e.com',
       },
-
-      {
-        name: 'Bernie',
-        color:0xff88ee,
-        importance: 4,
-        img:  'img/sites/bernie.png',
-        link: 'http://cabbi.bo/bernie/',
-      },
-
-      {
-        name: 'Pulse',
-        color:0xffffff,
-        importance: 10,
-        img:  'img/sites/pulse.png',
-        link: 'http://cabbi.bo/pulse/',
-      },
-    
      
 
     ]
 
   },
+
+    {
+    title:"EXPANSION PACKS",
+    links:[
+
+      {
+        name: 'cabbibo.is',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/cabbibois.png',
+        link: 'https://cabbibo.is',
+      },
+
+      {
+        name: 'Wombs',
+        importance: 8,
+        color:0x8844ff,
+        img:  'img/sites/wombs.png',
+        link: 'http://wom.bs/',
+      },
+
+       {
+        name: 'Cabbibo.com',
+        importance: 9,
+        color:0x990033,
+        img:  'img/sites/cabbibo.png',
+        link: 'http://cabbibo.com',
+      },
+
+
+     
+
+    ]
+
+  },
+
 
   {
     title:"Games",
