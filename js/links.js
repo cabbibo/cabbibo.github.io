@@ -13,6 +13,40 @@ var sections = [
       },
 
       {
+        name: 'There is a Light',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/light.png',
+        link: 'https://cabbi.bo/light/',
+      },
+
+      {
+        name: 'SPACEpuppy',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/SPACEpuppy.png',
+        link: 'https://cabbi.bo/SPACEpuppy/',
+      },
+
+
+      {
+        name: 'Max Weisel Egg',
+        color:0xff0000,
+        importance: 8,
+        img:  'img/sites/egg.png',
+        link: 'http://maxweisel.com/egg/',
+      },
+
+      {
+        name: 'Me Presskit ;)',
+        color:0xffffff,
+        importance: 3,
+        img:  'img/sites/me.png',
+        link: 'https://cabbi.bo/me/',
+      },
+
+
+      {
         name: 'cabbibo.is',
         color:0xffffff,
         importance: 10,
@@ -20,23 +54,7 @@ var sections = [
         link: 'https://cabbibo.is',
       },
 
-      {
-        name: 'The Digging Remedy',
-        color:0xffffff,
-        importance: 6,
-        img:  'img/sites/plaid.png',
-        link: 'https://www.thediggingremedy.com',
-      },
 
-
-
-      {
-        name: 'The Bee',
-        color:0xffaa11,
-        importance: 4,
-        img:  'img/sites/plaidpup.png',
-        link: 'https://dig.thediggingremedy.com',
-      },
 
       {
         name: 'Growth',
@@ -54,6 +72,16 @@ var sections = [
         img:  'img/sites/lune.png',
         link: 'http://l-u-n-e.com',
       },
+
+      {
+        name: 'Tool of North America',
+        importance: 9,
+        color:0x990033,
+        img:  'img/sites/tool.png',
+        link: 'http://toolofna.com/#!/director/cabbibo',
+      },
+
+
      
 
     ]
@@ -87,6 +115,8 @@ var sections = [
         img:  'img/sites/cabbibo.png',
         link: 'http://cabbibo.com',
       },
+
+
 
 
      
@@ -576,6 +606,32 @@ var sections = [
     ]
 
   },
+
+  {
+    title:"ME STUFF",
+    links:[
+
+    
+      {
+        name: 'Tool of North America',
+        importance: 9,
+        color:0x990033,
+        img:  'img/sites/tool.png',
+        link: 'http://toolofna.com/#!/director/cabbibo',
+      },
+
+      {
+        name: 'Me Presskit ;)',
+        color:0xffffff,
+        importance: 3,
+        img:  'img/sites/me.png',
+        link: 'https://cabbi.bo/me/',
+      },
+
+    ]
+
+  },
+
 
     {
     title:"Leap",
