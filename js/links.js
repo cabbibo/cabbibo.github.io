@@ -37,13 +37,7 @@ var sections = [
         link: 'http://maxweisel.com/egg/',
       },
 
-      {
-        name: 'Me Presskit ;)',
-        color:0xffffff,
-        importance: 3,
-        img:  'img/sites/me.png',
-        link: 'https://cabbi.bo/me/',
-      },
+ 
 
 
       {
@@ -618,15 +612,7 @@ var sections = [
         color:0x990033,
         img:  'img/sites/tool.png',
         link: 'http://toolofna.com/#!/director/cabbibo',
-      },
-
-      {
-        name: 'Me Presskit ;)',
-        color:0xffffff,
-        importance: 3,
-        img:  'img/sites/me.png',
-        link: 'https://cabbi.bo/me/',
-      },
+      }
 
     ]
 
