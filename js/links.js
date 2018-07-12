@@ -13,6 +13,23 @@ var sections = [
       },
 
       {
+        name: 'no Thing',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/noThing.png',
+        link: 'https://cabbi.bo/nothing/',
+      },
+
+
+      {
+        name: 'Lazarus',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/dawn.png',
+        link: 'https://cabbi.bo/dawnF2/',
+      },
+
+      {
         name: 'There is a Light',
         color:0xffffff,
         importance: 10,
