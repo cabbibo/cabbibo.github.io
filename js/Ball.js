@@ -5,15 +5,18 @@ function Ball(id , params){
   this.params = params;
   this.hovered = false;
 
+  console.log(params);
+
   this.importance  = this.params.importance || 4
 
   this.mat = new THREE.MeshBasicMaterial({
     color: new THREE.Color( this.params.color ),
    // map: THREE.ImageUtils.loadTexture( this.params.img )
   });
-  /*this.mat = new THREE.MeshNormalMaterial({
+  this.mat = new THREE.MeshNormalMaterial({
     //map: THREE.ImageUtils.loadTexture( this.params.img )
-  });*/
+  });
+
   this.mesh = new THREE.Mesh( 
       new THREE.IcosahedronGeometry( this.importance * 3 , 3 ) ,  
       this.mat
@@ -31,16 +34,21 @@ function Ball(id , params){
   this.mesh.deselect  = this.deselect.bind( this );
 
   
-  //this.mesh.material.opacity = .5;
-  //this.mesh.material.transparent = true;
- // this.mesh.material.blending = THREE.AdditiveBlending;
- // this.mesh.material.depthWrite = false;
+  this.mesh.material.opacity = .8;
+  this.mesh.material.transparent = true;
+  this.mesh.material.blending = THREE.AdditiveBlending;
+  this.mesh.material.depthWrite = false;
   this.mesh.materialNeedsUpdate = true; 
   
   this.position = this.mesh.position;
   this.velocity = new THREE.Vector3();
 
   G.objectControls.add( this.mesh );
+
+  this.label = G.textCreator.createMesh( params.name );
+  this.label.rotation.y = 180;
+  this.label.position.x = 100;
+  this.mesh.add(this.label);
 
 }
 
@@ -49,6 +57,8 @@ Ball.prototype._hoverOver = function(){
   this.hoverOver();
   G.beginScroll( this.id );
 
+
+
    G.hoverOver( this.id , true );
 
 }
@@ -56,6 +66,8 @@ Ball.prototype.hoverOver = function(){
 
   this.hovered = true;
 
+
+  this.mesh.add(this.label);
   G.tv1.copy( this.position );
 
   console.log( 'hes;s' );
@@ -64,6 +76,10 @@ Ball.prototype.hoverOver = function(){
   G.tv1.multiplyScalar( -500);
   this.position.copy(  G.camera.position );
   this.position.sub( G.tv1 );
+
+  this.mesh.rotation.x = 0;
+  this.mesh.rotation.y = 0;
+  this.mesh.rotation.z = 0;
 
   var n = notes[ Math.floor( Math.random() * notes.length) ];
  // console.log( this.params.name );
@@ -75,13 +91,14 @@ Ball.prototype.hoverOver = function(){
 }
 
 Ball.prototype._hoverOut = function(){
-
   this.hoverOut();
   G.hoverOut( this.id , true );
 
 }
 Ball.prototype.hoverOut = function(){
   this.hovered = false;
+
+  this.mesh.remove(this.label);
  ////////////////// this.mesh.material.color.setRGB( .2 , .2 , .2 );
   
  // this.mesh.material.opacity = .5;
@@ -93,7 +110,7 @@ Ball.prototype.select = function(){
     window.location = this.params.link
   }
 
-  G.select( this.id );
+  //G.select( this.id );
 
 }
 

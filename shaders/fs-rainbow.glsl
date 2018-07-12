@@ -20,8 +20,8 @@ void main(){
   //if( s < -.3) discard;//sem = vec4( 0.,0.,0.,.2);
 
  // vec4 aC = texture2D( t_audio , vec2( abs( s ) , 0. ) );
-  vec4 color = nCol * sem + nCol * pow(( 1.-abs(vFR)) , 4. );
-  gl_FragColor =sem* vec4(vColor ,1.);// aC * nCol + nCol * .8 * sem;
+  vec4 color = nCol;// * sem + nCol * pow(( 1.-abs(vFR)) , 4. );
+  gl_FragColor =sem* vec4(color.xyz ,1.);// aC * nCol + nCol * .8 * sem;
 
 }
 

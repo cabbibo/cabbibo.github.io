@@ -110,7 +110,7 @@
 
       //G.mobile = true;
 
-      G.scrollPos = 700;
+      G.scrollPos = 10;
       G.scrollSpeed = 0;
 
       G.camera.position.z = 1000;
@@ -176,7 +176,7 @@
         LOGO = new THREE.Mesh( 
           new THREE.PlaneGeometry( 100 , 100 ),
           new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture('img/cabbibo.png'),
+            map: THREE.ImageUtils.loadTexture('img/cabbiboWord.png'),
             transparent: true,
             blending: THREE.AdditiveBlending,
             opacity: .5
@@ -185,13 +185,13 @@
 
           
         if( !G.mobile ){
-          LOGO = initSnowflake();
+         // LOGO = initSnowflake();
         }
 
         LOGO.scrollPos = 0;
         if( !G.mobile ) LOGO.position.x = -800;
         LOGO.position.z = -1000;
-        LOGO.scale.multiplyScalar( 2 );
+        LOGO.scale.multiplyScalar( 3 );
         totalHeight -= 500;
         if(!G.mobile)G.scene.add(LOGO );
 
@@ -326,15 +326,15 @@
           var link = new Link( i , sm[i] );
 
           link.scrollPos =  i * SIZE ;
-          link.activate();
+          link.addToObject(LOGO);
 
-          link.scene.position.x = -120;
-          link.scene.position.y = -150 + (i * 80 );
-          link.scene.position.z = 600;
+          //link.scene.position.x = -120;
+          //link.scene.position.y = -150 + (i * 80 );
+          //link.scene.position.z = 600;
           if( !G.mobile ){
-            link.scene.position.x = 100 +( i * 80);
-            link.scene.position.z = 0;
-            link.scene.position.y = -300 ;
+            link.scene.position.y = 2*60-( i * 60);
+            link.scene.position.z = -200;
+            link.scene.position.x = 130 ;
 
           }
     
@@ -397,12 +397,12 @@
         var p1 = -this.scrollPos + 200;
 
         //console.log( p1 - p );
-        if( Math.abs((p1 - p )) < 1. ){
+      /*  if( Math.abs((p1 - p )) < 1. ){
           console.log('whoa');
           this.scrollingToPos = false;
         }else{
           this.scrollSpeed = -(p - p1 ) / 10;
-        }
+        }*/
        // G.links.scrollToPos
 
 

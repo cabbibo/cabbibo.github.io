@@ -134,6 +134,9 @@ Link.prototype.activate = function(){
   G.scene.add( this.scene );
  
 }
+Link.prototype.addToObject = function( obj ){
+  obj.add(this.scene);
+}
 
 Link.prototype.deactivate = function(){
 
