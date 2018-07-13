@@ -195,6 +195,22 @@
         totalHeight -= 500;
         if(!G.mobile)G.scene.add(LOGO );
 
+        var arrows= new THREE.Mesh( 
+          new THREE.PlaneGeometry( 100 , 100 ),
+          new THREE.MeshBasicMaterial({
+            map: THREE.ImageUtils.loadTexture('img/scroll.png'),
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            opacity: .5
+          })
+          );
+
+        arrows.position.y = -100;
+        arrows.position.z = 100;
+        arrows.position.x = 35;
+
+        //LOGO.add( arrows );
+
 
         /*var m = G.textCreator.createMesh( 'CABBIBO' );
         LOGO.add( m );

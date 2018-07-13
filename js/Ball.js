@@ -11,16 +11,23 @@ function Ball(id , params){
 
   this.mat = new THREE.MeshBasicMaterial({
     color: new THREE.Color( this.params.color ),
-   // map: THREE.ImageUtils.loadTexture( this.params.img )
+    map: THREE.ImageUtils.loadTexture( this.params.img )
   });
   this.mat = new THREE.MeshNormalMaterial({
     //map: THREE.ImageUtils.loadTexture( this.params.img )
   });
 
   this.mesh = new THREE.Mesh( 
+
       new THREE.IcosahedronGeometry( this.importance * 3 , 3 ) ,  
       this.mat
   );
+
+   /* this.mesh = new THREE.Mesh( 
+    
+      new THREE.PlaneGeometry( this.importance * 10 , this.importance * 10 * .618 ) ,  
+      this.mat
+  );*/
 
  /* this.mesh = new THREE.Mesh( 
       new THREE.BoxGeometry( this.importance * 3 , this.importance* 3 , this.importance* 20 ) ,  
@@ -48,7 +55,7 @@ function Ball(id , params){
   this.label = G.textCreator.createMesh( params.name );
   this.label.rotation.y = 180;
   this.label.position.x = 100;
-  this.mesh.add(this.label);
+ // this.mesh.add(this.label);
 
 }
 
@@ -62,12 +69,13 @@ Ball.prototype._hoverOver = function(){
    G.hoverOver( this.id , true );
 
 }
+
 Ball.prototype.hoverOver = function(){
 
-  this.hovered = true;
+  //this.hovered = true;
 
 
-  this.mesh.add(this.label);
+  //this.mesh.add(this.label);
   G.tv1.copy( this.position );
 
   console.log( 'hes;s' );
@@ -98,7 +106,7 @@ Ball.prototype._hoverOut = function(){
 Ball.prototype.hoverOut = function(){
   this.hovered = false;
 
-  this.mesh.remove(this.label);
+ // this.mesh.remove(this.label);
  ////////////////// this.mesh.material.color.setRGB( .2 , .2 , .2 );
   
  // this.mesh.material.opacity = .5;

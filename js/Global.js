@@ -485,7 +485,7 @@ G.updateBalls = function(){
 
     }
       
-    b1.mesh.lookAt( this.ballCenter );
+    b1.mesh.lookAt( G.camera.position );//this.ballCenter );
 
 
   }
