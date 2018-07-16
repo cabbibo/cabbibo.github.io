@@ -17,9 +17,28 @@ function Ball(id , params){
     //map: THREE.ImageUtils.loadTexture( this.params.img )
   });
 
+  this.mat = new THREE.ShaderMaterial({
+  
+          vertexShader: G.shaders.vs.rainbow,
+          fragmentShader: G.shaders.fs.rainbow,
+          shading: THREE.FlatShading,
+/*
+          attributes:{
+
+            vertColor:{ type:"v3" , value: CONVEX_COLORS },
+
+          },*/
+          uniforms:{
+            t_matcap:{type:"t" , value:G.TEXTURES['matcap']},
+            scrollPos:{type:"f" , value: G.scrollPos },
+            t_audio: G.t_audio
+          },
+          side: THREE.DoubleSide
+        });
+
   this.mesh = new THREE.Mesh( 
 
-      new THREE.IcosahedronGeometry( this.importance * 3 , 3 ) ,  
+      new THREE.IcosahedronGeometry( this.importance * 3 , 1 ) ,  
       this.mat
   );
 
@@ -41,10 +60,10 @@ function Ball(id , params){
   this.mesh.deselect  = this.deselect.bind( this );
 
   
-  this.mesh.material.opacity = .8;
+ // this.mesh.material.opacity = .8;
   this.mesh.material.transparent = true;
-  this.mesh.material.blending = THREE.AdditiveBlending;
-  this.mesh.material.depthWrite = false;
+//  this.mesh.material.blending = THREE.AdditiveBlending;
+  //this.mesh.material.depthWrite = false;
   this.mesh.materialNeedsUpdate = true; 
   
   this.position = this.mesh.position;
@@ -62,11 +81,11 @@ function Ball(id , params){
 Ball.prototype._hoverOver = function(){
 
   this.hoverOver();
-  G.beginScroll( this.id );
+  //G.beginScroll( this.id );
 
 
 
-   G.hoverOver( this.id , true );
+   //G.hoverOver( this.id , true );
 
 }
 
@@ -81,7 +100,7 @@ Ball.prototype.hoverOver = function(){
   console.log( 'hes;s' );
   G.tv1.sub( G.camera.position );
   G.tv1.normalize();
-  G.tv1.multiplyScalar( -500);
+  G.tv1.multiplyScalar( -1000);
   this.position.copy(  G.camera.position );
   this.position.sub( G.tv1 );
 

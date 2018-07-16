@@ -70,7 +70,7 @@
     <script src="lib/LoadedAudio.js"></script>
 
     <script src="lib/TextCreator.js"></script>
-    <script src="lib/TextParticles.js"></script>
+   <!-- <script src="lib/TextParticles.js"></script>-->
 
     <script src="lib/ObjectControls.js"></script>
     <script src="lib/RiggedSkeleton.js"></script>
@@ -95,6 +95,12 @@
     <script src="js/PhysicsText.js"></script>
     <script src="js/links.js"></script>
 
+
+    <script src="UbuntuMono.js"></script>
+    <script src="TextParticles.js"></script>
+
+
+
     <script>
 
 
@@ -110,14 +116,14 @@
 
       //G.mobile = true;
 
-      G.scrollPos = 10;
+      G.scrollPos = 250;
       G.scrollSpeed = 0;
 
       G.camera.position.z = 1000;
       if( !G.mobile ) G.camera.position.z = 1000;
       
 
-      var SIZE = 220;
+      var SIZE = 180;
       var LINES;
       var CONVEX, CONVEX_MAT;
       var CONVEX_POINTS=[];
@@ -132,6 +138,10 @@
 
       G.shaders.load( 'vs-rainbow' , 'rainbow' , 'vertex'    );
       G.shaders.load( 'fs-rainbow' , 'rainbow' , 'fragment'  );
+
+
+      G.shaders.load( 'vs-text' , 'text' , 'vertex'    );
+      G.shaders.load( 'fs-text' , 'text' , 'fragment'  );
 
       G.shaders.shaderSetLoaded = function(){
         G.loader.onLoad();
@@ -167,6 +177,14 @@
 
       G.addToStartArray( function(){
 
+
+        var font = UbuntuMono( 'UbuntuMono.png' );
+        var vs = G.shaders.vertexShaders.text;
+        var fs = G.shaders.fragmentShaders.text;
+
+     
+
+
         G.audio.mute.gain.value = .05;
 
         var totalHeight = 0;
@@ -176,10 +194,10 @@
         LOGO = new THREE.Mesh( 
           new THREE.PlaneGeometry( 100 , 100 ),
           new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture('img/cabbiboWord.png'),
+            map: THREE.ImageUtils.loadTexture('img/cabbiboWhite.png'),
             transparent: true,
             blending: THREE.AdditiveBlending,
-            opacity: .5
+            opacity: 1
           })
           );
 
@@ -189,11 +207,11 @@
         }
 
         LOGO.scrollPos = 0;
-        if( !G.mobile ) LOGO.position.x = -800;
-        LOGO.position.z = -1000;
-        LOGO.scale.multiplyScalar( 3 );
-        totalHeight -= 500;
-        if(!G.mobile)G.scene.add(LOGO );
+        //if( !G.mobile ) LOGO.position.x = -800;
+        LOGO.position.z = 300;
+        LOGO.scale.multiplyScalar( 1 );
+        //totalHeight -= 500;
+       // if(!G.mobile)G.scene.add(LOGO );
 
         var arrows= new THREE.Mesh( 
           new THREE.PlaneGeometry( 100 , 100 ),
@@ -205,11 +223,11 @@
           })
           );
 
-        arrows.position.y = -100;
+        arrows.position.y = 150;
         arrows.position.z = 100;
-        arrows.position.x = 35;
+        arrows.position.x = 535;
 
-        //LOGO.add( arrows );
+        LOGO.add( arrows );
 
 
         /*var m = G.textCreator.createMesh( 'CABBIBO' );
@@ -241,9 +259,9 @@
           G.sections.push( section );
           section.activate();
           section.scrollPos = totalHeight;
-          if( !G.mobile ) section.scene.position.x = -400;
+          if( !G.mobile ) section.scene.position.x = -500 +  i * 300;
 
-          totalHeight -= 150;
+          totalHeight -= 100;
 
           for( var j = 0; j < s.links.length; j++ ){
 
@@ -255,7 +273,7 @@
             link.scrollPos =  totalHeight ;
             link.activate();
 
-            if( !G.mobile ) link.scene.position.x = -400;
+            if( !G.mobile ) link.scene.position.x = -500+  i * 300;
           //  link.scene.position.y = -totalLinks * SIZE * 2 ;
             var ball = new Ball( totalLinks , s.links[j] );
             G.scene.add( ball.mesh );
@@ -272,7 +290,49 @@
 
           }
         }
-        
+
+/*
+        totalHeight = -500;
+         for( var i =0; i < sections2.length; i++ ){
+
+          var s = sections2[i];
+
+          var section = new Section( s );
+          G.sections.push( section );
+          section.activate();
+          section.scrollPos = totalHeight;
+          if( !G.mobile ) section.scene.position.x = -200;
+
+          totalHeight -= 100;
+
+          for( var j = 0; j < s.links.length; j++ ){
+
+            s.links[j].sm = false;
+            // totalLinks ++;
+            var link = new Link( totalLinks , s.links[j] );
+            G.links.push( link );
+
+            link.scrollPos =  totalHeight ;
+            link.activate();
+
+            if( !G.mobile ) link.scene.position.x = -200;
+          //  link.scene.position.y = -totalLinks * SIZE * 2 ;
+            var ball = new Ball( totalLinks , s.links[j] );
+            G.scene.add( ball.mesh );
+            G.balls.push( ball );
+
+            ball.position.x = (Math.random() -.5) * 200;
+            ball.position.y = (Math.random() -.5) * 200;
+            ball.position.z = (Math.random() -.5) * 200;
+
+
+            totalLinks ++;
+            totalHeight -= SIZE;
+
+
+          }
+        }
+        */
 
        /* var lineGeo = new THREE.Geometry();
         for( var i = 0; i < G.balls.length; i++ ){
@@ -342,15 +402,15 @@
           var link = new Link( i , sm[i] );
 
           link.scrollPos =  i * SIZE ;
-          link.addToObject(LOGO);
+          link.addToObject(G.scene);
 
           //link.scene.position.x = -120;
           //link.scene.position.y = -150 + (i * 80 );
           //link.scene.position.z = 600;
           if( !G.mobile ){
             link.scene.position.y = 2*60-( i * 60);
-            link.scene.position.z = -200;
-            link.scene.position.x = 130 ;
+            link.scene.position.z = 200;
+            link.scene.position.x = 430 ;
 
           }
     
@@ -362,9 +422,9 @@
 
         G.maxPos = Math.abs( totalHeight );//links.length * (SIZE);
 
-        G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
+      G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
 	    G.renderer.domElement.addEventListener( 'touchstart', touchstart, false );
-        G.renderer.domElement.addEventListener( 'touchend', touchend, false );
+      G.renderer.domElement.addEventListener( 'touchend', touchend, false );
 	    G.renderer.domElement.addEventListener( 'touchmove', touchmove, false );
 
 
@@ -413,12 +473,12 @@
         var p1 = -this.scrollPos + 200;
 
         //console.log( p1 - p );
-      /*  if( Math.abs((p1 - p )) < 1. ){
+        if( Math.abs((p1 - p )) < 1. ){
           console.log('whoa');
           this.scrollingToPos = false;
         }else{
           this.scrollSpeed = -(p - p1 ) / 10;
-        }*/
+        }
        // G.links.scrollToPos
 
 

@@ -8,7 +8,32 @@ function Link( id , params ){
   this.weight = Math.random() * .3 + .2;
   //this.weight = .1;
 
+
+  this.time = { type:"f",value:0}
+  this.startTime = { type:"f",value:0}
+
   this.mesh = G.textCreator.createMesh( this.params.name );
+
+  var vs = G.shaders.vertexShaders.text;
+  var fs = G.shaders.fragmentShaders.text;
+
+  if( this.params.info ){
+  this.info =  new TextParticles( this.params.info , G.font , vs , fs , {
+         letterWidth: 10,
+         lineLength: 70,
+        });
+  this.info.visible = false;
+  this.info.position.x = -300;
+  this.info.position.y = 200;
+
+G.scene.add( this.info );
+}else{
+  this.info = { visible : false }
+}
+
+
+
+
 
   this.mesh.hoverOver = this.hoverOver.bind( this );
   this.mesh.hoverOut  = this.hoverOut.bind( this );
@@ -31,11 +56,40 @@ function Link( id , params ){
 
   if( !this.params.sm ){
     this.img = new THREE.Mesh(  
-      new THREE.PlaneGeometry( 200 * 1.618 , 200 ),
+      new THREE.PlaneGeometry( 150 * 1.618 , 150 ),
       new THREE.MeshBasicMaterial({
         map: THREE.ImageUtils.loadTexture( this.params.img )
       })
     );
+
+    if( this.params.screenshots){
+      this.screenshots = []
+      for( var i = 0; i < this.params.screenshots.length; i++ ){
+
+        var img = new THREE.Mesh(  
+          new THREE.PlaneGeometry( 120 * 1.618 , 120 ),
+          new THREE.MeshBasicMaterial({
+            map: THREE.ImageUtils.loadTexture( this.params.img )
+          })
+        );
+        img.position.x = i * 240 - (1*200);
+        img.position.y = -150;
+        G.scene.add(img);
+        this.screenshots.push( img);
+      }
+
+      this.background =  new THREE.Mesh(  
+          new THREE.PlaneGeometry( 480 * 1.618 , 480 ),
+          new THREE.MeshBasicMaterial({
+            color:0x000000,
+            opacity: .5,
+            transparent : true
+          })
+        );  
+      this.background.position.x = 40;
+      this.background.position.z = -20;
+        G.scene.add(this.background); 
+    }
  
   }else{
 
@@ -86,6 +140,11 @@ function Link( id , params ){
 Link.prototype.update = function(){
 
   if( !this.params.sm ){
+
+    //this.info.material.uniforms.time1.value += .1;
+    //this.info.material.needsUpdate = true;
+    //this.time.value += .1;
+    //this.startTime.value += .1;
    
     this.targetPos = this.scrollPos + G.scrollPos;
 
@@ -158,11 +217,9 @@ Link.prototype._hoverOver = function(){
 
   this.hoverOver();
   if( this.sm === false ){
-    console.log('YASSS');
     G.hoverOver( this.id , false );
   }else{
 
-    console.log('NOO');
 
   }
 
@@ -177,6 +234,16 @@ Link.prototype.hoverOver = function( recursed ){
 
   this.mesh.material.opacity = 1;
   this.img.material.opacity = 1;
+  this.info.visible = true;
+
+if( this.screenshots ){
+  for( var i =0; i < this.screenshots.length; i++ ){
+    this.screenshots[i].visible = true;
+  }
+}
+
+if( this.background ){ this.background.visible = true; }
+if( this.info ){ this.info.visible = true; this.info.material.uniforms.startTime.value = G.timer.value; }
 
 }
 
@@ -193,6 +260,18 @@ Link.prototype.hoverOut = function( recursed ){
 
   this.mesh.material.opacity = .5;
   this.img.material.opacity = .5;
+
+  //this.info.visible = false;
+
+  if( this.screenshots ){
+  for( var i =0; i < this.screenshots.length; i++ ){
+    this.screenshots[i].visible = false;
+  }
+}
+
+if( this.background ){ this.background.visible = false; }
+if( this.info ){ this.info.visible = false; }
+
 
 }
 

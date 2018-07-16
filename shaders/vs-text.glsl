@@ -1,40 +1,40 @@
 
-//attribute vec3 position;
 attribute vec4 textCoord;
-attribute vec2 textOffset;
+attribute vec2 lookup;
 
-uniform sampler2D t_text;
 uniform sampler2D t_lookup;
-uniform sampler2D t_textCoord;
-uniform float textureSize;
-uniform float dpr;
-uniform float letterWidth;
-uniform vec2 windowSize;
+uniform float time; 
+uniform float startTime;
 
-varying vec4 vLookup;
 varying vec4 vTextCoord;
-varying vec2 vTextOffset;
-varying vec3 vPos;
+varying vec2 vUv;
+varying vec3 vNorm;
+varying vec3 vMPos;
+varying float vDist;
 
+$simplex
 
 void main(){
+  
+  vUv         = uv;
+  vTextCoord  = textCoord;
+ 
+  vec3 tpos =  texture2D( t_lookup , lookup ).xyz;
 
-  vPos        = position;
-  vec2 uv     = position.xy + .5/textureSize;
-  vLookup     = texture2D( t_lookup , uv );
-  vTextCoord  = textCoord;//texture2D( t_textCoord , uv );
-  vTextOffset = textOffset;
+  float dif = (tpos - cameraPosition).y;
 
+  vec3 weird = vec3( snoise( tpos * 20. ) , snoise( tpos * 13. ) , 0. );
 
-  vec3 pos =vLookup.xyz;
+  float displacement = mix( 40. , 0. , clamp( ( time - startTime) * 2.,0.,1. ));
+ 
+  vec3 pos = tpos + position + (vec3(0,0,5.) * snoise(tpos*.01 + vec3(0,time * 2.,0)) + vec3(0,0,5.)) * displacement;// + weird * min( pow( abs(dif), 4.) , 1. ) * .8;
+
+  vMPos = ( modelMatrix * vec4( pos , 1. ) ).xyz;
+
   vec4 mvPos = modelViewMatrix * vec4( pos , 1.0 );
  
-  float size = ( letterWidth * 1. * dpr);// length( mvPos );
-
-  gl_PointSize = size * windowSize.x / length( mvPos.xyz ) ;
-
-//vec4 mvPos = modelViewMatrix * vec4( position , 1.0 );
-
   gl_Position = projectionMatrix * mvPos;
+
+  vDist = length( mvPos );
 
 }

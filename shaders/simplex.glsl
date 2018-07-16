@@ -1,4 +1,3 @@
-
 //
 // Description : Array and textureless GLSL 2D simplex noise function.
 // Author : Ian McEwan, Ashima Arts.
@@ -288,5 +287,3 @@ float snoise(vec4 v)
                + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;
 
   }
-
-

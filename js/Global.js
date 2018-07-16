@@ -49,9 +49,11 @@ G.tv2 = new THREE.Vector3();
 
 G.springLength = 400;
 G.maxVel = 30;
-G.ballCenter = new THREE.Vector3( 400 , 0 , 0 );
+G.ballCenter = new THREE.Vector3( 0 , 0 , 0 );
 
-if( !G.mobile ){ G.ballCenter.set( 200 , 0 , 0); }
+if( !G.mobile ){ G.ballCenter.set( 0 , 0 , -200); }
+
+
 
 
 
@@ -167,6 +169,8 @@ G.init = function(){
 
   this.attracting = false;
   this.attractionTimer = 0;
+
+  this.font = UbuntuMono( 'UbuntuMono.png'  );
  
 
  
@@ -177,13 +181,13 @@ G.init = function(){
 
   */
 
-  this.text = new TextParticles({
+  /*this.text = new TextParticles({
     vertexShader:   this.shaders.vs.text,
     fragmentShader: this.shaders.fs.text,
     lineLength:     60,
     //letterWidth:    40,
     //lineHeight:     40
-  });
+  });*/
 
 
 

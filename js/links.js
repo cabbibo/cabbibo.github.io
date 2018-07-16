@@ -1,7 +1,7 @@
 var sections = [
 
   {
-    title:"NEW PROJECTS",
+    title:"PROJECTS",
     links:[
 
       {
@@ -10,14 +10,36 @@ var sections = [
         importance: 12,
         img:  'img/sites/enough.png',
         link: 'http://cabbi.bo/enough/',
+        info:
+        `If you try one thing on this site, please let it be this one! Its definitely the most important project I've made and is near and dear to my heart.
+
+        Its about 30 minutes long, and is an exploration into what a kids book could be. It took over a year to make, each individual page being created in its own seperate universe, after some experience I had ( sitting by a tree, floating under kelp, watching fireworks in malibu ) and then slowly got woven into the overall narrative.
+
+         I've tried doing a few projects since that have been narrative, but have never made it to anything quite this scale. One day I will again, or at least I hope. If I never do, well I do still think just making this was ENOUGH.
+        `,
+        /*screenshots:[ 
+        'img/sites/enough.png',
+        'img/sites/enough.png',
+        'img/sites/enough.png'
+        ],*/
+        mobile:false
+
+
       },
 
       {
-        name: 'no Thing',
+        name: 'nothing',
         color:0xffffff,
         importance: 10,
         img:  'img/sites/noThing.png',
         link: 'https://cabbi.bo/nothing/',
+        info:"I am info2",
+        info:
+        `This project was made for Christmas Experiments 2017. I knew I wanted to make something narrative for it, but also wanted to challenge myself to create something that workd on mobile. 
+
+         I remember sitting by a riverbank in Kyoto, over by the bamboo forest, and feeling the air that was slightly too cold. I always find when you are traveling, there is this strange mix of loniness and happiness that wanted to try and describe.
+        `,
+        mobile:true
       },
 
 
@@ -27,31 +49,51 @@ var sections = [
         importance: 10,
         img:  'img/sites/dawn.png',
         link: 'https://cabbi.bo/dawnF2/',
+        info:` I got brought this project by one of my visual idols Sam Rolfes. We had always chatted about collaborating on something, and this was the perfect opportunity. Sam had come to me with a concept of a 'stage' that is made from DAWN's face, and a backdrop, and that we would project a movie onto this stage.
+
+        It turns out that doing stuff w/ videos on mobile (specifically iOS) is crazy difficult, but luckily the pal Jono came in to save the day. For this piece, I felt like the story should go Life -> Death -> Rebirth -> Life. I'm hoping the abstract rendition of this cycle comes through, and if not you still think its pretty :p 
+
+        `,
+        mobile:true
       },
 
       {
-        name: 'There is a Light',
+        name: 'Light',
         color:0xffffff,
         importance: 10,
         img:  'img/sites/light.png',
         link: 'https://cabbi.bo/light/',
+        info:`I made this project in a sleepless 2 days after the 2016 Elections. I had spent the night crying, and figured that doing something was better than doing nothing.
+
+        I often wonder about the role of art has in bettering the world. Half of me feels that its extroidinarily selfish, childish, and narcissistic to believe that somehow the art you create can make a change in the world, and that choosing that nebulous of a goal is so cowardly compared to spending your time helping people who are in pain right now. The other half of me still feels this but also hopes that there is a place to make deeper spiritual changes by examining our reality through art.`,
+        mobile:true
       },
 
-      {
+     /* {
         name: 'SPACEpuppy',
         color:0xffffff,
         importance: 10,
         img:  'img/sites/SPACEpuppy.png',
         link: 'https://cabbi.bo/SPACEpuppy/',
+        info:`I am info5 I found out what is this this
+
+            <br/>and then I learned that that that is this that
+            and then I learned that that that is this thatand then I learned that that that is this that
+
+
+        `,
+        mobile:false
       },
 
 
       {
-        name: 'Max Weisel Egg',
+        name: 'Max Egg',
         color:0xff0000,
         importance: 8,
         img:  'img/sites/egg.png',
         link: 'http://maxweisel.com/egg/',
+        info:"I am info6",
+        mobile:false
       },
 
  
@@ -63,6 +105,8 @@ var sections = [
         importance: 10,
         img:  'img/sites/cabbibois.png',
         link: 'https://cabbibo.is',
+        info:"I am info7",
+        mobile:true
       },
 
 
@@ -73,6 +117,9 @@ var sections = [
         importance: 8,
         img:  'img/sites/growth.png',
         link: 'http://cabbi.bo/growth/',
+        info:"I am info8",
+
+        mobile:false
       },
 
       
@@ -82,23 +129,29 @@ var sections = [
         importance: 8,
         img:  'img/sites/lune.png',
         link: 'http://l-u-n-e.com',
+        info:"I am info9",
+
+        mobile:false
       },
 
       {
-        name: 'Tool of North America',
+        name: 'Tool',
         importance: 9,
         color:0x990033,
         img:  'img/sites/tool.png',
         link: 'http://toolofna.com/#!/director/cabbibo',
-      },
+        info:"I am info10",
 
+        mobile:true
+      },
+*/
 
      
 
     ]
 
   },
-
+/*
     {
     title:"EXPANSION PACKS",
     links:[
@@ -661,7 +714,7 @@ var sections = [
 
   }
 
-
+*/
 
 
 
@@ -709,3 +762,122 @@ var sm = [
 
 
 ]
+
+var sections2 = [
+
+  {
+    title:"NEW PROJECTS",
+    links:[
+
+      {
+        name: 'ENOUGH',
+        color:0xffaa11,
+        importance: 12,
+        img:  'img/sites/enough.png',
+        link: 'http://cabbi.bo/enough/',
+        info:"I am info1",
+      },
+
+      {
+        name: 'nothing',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/noThing.png',
+        link: 'https://cabbi.bo/nothing/',
+        info:"I am info2",
+      },
+
+
+      {
+        name: 'Lazarus',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/dawn.png',
+        link: 'https://cabbi.bo/dawnF2/',
+        info:"I am info3",
+      },
+
+      {
+        name: 'Light',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/light.png',
+        link: 'https://cabbi.bo/light/',
+        info:"I am info4",
+      },
+
+      {
+        name: 'SPACEpuppy',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/SPACEpuppy.png',
+        link: 'https://cabbi.bo/SPACEpuppy/',
+        info:`I am info5 I found out what is this this
+
+            <br/>and then I learned that that that is this that
+            and then I learned that that that is this thatand then I learned that that that is this that
+
+
+        `,
+      },
+
+
+      {
+        name: 'Max Egg',
+        color:0xff0000,
+        importance: 8,
+        img:  'img/sites/egg.png',
+        link: 'http://maxweisel.com/egg/',
+        info:"I am info6",
+      },
+
+ 
+
+
+      {
+        name: 'cabbibo.is',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/cabbibois.png',
+        link: 'https://cabbibo.is',
+        info:"I am info7",
+      },
+
+
+
+      {
+        name: 'Growth',
+        color:0xaa00ff,
+        importance: 8,
+        img:  'img/sites/growth.png',
+        link: 'http://cabbi.bo/growth/',
+        info:"I am info8",
+      },
+
+      
+      {
+        name: 'L U N E',
+        color:0x000000,
+        importance: 8,
+        img:  'img/sites/lune.png',
+        link: 'http://l-u-n-e.com',
+        info:"I am info9",
+      },
+
+      {
+        name: 'Tool',
+        importance: 9,
+        color:0x990033,
+        img:  'img/sites/tool.png',
+        link: 'http://toolofna.com/#!/director/cabbibo',
+        info:"I am info10",
+      },
+
+
+     
+
+    ]
+
+  },
+
+];

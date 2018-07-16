@@ -7,9 +7,9 @@ function Section( params ){
    //this.mesh.position.x = 300;
 
    var geo = new THREE.Geometry();
-   geo.vertices.push( new THREE.Vector3( -200 , -params.links.length * SIZE , 0  ) );
-   geo.vertices.push( new THREE.Vector3( -200 , 0 , 0  ) );
-   geo.vertices.push( new THREE.Vector3( 200 , 0 , 0  ) );
+   geo.vertices.push( new THREE.Vector3( -150 , -params.links.length * SIZE , 0  ) );
+   geo.vertices.push( new THREE.Vector3( -150 , 0 , 0  ) );
+   geo.vertices.push( new THREE.Vector3( 150 , 0 , 0  ) );
    //geo.vertices.push( new THREE.Vector3( 200 , 20 , 0  ) );
 
    var mat = new THREE.LineBasicMaterial();
