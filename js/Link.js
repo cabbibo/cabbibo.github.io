@@ -243,7 +243,9 @@ if( this.screenshots ){
 }
 
 if( this.background ){ this.background.visible = true; }
-if( this.info ){ this.info.visible = true; this.info.material.uniforms.startTime.value = G.timer.value; }
+if( this.info ){ this.info.visible = true; 
+  if( this.info.material){ this.info.material.uniforms.startTime.value = G.timer.value; }
+}
 
 }
 
