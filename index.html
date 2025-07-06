@@ -1,5 +1,5 @@
 <html>
-  <!--
+<!--
 
   PLEASE DEAR GOD DONT LOOK AT THIS SOURCE ITS HIDEOUS!!!!!!!
 
@@ -9,572 +9,584 @@
 
   -->
 
-  <head>
+<head>
 
 
-    <link rel="stylesheet" type="text/css" href="css/main.css">
-    <link href="/favicon.ico" rel="icon" type="image/x-icon" >
-    
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    
-    <meta name="twitter:card" content="photo">
-    <meta name="twitter:site" content="@cabbibo">
-    <meta name="twitter:creator" content="@cabbibo">
-    <meta name="twitter:url" content="http://cabbi.bo">
-    <meta name="twitter:title" content="Long Live Synesthesia">
-    <meta name="twitter:description" content="Long Live Synesthesia">
-    <meta name="twitter:creator" content="@cabbibo">
-    <meta name="twitter:image" content="http://cabbi.bo/image.png">
-    <meta name="twitter:image:width" content="1440">
-    <meta name="twitter:image:height" content="900">
-    <meta name="twitter:domain" content="cabbi.bo">
-    <meta itemprop="name" content="Cabbi.bo">
-    <meta itemprop="description" content="Long Live Synesthesia">
-    <meta itemprop="image" src="http://cabbi.bo/image.png">
-    <meta property="og:title" content="Cabbi.bo">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="http://cabbi.bo/image.png"/>
-    <meta property="og:site_name" content="Cabbi.bo">
-    <meta property="og:description" content="Long Live Synesthesia">
-    
-    <style>
- #container{ position:absolute; left:0px; top:0px; z-index:0; width:100%; height:100%; display:block; overflow:hidden}
-    </style>
-  </head>
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link href="/favicon.ico" rel="icon" type="image/x-icon">
 
-  <body>
-    <div id="container"></div>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-    
-    <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <meta name="twitter:card" content="photo">
+  <meta name="twitter:site" content="@cabbibo">
+  <meta name="twitter:creator" content="@cabbibo">
+  <meta name="twitter:url" content="http://cabbi.bo">
+  <meta name="twitter:title" content="Long Live Synesthesia">
+  <meta name="twitter:description" content="Long Live Synesthesia">
+  <meta name="twitter:creator" content="@cabbibo">
+  <meta name="twitter:image" content="http://cabbi.bo/image.png">
+  <meta name="twitter:image:width" content="1440">
+  <meta name="twitter:image:height" content="900">
+  <meta name="twitter:domain" content="cabbi.bo">
+  <meta itemprop="name" content="Cabbi.bo">
+  <meta itemprop="description" content="Long Live Synesthesia">
+  <meta itemprop="image" src="http://cabbi.bo/image.png">
+  <meta property="og:title" content="Cabbi.bo">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="http://cabbi.bo/image.png" />
+  <meta property="og:site_name" content="Cabbi.bo">
+  <meta property="og:description" content="Long Live Synesthesia">
 
-  ga('create', 'UA-57632305-1', 'auto');
-  ga('send', 'pageview');
+  <style>
+    #container {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: hidden
+    }
+  </style>
+</head>
 
-</script>
-    <script src="lib/three.js"></script>
-    <script src="lib/jquery.min.js"></script>
-    <script src="lib/stats.min.js"></script>
-    <script src="lib/dat.gui.min.js"></script>
-    <script src="lib/underscore.js"></script>
-    <script src="lib/Tween.js"></script>
-    
-    <script src="lib/ShaderLoader.js"></script>
-
-    <script src="lib/AudioController.js"></script>
-    <script src="lib/AudioTexture.js"></script>
-    <script src="lib/LoadedAudio.js"></script>
-
-    <script src="lib/TextCreator.js"></script>
-   <!-- <script src="lib/TextParticles.js"></script>-->
-
-    <script src="lib/ObjectControls.js"></script>
-    <script src="lib/RiggedSkeleton.js"></script>
-
-    <script src="lib/ParticleUtils.js"></script>
-    <script src="lib/PhysicsRenderer.js"></script>
-    <script src="lib/ConvexGeometry.js"></script>
-    
-    <script src="lib/Loader.js"></script>
-
-    <script src="js/SnowflakeGeometry.js"></script>
-    <script src="js/initSnowflake.js"></script>
-    
-    
+<body>
+  <div id="container"></div>
 
 
-    <!-- THESE ALWAYS GOES LAST -->
-    <script src="js/Global.js"></script>
-    <script src="js/Link.js"></script>
-    <script src="js/Section.js"></script>
-    <script src="js/Ball.js"></script>
-    <script src="js/PhysicsText.js"></script>
-    <script src="js/links.js"></script>
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
+    ga('create', 'UA-57632305-1', 'auto');
+    ga('send', 'pageview');
 
-    <script src="UbuntuMono.js"></script>
-    <script src="TextParticles.js"></script>
+  </script>
+  <script src="lib/three.js"></script>
+  <script src="lib/jquery.min.js"></script>
+  <script src="lib/stats.min.js"></script>
+  <script src="lib/dat.gui.min.js"></script>
+  <script src="lib/underscore.js"></script>
+  <script src="lib/Tween.js"></script>
+
+  <script src="lib/ShaderLoader.js"></script>
+
+  <script src="lib/AudioController.js"></script>
+  <script src="lib/AudioTexture.js"></script>
+  <script src="lib/LoadedAudio.js"></script>
+
+  <script src="lib/TextCreator.js"></script>
+  <!-- <script src="lib/TextParticles.js"></script>-->
+
+  <script src="lib/ObjectControls.js"></script>
+  <script src="lib/RiggedSkeleton.js"></script>
+
+  <script src="lib/ParticleUtils.js"></script>
+  <script src="lib/PhysicsRenderer.js"></script>
+  <script src="lib/ConvexGeometry.js"></script>
+
+  <script src="lib/Loader.js"></script>
+
+  <script src="js/SnowflakeGeometry.js"></script>
+  <script src="js/initSnowflake.js"></script>
 
 
 
-    <script>
 
-    console.log("SUPPPPPPP!");
-    console.log("SUPPPP!");
-    console.log("SUPP!");
-
-      // TODO: 
-      // Write shaders for hands
-
-//      G.audio.mute.gain.value = .05;
-  
-      var LOGO;
-
-      var MOBILE;
+  <!-- THESE ALWAYS GOES LAST -->
+  <script src="js/Global.js"></script>
+  <script src="js/Link.js"></script>
+  <script src="js/Section.js"></script>
+  <script src="js/Ball.js"></script>
+  <script src="js/PhysicsText.js"></script>
+  <script src="js/links.js"></script>
 
 
-      //G.mobile = true;
+  <script src="UbuntuMono.js"></script>
+  <script src="TextParticles.js"></script>
 
-      G.scrollPos = 250;
-      G.scrollSpeed = 0;
 
-      G.camera.position.z = 1000;
-      if( !G.mobile ) G.camera.position.z = 1000;
+
+  <script>
+
+    console.log("SUP111");
+    console.log("SUP222!");
+    console.log("SUP444!");
+
+    // TODO: 
+    // Write shaders for hands
+
+    //      G.audio.mute.gain.value = .05;
+
+    var LOGO;
+
+    var MOBILE;
+
+
+    //G.mobile = true;
+
+    G.scrollPos = 250;
+    G.scrollSpeed = 0;
+
+    G.camera.position.z = 1000;
+    if (!G.mobile) G.camera.position.z = 1000;
+
+
+    var SIZE = 180;
+    var LINES;
+    var CONVEX, CONVEX_MAT;
+    var CONVEX_POINTS = [];
+    var CONVEX_COLORS = [];
+
+    var TOUCH_DOWN = false;
+    G.loader.addLoad();
+
+    // For text
+    G.shaders.load('vs-snow', 'snow', 'vertex');
+    G.shaders.load('fs-snow', 'snow', 'fragment');
+
+    G.shaders.load('vs-rainbow', 'rainbow', 'vertex');
+    G.shaders.load('fs-rainbow', 'rainbow', 'fragment');
+
+
+    G.shaders.load('vs-text', 'text', 'vertex');
+    G.shaders.load('fs-text', 'text', 'fragment');
+
+    G.shaders.shaderSetLoaded = function () {
+      G.loader.onLoad();
+    }
+
+    var notes = ["c1", "c2", "c3", "c4", "c5", "c6"]
+
+    for (var i = 0; i < notes.length; i++) {
+
+      var name = notes[i];
+      var file = "audio/" + name + ".mp3"
+
+      if (!G.AUDIO[name]) {
+
+        G.loader.addLoad();
+
+        var file = "audio/" + name + ".mp3"
+
+        G.AUDIO[name] = new LoadedAudio(G.audio, file);
+
+        G.AUDIO[name].onLoad = function () {
+          G.loader.onLoad();
+        }.bind(this);
+
+      }
+
+    }
+
+
+    G.loadTextures();
+
+    G.t_audio = { type: "t", value: G.audio.texture }
+
+    G.addToStartArray(function () {
+
+
+      var font = UbuntuMono('UbuntuMono.png');
+      var vs = G.shaders.vertexShaders.text;
+      var fs = G.shaders.fragmentShaders.text;
+
+
+
+
+      G.audio.mute.gain.value = .05;
+
+      var totalHeight = 0;
+      var totalLinks = 0;
+
+
+      LOGO = new THREE.Mesh(
+        new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshBasicMaterial({
+          map: THREE.ImageUtils.loadTexture('img/cabbiboWhite.png'),
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          opacity: 1
+        })
+      );
+
+
+      if (!G.mobile) {
+        // LOGO = initSnowflake();
+      }
+
+      LOGO.scrollPos = 0;
+      //if( !G.mobile ) LOGO.position.x = -800;
+      LOGO.position.z = 300;
+      LOGO.scale.multiplyScalar(1);
+      //totalHeight -= 500;
+      // if(!G.mobile)G.scene.add(LOGO );
+
+      var arrows = new THREE.Mesh(
+        new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshBasicMaterial({
+          map: THREE.ImageUtils.loadTexture('img/scroll.png'),
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          opacity: .5
+        })
+      );
+
+      arrows.position.y = 150;
+      arrows.position.z = 100;
+      arrows.position.x = 535;
+
+      LOGO.add(arrows);
+
+
+      /*var m = G.textCreator.createMesh( 'CABBIBO' );
+      LOGO.add( m );
+      m.position.z = 100;
+      m.position.x = 00;*/
+      // m.position.y = -100;
+
+
+      LOGO.update = function () {
+        this.position.y = this.scrollPos + G.scrollPos;
+
+        if (this.position.y > G.maxPos / 2) {
+          this.position.y -= G.maxPos
+          this.scrollPos -= G.maxPos
+        }
+
+        if (this.position.y < -G.maxPos / 2) {
+          this.position.y += G.maxPos
+          this.scrollPos += G.maxPos
+        }
+      }.bind(LOGO);
+
+      for (var i = 0; i < sections.length; i++) {
+
+        var s = sections[i];
+
+        var section = new Section(s);
+        G.sections.push(section);
+        section.activate();
+        section.scrollPos = totalHeight;
+        if (!G.mobile) section.scene.position.x = -500 + i * 300;
+
+        totalHeight -= 100;
+
+        for (var j = 0; j < s.links.length; j++) {
+
+          s.links[j].sm = false;
+          // totalLinks ++;
+          var link = new Link(totalLinks, s.links[j]);
+          G.links.push(link);
+
+          link.scrollPos = totalHeight;
+          link.activate();
+
+          if (!G.mobile) link.scene.position.x = -500 + i * 300;
+          //  link.scene.position.y = -totalLinks * SIZE * 2 ;
+          var ball = new Ball(totalLinks, s.links[j]);
+          G.scene.add(ball.mesh);
+          G.balls.push(ball);
+
+          ball.position.x = (Math.random() - .5) * 200;
+          ball.position.y = (Math.random() - .5) * 200;
+          ball.position.z = (Math.random() - .5) * 200;
+
+
+          totalLinks++;
+          totalHeight -= SIZE;
+
+
+        }
+      }
+
+      /*
+              totalHeight = -500;
+               for( var i =0; i < sections2.length; i++ ){
       
-
-      var SIZE = 180;
-      var LINES;
-      var CONVEX, CONVEX_MAT;
-      var CONVEX_POINTS=[];
-      var CONVEX_COLORS=[];
-
-      var TOUCH_DOWN = false;
-      G.loader.addLoad();
-
-      // For text
-      G.shaders.load( 'vs-snow' , 'snow' , 'vertex'    );
-      G.shaders.load( 'fs-snow' , 'snow' , 'fragment'  );
-
-      G.shaders.load( 'vs-rainbow' , 'rainbow' , 'vertex'    );
-      G.shaders.load( 'fs-rainbow' , 'rainbow' , 'fragment'  );
-
-
-      G.shaders.load( 'vs-text' , 'text' , 'vertex'    );
-      G.shaders.load( 'fs-text' , 'text' , 'fragment'  );
-
-      G.shaders.shaderSetLoaded = function(){
-        G.loader.onLoad();
-      }
-
-      var notes = [ "c1", "c2", "c3", "c4", "c5", "c6" ]
-
-      for( var i = 0; i < notes.length; i++ ){
-
-        var name = notes[i];
-        var file = "audio/"+name+".mp3"
-
-        if( !G.AUDIO[ name ] ){
-
-          G.loader.addLoad();
-
-          var file = "audio/"+name+".mp3"
-
-          G.AUDIO[ name ]= new LoadedAudio( G.audio , file );
-
-          G.AUDIO[ name ].onLoad = function(){
-            G.loader.onLoad();
-          }.bind( this );
-
-        }
-        
-      }
-
-
-      G.loadTextures();
-  
-      G.t_audio = { type:"t" , value: G.audio.texture }
-
-      G.addToStartArray( function(){
-
-
-        var font = UbuntuMono( 'UbuntuMono.png' );
-        var vs = G.shaders.vertexShaders.text;
-        var fs = G.shaders.fragmentShaders.text;
-
-     
-
-
-        G.audio.mute.gain.value = .05;
-
-        var totalHeight = 0;
-        var totalLinks = 0;
-
-
-        LOGO = new THREE.Mesh( 
-          new THREE.PlaneGeometry( 100 , 100 ),
-          new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture('img/cabbiboWhite.png'),
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            opacity: 1
-          })
-          );
-
-          
-        if( !G.mobile ){
-         // LOGO = initSnowflake();
-        }
-
-        LOGO.scrollPos = 0;
-        //if( !G.mobile ) LOGO.position.x = -800;
-        LOGO.position.z = 300;
-        LOGO.scale.multiplyScalar( 1 );
-        //totalHeight -= 500;
-       // if(!G.mobile)G.scene.add(LOGO );
-
-        var arrows= new THREE.Mesh( 
-          new THREE.PlaneGeometry( 100 , 100 ),
-          new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture('img/scroll.png'),
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            opacity: .5
-          })
-          );
-
-        arrows.position.y = 150;
-        arrows.position.z = 100;
-        arrows.position.x = 535;
-
-        LOGO.add( arrows );
-
-
-        /*var m = G.textCreator.createMesh( 'CABBIBO' );
-        LOGO.add( m );
-        m.position.z = 100;
-        m.position.x = 00;*/
-       // m.position.y = -100;
-
-
-        LOGO.update = function(){
-          this.position.y = this.scrollPos + G.scrollPos;
-
-          if( this.position.y > G.maxPos/2 ){
-            this.position.y -= G.maxPos
-              this.scrollPos-= G.maxPos
-          }
-
-          if( this.position.y < -G.maxPos/2 ){
-             this.position.y += G.maxPos
-             this.scrollPos += G.maxPos
-          }
-        }.bind( LOGO );
-
-        for( var i =0; i < sections.length; i++ ){
-
-          var s = sections[i];
-
-          var section = new Section( s );
-          G.sections.push( section );
-          section.activate();
-          section.scrollPos = totalHeight;
-          if( !G.mobile ) section.scene.position.x = -500 +  i * 300;
-
-          totalHeight -= 100;
-
-          for( var j = 0; j < s.links.length; j++ ){
-
-            s.links[j].sm = false;
-            // totalLinks ++;
-            var link = new Link( totalLinks , s.links[j] );
-            G.links.push( link );
-
-            link.scrollPos =  totalHeight ;
-            link.activate();
-
-            if( !G.mobile ) link.scene.position.x = -500+  i * 300;
-          //  link.scene.position.y = -totalLinks * SIZE * 2 ;
-            var ball = new Ball( totalLinks , s.links[j] );
-            G.scene.add( ball.mesh );
-            G.balls.push( ball );
-
-            ball.position.x = (Math.random() -.5) * 200;
-            ball.position.y = (Math.random() -.5) * 200;
-            ball.position.z = (Math.random() -.5) * 200;
-
-
-            totalLinks ++;
-            totalHeight -= SIZE;
-
-
-          }
-        }
-
-/*
-        totalHeight = -500;
-         for( var i =0; i < sections2.length; i++ ){
-
-          var s = sections2[i];
-
-          var section = new Section( s );
-          G.sections.push( section );
-          section.activate();
-          section.scrollPos = totalHeight;
-          if( !G.mobile ) section.scene.position.x = -200;
-
-          totalHeight -= 100;
-
-          for( var j = 0; j < s.links.length; j++ ){
-
-            s.links[j].sm = false;
-            // totalLinks ++;
-            var link = new Link( totalLinks , s.links[j] );
-            G.links.push( link );
-
-            link.scrollPos =  totalHeight ;
-            link.activate();
-
-            if( !G.mobile ) link.scene.position.x = -200;
-          //  link.scene.position.y = -totalLinks * SIZE * 2 ;
-            var ball = new Ball( totalLinks , s.links[j] );
-            G.scene.add( ball.mesh );
-            G.balls.push( ball );
-
-            ball.position.x = (Math.random() -.5) * 200;
-            ball.position.y = (Math.random() -.5) * 200;
-            ball.position.z = (Math.random() -.5) * 200;
-
-
-            totalLinks ++;
-            totalHeight -= SIZE;
-
-
-          }
-        }
-        */
-
-       /* var lineGeo = new THREE.Geometry();
-        for( var i = 0; i < G.balls.length; i++ ){
-          for( var j = i; j < G.balls.length; j++ ){
-
-            lineGeo.vertices.push( G.balls[i].position );
-            lineGeo.vertices.push( G.balls[j].position );
-
-          }
-        }*/
-
-        //if( !G.mobile ){
-    
-        for( var i = 0; i < G.balls.length; i++ ){
-          
-          G.balls[i].position.bID = i;
-          CONVEX_POINTS.push( G.balls[i].position );
-
-          var c = new THREE.Color( G.balls[i].params.color);//links[i].color );
-          CONVEX_COLORS.push( 
-            new THREE.Vector3( c.r , c.g , c.b )
-          );
-
-        }
-
-
-        CONVEX_MAT = new THREE.ShaderMaterial({
-  
-          vertexShader: G.shaders.vs.rainbow,
-          fragmentShader: G.shaders.fs.rainbow,
-          shading: THREE.FlatShading,
-
-          attributes:{
-
-            vertColor:{ type:"v3" , value: CONVEX_COLORS },
-
-          },
-          uniforms:{
-            t_matcap:{type:"t" , value:G.TEXTURES['matcap']},
-            scrollPos:{type:"f" , value: G.scrollPos },
-            t_audio: G.t_audio
-          },
-          side: THREE.DoubleSide
-        });
-        CONVEX = new THREE.Mesh( 
-          new THREE.ConvexGeometry( CONVEX_POINTS ),
-          CONVEX_MAT
+                var s = sections2[i];
+      
+                var section = new Section( s );
+                G.sections.push( section );
+                section.activate();
+                section.scrollPos = totalHeight;
+                if( !G.mobile ) section.scene.position.x = -200;
+      
+                totalHeight -= 100;
+      
+                for( var j = 0; j < s.links.length; j++ ){
+      
+                  s.links[j].sm = false;
+                  // totalLinks ++;
+                  var link = new Link( totalLinks , s.links[j] );
+                  G.links.push( link );
+      
+                  link.scrollPos =  totalHeight ;
+                  link.activate();
+      
+                  if( !G.mobile ) link.scene.position.x = -200;
+                //  link.scene.position.y = -totalLinks * SIZE * 2 ;
+                  var ball = new Ball( totalLinks , s.links[j] );
+                  G.scene.add( ball.mesh );
+                  G.balls.push( ball );
+      
+                  ball.position.x = (Math.random() -.5) * 200;
+                  ball.position.y = (Math.random() -.5) * 200;
+                  ball.position.z = (Math.random() -.5) * 200;
+      
+      
+                  totalLinks ++;
+                  totalHeight -= SIZE;
+      
+      
+                }
+              }
+              */
+
+      /* var lineGeo = new THREE.Geometry();
+       for( var i = 0; i < G.balls.length; i++ ){
+         for( var j = i; j < G.balls.length; j++ ){
+
+           lineGeo.vertices.push( G.balls[i].position );
+           lineGeo.vertices.push( G.balls[j].position );
+
+         }
+       }*/
+
+      //if( !G.mobile ){
+
+      for (var i = 0; i < G.balls.length; i++) {
+
+        G.balls[i].position.bID = i;
+        CONVEX_POINTS.push(G.balls[i].position);
+
+        var c = new THREE.Color(G.balls[i].params.color);//links[i].color );
+        CONVEX_COLORS.push(
+          new THREE.Vector3(c.r, c.g, c.b)
         );
-        G.objectControls.add( CONVEX );
-        G.scene.add( CONVEX );
+
+      }
+
+
+      CONVEX_MAT = new THREE.ShaderMaterial({
+
+        vertexShader: G.shaders.vs.rainbow,
+        fragmentShader: G.shaders.fs.rainbow,
+        shading: THREE.FlatShading,
+
+        attributes: {
+
+          vertColor: { type: "v3", value: CONVEX_COLORS },
+
+        },
+        uniforms: {
+          t_matcap: { type: "t", value: G.TEXTURES['matcap'] },
+          scrollPos: { type: "f", value: G.scrollPos },
+          t_audio: G.t_audio
+        },
+        side: THREE.DoubleSide
+      });
+      CONVEX = new THREE.Mesh(
+        new THREE.ConvexGeometry(CONVEX_POINTS),
+        CONVEX_MAT
+      );
+      G.objectControls.add(CONVEX);
+      G.scene.add(CONVEX);
 
       //}
 
 
-        /*var mat = new THREE.LineBasicMaterial({
-         linewidth:3 
-        });
+      /*var mat = new THREE.LineBasicMaterial({
+       linewidth:3 
+      });
 
-        LINES = new THREE.Line( lineGeo , CONVEX_MAT);
-        G.scene.add( LINES );*/
-
-
-        totalHeight -= SIZE;
-        for( var i = 0; i < sm.length; i++ ){
-
-          sm[i].sm = true;
-          var link = new Link( i , sm[i] );
-
-          link.scrollPos =  i * SIZE ;
-          link.addToObject(G.scene);
-
-          //link.scene.position.x = -120;
-          //link.scene.position.y = -150 + (i * 80 );
-          //link.scene.position.z = 600;
-          if( !G.mobile ){
-            link.scene.position.y = 2*60-( i * 60);
-            link.scene.position.z = 200;
-            link.scene.position.x = 430 ;
-
-          }
-    
-
-          link.mesh.scale.multiplyScalar( .0001 );
+      LINES = new THREE.Line( lineGeo , CONVEX_MAT);
+      G.scene.add( LINES );*/
 
 
-        }
+      totalHeight -= SIZE;
+      for (var i = 0; i < sm.length; i++) {
 
-        G.maxPos = Math.abs( totalHeight );//links.length * (SIZE);
+        sm[i].sm = true;
+        var link = new Link(i, sm[i]);
 
-      G.renderer.domElement.addEventListener( 'mousewheel', mousewheel, false );
-	    G.renderer.domElement.addEventListener( 'touchstart', touchstart, false );
-      G.renderer.domElement.addEventListener( 'touchend', touchend, false );
-	    G.renderer.domElement.addEventListener( 'touchmove', touchmove, false );
+        link.scrollPos = i * SIZE;
+        link.addToObject(G.scene);
 
-
-        for( var i = 0; i < G.balls.length; i++ ){
-
-          G.balls[i]._hoverOut();
-
-        }
-
-        setTimeout(function(){
-          G.balls[0]._hoverOut();
-        },500 );
-
-      }.bind( G ) );
-
-
-
-      G.scrollingToPos = false;
-      G.updateScroll = function(){
-
-        if( this.scrollingToPos !== false ){
-
-          this.scrollToPos( this.scrollingToPos );
+        //link.scene.position.x = -120;
+        //link.scene.position.y = -150 + (i * 80 );
+        //link.scene.position.z = 600;
+        if (!G.mobile) {
+          link.scene.position.y = 2 * 60 - (i * 60);
+          link.scene.position.z = 200;
+          link.scene.position.x = 430;
 
         }
 
 
-        this.scrollPos += this.scrollSpeed;  
-        this.scrollSpeed *= .95;
+        link.mesh.scale.multiplyScalar(.0001);
 
-        if( CONVEX_MAT ){
-          CONVEX_MAT.uniforms.scrollPos.value = this.scrollPos;
-        }
-      }
-
-      G.beginScroll = function( id ){
-
-        console.log( this.links[ id ].params );
-        this.scrollingToPos = id
-
-      };
-
-      G.scrollToPos = function( id ){
-
-        var p = this.links[ id ].scrollPos;
-        var p1 = -this.scrollPos + 200;
-
-        //console.log( p1 - p );
-        if( Math.abs((p1 - p )) < 1. ){
-          console.log('whoa');
-          this.scrollingToPos = false;
-        }else{
-          this.scrollSpeed = -(p - p1 ) / 10;
-        }
-       // G.links.scrollToPos
-
-
-     }
-
-      G.hoverOver = function( id, ball){
-
-        for(var i = 0; i < G.balls.length; i++ ){
-
-          G.tv1.set(
-            Math.random() -.5 ,  
-            Math.random() -.5 ,  
-            Math.random() -.5  
-            );
-
-          G.tv1.multiplyScalar( 10 );
-
-          G.balls[i].velocity.add( G.tv1 );
-
-        }
-
-        if( !ball ){
-          console.log('ss');
-          var cb = G.balls[id].hoverOver.bind( G.balls[id] );
-          cb(); 
-        }else{
-          console.log( id );
-          var cb = G.links[id].hoverOver.bind( G.links[id] );
-          cb();
-        }
-      
-      }
-
-      
-      G.hoverOut = function( id , ball ){
-        
-        if( !ball ){
-          var cb = G.balls[id].hoverOut.bind( G.balls[id] );
-          cb(); 
-        }else{
-          var cb = G.links[id].hoverOut.bind( G.links[id] );
-          cb();
-        }
 
       }
 
-      G.select = function( id ){
-       
+      G.maxPos = Math.abs(totalHeight);//links.length * (SIZE);
+
+      G.renderer.domElement.addEventListener('mousewheel', mousewheel, false);
+      G.renderer.domElement.addEventListener('touchstart', touchstart, false);
+      G.renderer.domElement.addEventListener('touchend', touchend, false);
+      G.renderer.domElement.addEventListener('touchmove', touchmove, false);
+
+
+      for (var i = 0; i < G.balls.length; i++) {
+
+        G.balls[i]._hoverOut();
+
       }
 
-      G.deselect = function( id ){
+      setTimeout(function () {
+        G.balls[0]._hoverOut();
+      }, 500);
 
-       
+    }.bind(G));
+
+
+
+    G.scrollingToPos = false;
+    G.updateScroll = function () {
+
+      if (this.scrollingToPos !== false) {
+
+        this.scrollToPos(this.scrollingToPos);
+
       }
 
-      function mousewheel( e ){
 
-        G.scrollSpeed -= e.wheelDelta / 100;
-  
+      this.scrollPos += this.scrollSpeed;
+      this.scrollSpeed *= .95;
+
+      if (CONVEX_MAT) {
+        CONVEX_MAT.uniforms.scrollPos.value = this.scrollPos;
+      }
+    }
+
+    G.beginScroll = function (id) {
+
+      console.log(this.links[id].params);
+      this.scrollingToPos = id
+
+    };
+
+    G.scrollToPos = function (id) {
+
+      var p = this.links[id].scrollPos;
+      var p1 = -this.scrollPos + 200;
+
+      //console.log( p1 - p );
+      if (Math.abs((p1 - p)) < 1.) {
+        console.log('whoa');
+        this.scrollingToPos = false;
+      } else {
+        this.scrollSpeed = -(p - p1) / 10;
+      }
+      // G.links.scrollToPos
+
+
+    }
+
+    G.hoverOver = function (id, ball) {
+
+      for (var i = 0; i < G.balls.length; i++) {
+
+        G.tv1.set(
+          Math.random() - .5,
+          Math.random() - .5,
+          Math.random() - .5
+        );
+
+        G.tv1.multiplyScalar(10);
+
+        G.balls[i].velocity.add(G.tv1);
+
       }
 
-      function touchstart( e ){
+      if (!ball) {
+        console.log('ss');
+        var cb = G.balls[id].hoverOver.bind(G.balls[id]);
+        cb();
+      } else {
+        console.log(id);
+        var cb = G.links[id].hoverOver.bind(G.links[id]);
+        cb();
+      }
 
+    }
+
+
+    G.hoverOut = function (id, ball) {
+
+      if (!ball) {
+        var cb = G.balls[id].hoverOut.bind(G.balls[id]);
+        cb();
+      } else {
+        var cb = G.links[id].hoverOut.bind(G.links[id]);
+        cb();
+      }
+
+    }
+
+    G.select = function (id) {
+
+    }
+
+    G.deselect = function (id) {
+
+
+    }
+
+    function mousewheel(e) {
+
+      G.scrollSpeed -= e.wheelDelta / 100;
+
+    }
+
+    function touchstart(e) {
+
+      OTOUCH = e.touches[0].pageY;
+      TOUCH_DOWN = true;
+      // G.objectControls.touchStart( e );
+      //alert( e.touches[ 0 ].pageX );
+      // G.scrollSpeed += 100;//e.wheelDelta / 100;
+
+    }
+
+    function touchend(e) {
+
+      TOUCH_DOWN = false;
+      // G.objectControls.touchEnd( e );
+
+
+
+    }
+
+    function touchmove(e) {
+
+      G.objectControls.touchMove(e);
+
+      if (TOUCH_DOWN) {
+
+        G.scrollSpeed += (OTOUCH - e.touches[0].pageY);
         OTOUCH = e.touches[0].pageY;
-        TOUCH_DOWN = true;
-       // G.objectControls.touchStart( e );
-        //alert( e.touches[ 0 ].pageX );
-       // G.scrollSpeed += 100;//e.wheelDelta / 100;
-  
-      }
-
-      function touchend( e ){
-
-        TOUCH_DOWN = false;
-       // G.objectControls.touchEnd( e );
-
-
 
       }
 
-      function touchmove( e ){
+    }
+  </script>
 
-        G.objectControls.touchMove( e );
+</body>
 
-        if( TOUCH_DOWN ){
-
-          G.scrollSpeed += (OTOUCH - e.touches[0].pageY);
-          OTOUCH = e.touches[0].pageY;
-
-        }
-
-      }
-    </script>
-
-  </body>
 </html>
