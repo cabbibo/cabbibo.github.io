@@ -47,7 +47,7 @@ G.stats   = new Stats();
 G.tv1 = new THREE.Vector3();
 G.tv2 = new THREE.Vector3();
 
-G.springLength = 400;
+G.springLength = 200;
 G.maxVel = 30;
 G.ballCenter = new THREE.Vector3( 0 , 0 , 0 );
 
@@ -301,34 +301,14 @@ G.animate = function(){
       }
    // if( !G.mobile ){
 
-      if( CONVEX && CONVEX_POINTS ){
+      if( CONVEX && CONVEX_GEO && CONVEX_VERTEX_TO_BALL ){
 
-          G.objectControls.remove( CONVEX );
-        
-        G.scene.remove( CONVEX );
-
-        var geo = new THREE.ConvexGeometry( CONVEX_POINTS );
-        geo.computeVertexNormals();
-        
-        var aColor = [];
-
-        for( var i = 0; i < geo.vertices.length; i++ ){
-
-          var v = geo.vertices[i];
-          aColor.push( CONVEX_COLORS[ v.bID ] );
-
+        for( var i = 0; i < CONVEX_GEO.vertices.length; i++ ){
+          CONVEX_GEO.vertices[i].copy( G.balls[ CONVEX_VERTEX_TO_BALL[i] ].position );
         }
-        CONVEX_MAT.attributes.vertColor.value = aColor;
+        CONVEX_GEO.verticesNeedUpdate = true;
+        CONVEX_GEO.computeFaceNormals();
 
-        CONVEX = new THREE.Mesh( 
-          geo,
-          CONVEX_MAT 
-        );
-        G.scene.add( CONVEX );
-          G.objectControls.add( CONVEX );
-        
-        //CONVEX.geometryNeedsUpdate = true;
-     
       }
    
    // }
@@ -409,88 +389,33 @@ G.loadTexture = function( name , file ){
 
 G.updateBalls = function(){
 
+  if( !BALL_ORIGINS || !BALL_ORIGINS.length ) return;
 
-  // Updating Forces --> Velocity
+  var angle = this.scrollPos * 0.001;
+  var cosA  = Math.cos( angle );
+  var sinA  = Math.sin( angle );
+
   for( var i = 0; i < this.balls.length; i++ ){
 
-    var b1 = this.balls[i];
-    
-    this.tv1.copy( G.ballCenter );
+    var b    = this.balls[i];
+    var orig = BALL_ORIGINS[i];
 
-    this.tv1.sub( b1.position );
-    this.tv1.multiplyScalar( .01 );
-    b1.velocity.add( this.tv1 );
+    // Rotate origin around X axis by scroll angle to get target
+    var tx = orig.x;
+    var ty = orig.y * cosA - orig.z * sinA;
+    var tz = orig.y * sinA + orig.z * cosA;
 
-    this.tv1.copy( b1.position );
-    this.tv1.sub( G.ballCenter );
+    // Spring toward target
+    b.velocity.x += ( tx - b.position.x ) * 0.05;
+    b.velocity.y += ( ty - b.position.y ) * 0.05;
+    b.velocity.z += ( tz - b.position.z ) * 0.05;
 
-    var l = this.tv1.length();
-    this.tv1.normalize();
-    this.tv2.set(1 ,0, 0 ); 
-    this.tv1.cross( this.tv2 );
-
-    b1.velocity.add( this.tv1.multiplyScalar( l * this.scrollSpeed * .00003) );
-    
-
-    for( var j = i+1; j < this.balls.length; j++ ){
-
-      var b2 = this.balls[j];
-
-
-      this.tv1.copy( b1.position );
-      this.tv1.sub( b2.position );
-
-      var l = this.tv1.length();
-      this.tv1.normalize();
-      //console.log( b1.position.x );
-      //console.log( b1.velocity.x );
-
-      //if( l < (b1.importance + b2.importance) ){
-        
-        this.tv1.multiplyScalar( l - this.springLength );
-
-        this.tv1.multiplyScalar( .001 );
-        b1.velocity.sub( this.tv1 ); 
-        b2.velocity.add( this.tv1 ); 
-
-      /*}else{
-
-        //console.log('n');
-        this.tv1.multiplyScalar( 1000 );
-        b1.velocity.add( this.tv1 ); 
-        b2.velocity.sub( this.tv1 ); */
-
-     // }
-
+    if( !b.hovered ){
+      b.position.add( b.velocity );
+      b.velocity.multiplyScalar( 0.85 );
     }
-  }
 
-
-  // Updating Positions
-  for( var i = 0; i < this.balls.length; i++ ){
-
-    var b1 = this.balls[i];
-
-    if( !b1.hovered ){
-
-      if( b1.velocity.length() > this.maxVel ){
-
-        b1.velocity.normalize().multiplyScalar( this.maxVel );
-
-      }
-
-      
-     // this.tv1.copy( b1.position );
-
-      b1.position.add( b1.velocity );
-
-      b1.velocity.multiplyScalar( .98 );
-
-
-    }
-      
-    b1.mesh.lookAt( G.camera.position );//this.ballCenter );
-
+    b.mesh.lookAt( this.camera.position );
 
   }
 

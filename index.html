@@ -139,9 +139,11 @@
 
     var SIZE = 180;
     var LINES;
-    var CONVEX, CONVEX_MAT;
+    var CONVEX, CONVEX_MAT, CONVEX_GEO;
     var CONVEX_POINTS = [];
     var CONVEX_COLORS = [];
+    var CONVEX_VERTEX_TO_BALL = [];
+    var BALL_ORIGINS = [];
 
     var TOUCH_DOWN = false;
     G.loader.addLoad();
@@ -191,6 +193,13 @@
 
     G.addToStartArray(function () {
 
+      G.objectControls.noObjectIntersected = function() {
+        if( G.lockedBall ){
+          G.lockedBall.hovered = false;
+          G.lockedBall.mat.uniforms.hoverState.value = 0.0;
+          G.lockedBall = null;
+        }
+      };
 
       var font = UbuntuMono('UbuntuMono.png');
       var vs = G.shaders.vertexShaders.text;
@@ -273,7 +282,7 @@
         G.sections.push(section);
         section.activate();
         section.scrollPos = totalHeight;
-        if (!G.mobile) section.scene.position.x = -500 + i * 300;
+        if (!G.mobile) section.scene.position.x = -500;
 
         totalHeight -= 100;
 
@@ -287,7 +296,7 @@
           link.scrollPos = totalHeight;
           link.activate();
 
-          if (!G.mobile) link.scene.position.x = -500 + i * 300;
+          if (!G.mobile) link.scene.position.x = -500;
           //  link.scene.position.y = -totalLinks * SIZE * 2 ;
           var ball = new Ball(totalLinks, s.links[j]);
           G.scene.add(ball.mesh);
@@ -387,14 +396,50 @@
         uniforms: {
           t_matcap: { type: "t", value: G.TEXTURES['matcap'] },
           scrollPos: { type: "f", value: G.scrollPos },
-          t_audio: G.t_audio
+          t_audio: G.t_audio,
+          hoverState: { type: "f", value: 0.0 }
         },
         side: THREE.DoubleSide
       });
-      CONVEX = new THREE.Mesh(
-        new THREE.ConvexGeometry(CONVEX_POINTS),
-        CONVEX_MAT
-      );
+
+      // Build topology once using a Fibonacci sphere so every ball becomes a hull vertex.
+      // ConvexGeometry of points already on a sphere surface must use all of them.
+      var goldenAngle = Math.PI * (3 - Math.sqrt(5));
+      var sphereSeeds = [];
+      for (var i = 0; i < G.balls.length; i++) {
+        var y = 1 - (i / (G.balls.length - 1)) * 2;
+        var r = Math.sqrt(1 - y * y);
+        var theta = goldenAngle * i;
+        sphereSeeds.push(new THREE.Vector3(r * Math.cos(theta), y, r * Math.sin(theta)));
+      }
+
+      var hullSeed = new THREE.ConvexGeometry(sphereSeeds);
+      hullSeed.computeFaceNormals();
+
+      CONVEX_GEO = new THREE.Geometry();
+      CONVEX_GEO.dynamic = true;
+      CONVEX_VERTEX_TO_BALL = [];
+
+      for (var i = 0; i < hullSeed.vertices.length; i++) {
+        var minDist = Infinity, minIdx = 0;
+        for (var j = 0; j < sphereSeeds.length; j++) {
+          var d = hullSeed.vertices[i].distanceTo(sphereSeeds[j]);
+          if (d < minDist) { minDist = d; minIdx = j; }
+        }
+        CONVEX_VERTEX_TO_BALL.push(minIdx);
+        CONVEX_GEO.vertices.push(G.balls[minIdx].position.clone());
+      }
+
+      CONVEX_GEO.faces = hullSeed.faces;
+      CONVEX_GEO.computeFaceNormals();
+
+      // Place each ball at its Fibonacci sphere position and store as origin
+      for (var i = 0; i < G.balls.length; i++) {
+        G.balls[i].position.copy(sphereSeeds[i]).multiplyScalar(G.springLength);
+        BALL_ORIGINS.push(G.balls[i].position.clone());
+      }
+
+      CONVEX = new THREE.Mesh(CONVEX_GEO, CONVEX_MAT);
       G.objectControls.add(CONVEX);
       G.scene.add(CONVEX);
 
@@ -467,7 +512,7 @@
 
 
       this.scrollPos += this.scrollSpeed;
-      this.scrollSpeed *= .95;
+      this.scrollSpeed *= .98;
 
       if (CONVEX_MAT) {
         CONVEX_MAT.uniforms.scrollPos.value = this.scrollPos;

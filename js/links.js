@@ -86,29 +86,25 @@ var sections = [
 
 
       {
-        name: 'Max Egg',
+        name: 'MAX PAIN',
         color: 0xff0000,
         importance: 8,
         img: 'img/sites/egg.png',
-        link: 'http://maxweisel.com/egg/',
+        link: 'https://cabbi.bo/MAX_PAIN/',
         info: "Max commissioned me to make an easter egg for his site. I am SUPER happy with how it turned out, but will say that if you don't have momentum scrolling you are going to spend a *LONG* time in hell.",
         mobile: false
       },
 
 
-      /*
-      
-            {
-              name: 'cabbibo.is',
-              color:0xffffff,
-              importance: 10,
-              img:  'img/sites/cabbibois.png',
-              link: 'https://cabbibo.is',
-              info:"I am info7",
-              mobile:true
-            },
-      
-      */
+      {
+        name: 'cabbibo.is',
+        color:0xffffff,
+        importance: 10,
+        img:  'img/sites/cabbibois.png',
+        link: 'https://cabbibo.is',
+        info:"I am info7",
+        mobile:true
+      },
 
       {
         name: 'Growth',
@@ -123,7 +119,6 @@ var sections = [
 
 
 
-      /*
       {
         name: 'L U N E',
         color: 0x000000,
@@ -133,16 +128,16 @@ var sections = [
         info: "I am info9",
 
         mobile: false
-      }*/
+      },
 
 
 
     ]
 
   },
-  /*
-      {
-      title:"EXPANSION PACKS",
+
+  {
+    title:"EXPANSION PACKS",
       links:[
   
         {
@@ -702,8 +697,6 @@ var sections = [
       ]
   
     }
-  
-  */
 
 
 
