@@ -74,7 +74,7 @@
 
     var particles = [];
 
-    var lineArray = string.split("\n");
+    var lineArray = string.replace(/<br\s*\/?>/gi, "\n").split("\n");
     var counter = [0,0]; // keeps track of where we are
 
     for( var i = 0; i < lineArray.length; i++ ){

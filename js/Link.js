@@ -227,14 +227,18 @@ Link.prototype._hoverOver = function(){
 
 Link.prototype.hoverOver = function( recursed ){
 
+  if( G.activeLink && G.activeLink !== this ){
+    G.activeLink.mesh.material.opacity = .5;
+    G.activeLink.img.material.opacity = .5;
+    if( G.activeLink.info ){ G.activeLink.info.visible = false; }
+  }
+  G.activeLink = this;
 
   var n = notes[ Math.floor( Math.random() * notes.length) ];
- // console.log( this.params.name );
   G.AUDIO[ n ].play();
 
   this.mesh.material.opacity = 1;
   this.img.material.opacity = 1;
-  this.info.visible = true;
 
 if( this.screenshots ){
   for( var i =0; i < this.screenshots.length; i++ ){
@@ -243,7 +247,7 @@ if( this.screenshots ){
 }
 
 if( this.background ){ this.background.visible = true; }
-if( this.info ){ this.info.visible = true; 
+if( this.info ){ this.info.visible = true;
   if( this.info.material){ this.info.material.uniforms.startTime.value = G.timer.value; }
 }
 
@@ -260,20 +264,13 @@ Link.prototype._hoverOut = function(){
 
 Link.prototype.hoverOut = function( recursed ){
 
-  this.mesh.material.opacity = .5;
-  this.img.material.opacity = .5;
-
-  //this.info.visible = false;
-
   if( this.screenshots ){
-  for( var i =0; i < this.screenshots.length; i++ ){
-    this.screenshots[i].visible = false;
+    for( var i =0; i < this.screenshots.length; i++ ){
+      this.screenshots[i].visible = false;
+    }
   }
-}
 
-if( this.background ){ this.background.visible = false; }
-if( this.info ){ this.info.visible = false; }
-
+  if( this.background ){ this.background.visible = false; }
 
 }
 

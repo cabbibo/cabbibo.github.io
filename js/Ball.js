@@ -31,7 +31,8 @@ function Ball(id , params){
           uniforms:{
             t_matcap:{type:"t" , value:G.TEXTURES['matcap']},
             scrollPos:{type:"f" , value: G.scrollPos },
-            t_audio: G.t_audio
+            t_audio: G.t_audio,
+            hoverState:{type:"f" , value: 0.0}
           },
           side: THREE.DoubleSide
         });
@@ -80,12 +81,13 @@ function Ball(id , params){
 
 Ball.prototype._hoverOver = function(){
 
-  this.hoverOver();
-  //G.beginScroll( this.id );
+  if( G.lockedBall && G.lockedBall !== this ) return;
 
-
-
-   //G.hoverOver( this.id , true );
+  this.hovered = true;
+  G.lockedBall = this;
+  this.mat.uniforms.hoverState.value = 1.0;
+  G.beginScroll( this.id );
+  if( G.links[ this.id ] ){ G.links[ this.id ].hoverOver(); }
 
 }
 
