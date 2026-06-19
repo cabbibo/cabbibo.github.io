@@ -79,74 +79,30 @@ var FRAME_OFFSETS = [
 // ── bubble-in ────────────────────────────────────────────────────
 var _bubbleCount   = 0;
 var _bubbleT0      = null;
-var _thumbImgCache = {};
-var _thumbManifest = null;  // Set<id> of locally available thumbnails
-
-fetch('thumbs/manifest.json')
-  .then(function(r) { return r.json(); })
-  .then(function(ids) { _thumbManifest = new Set(ids); })
-  .catch(function() { _thumbManifest = new Set(); });
-
 // result passed to cb: { img, isComposite, isTiny }
-// cb may be called twice: first with isTiny=true (64×36 placeholder), then isTiny=false (full)
-// isComposite=true  → 2×2 tile, crop by quadrant
-// isComposite=false → single image, draw whole
+// isComposite=true → 2×2 tile sheet; isComposite=false → single image
 var _tinyImgCache = {};
 
 function getThumbImg(videoId, fallbackUrl, cb) {
-  // hasLocalFull: whether thumbs/{id}.jpg is expected to exist
-  // null manifest = still loading; treat as unknown (try full anyway)
-  var hasLocalFull = !_thumbManifest || _thumbManifest.has(videoId);
-
-  function tryFallback() {
-    // Skip the remote Google URL if a tiny is already cached — avoids 404s
-    if (_tinyImgCache[videoId]) {
-      _thumbImgCache[videoId] = _tinyImgCache[videoId];
-      return;
-    }
-    if (fallbackUrl) {
-      var img2 = new Image();
-      img2.crossOrigin = 'anonymous';
-      img2.onload  = function() { _thumbImgCache[videoId] = { img: img2, isComposite: false }; cb(_thumbImgCache[videoId]); };
-      img2.onerror = function() { _thumbImgCache[videoId] = null; cb(null); };
-      img2.src = fallbackUrl;
-    } else {
-      _thumbImgCache[videoId] = null; cb(null);
-    }
-  }
-
-  // --- full-size loader (called after tiny, or directly if no tiny) ---
-  function loadFull() {
-    if (videoId in _thumbImgCache) { cb(_thumbImgCache[videoId]); return; }
-    if (!hasLocalFull) { tryFallback(); return; }
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload  = function() {
-      var isComp = img.naturalWidth <= 450 && img.naturalHeight <= 250;
-      _thumbImgCache[videoId] = { img: img, isComposite: isComp };
-      cb(_thumbImgCache[videoId]);
-    };
-    img.onerror = function() { tryFallback(); };
-    img.src = 'thumbs/' + videoId + '.jpg';
-  }
-
-  // --- always try tiny first, regardless of hasLocalFull ---
+  // Return cached result immediately
   if (videoId in _tinyImgCache) {
     if (_tinyImgCache[videoId]) cb(_tinyImgCache[videoId]);
-    loadFull();
     return;
   }
-
+  // Try tiny thumb first; only fall back to Google URL if tiny doesn't exist
   var tiny = new Image();
-  tiny.crossOrigin = 'anonymous';
   tiny.onload = function() {
     _tinyImgCache[videoId] = { img: tiny, isComposite: false, isTiny: true };
     cb(_tinyImgCache[videoId]);
-    loadFull();
   };
   tiny.onerror = function() {
     _tinyImgCache[videoId] = null;
-    loadFull();
+    if (!fallbackUrl) { cb(null); return; }
+    var img2 = new Image();
+    img2.crossOrigin = 'anonymous';
+    img2.onload  = function() { _tinyImgCache[videoId] = { img: img2, isComposite: false }; cb(_tinyImgCache[videoId]); };
+    img2.onerror = function() { cb(null); };
+    img2.src = fallbackUrl;
   };
   tiny.src = 'thumbs/tiny/' + videoId + '.jpg';
 }
@@ -1757,7 +1713,6 @@ function startVideoOnNode(node, seekFraction) {
   function doLoad() {
     vidEl.removeAttribute('src');
     vidEl.load();
-    vidEl.crossOrigin = 'anonymous';
     vidEl.src = mediaUrl(node.videoId);
 
     vidEl.addEventListener('loadedmetadata', function onMeta() {
