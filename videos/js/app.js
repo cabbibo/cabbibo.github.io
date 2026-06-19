@@ -79,25 +79,57 @@ var FRAME_OFFSETS = [
 // ── bubble-in ────────────────────────────────────────────────────
 var _bubbleCount   = 0;
 var _bubbleT0      = null;
-// result passed to cb: { img, isComposite, isTiny }
-// isComposite=true → 2×2 tile sheet; isComposite=false → single image
-var _tinyImgCache = {};
+// ── thumbnail atlas ───────────────────────────────────────────────
+// One image (thumbs/atlas.jpg) packs all tiny thumbs; atlas.json maps
+// videoId → pixel rect. Each frame node gets a vec4 atlasRect uniform.
 
-function getThumbImg(videoId, fallbackUrl, cb) {
-  if (videoId in _tinyImgCache) {
-    if (_tinyImgCache[videoId]) cb(_tinyImgCache[videoId]);
-    return;
+var _atlasTexture  = null;
+var _atlasManifest = null;
+
+function loadAtlas() {
+  fetch('thumbs/atlas.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _atlasManifest = data;
+      var img = new Image();
+      img.onload = function() {
+        _atlasTexture = new THREE.Texture(img);
+        _atlasTexture.wrapS  = THREE.ClampToEdgeWrapping;
+        _atlasTexture.wrapT  = THREE.ClampToEdgeWrapping;
+        _atlasTexture.minFilter = THREE.LinearFilter;
+        _atlasTexture.magFilter = THREE.LinearFilter;
+        _atlasTexture.needsUpdate = true;
+        _applyAtlasToAll();
+      };
+      img.onerror = function() {};
+      img.src = 'thumbs/atlas.jpg';
+    })
+    .catch(function() {});
+}
+
+// Returns a THREE.Vector4 with UV (offset.xy, size.zw) for a given videoId,
+// or null if not in the manifest. Three.js texture uses flipY=true by default,
+// so v = 1 - pixelY/H (y=0 at top in pixels → v=1 in UV).
+function _atlasRect(videoId) {
+  if (!_atlasManifest || !_atlasManifest.thumbs[videoId]) return null;
+  var t = _atlasManifest.thumbs[videoId];
+  var W = _atlasManifest.size[0], H = _atlasManifest.size[1];
+  return new THREE.Vector4(t.x / W, 1 - (t.y + t.h) / H, t.w / W, t.h / H);
+}
+
+function _applyAtlasToNode(nd) {
+  if (!nd.mat || !nd.mat.uniforms || !_atlasTexture) return;
+  var rect = _atlasRect(nd.videoId);
+  if (!rect) return;
+  nd.mat.uniforms.map.value = _atlasTexture;
+  nd.mat.uniforms.hasMap.value = 1.0;
+  nd.mat.uniforms.atlasRect.value.copy(rect);
+}
+
+function _applyAtlasToAll() {
+  for (var i = 0; i < nodes.length; i++) {
+    if (nodes[i].type === 'frame') _applyAtlasToNode(nodes[i]);
   }
-  var tiny = new Image();
-  tiny.onload = function() {
-    _tinyImgCache[videoId] = { img: tiny, isComposite: false, isTiny: true };
-    cb(_tinyImgCache[videoId]);
-  };
-  tiny.onerror = function() {
-    _tinyImgCache[videoId] = null;
-    cb(null);
-  };
-  tiny.src = 'thumbs/tiny/' + videoId + '.jpg';
 }
 
 function bubbleIn(nd) {
@@ -137,24 +169,15 @@ var FLIPBOOK_VERT = [
 
 var FLIPBOOK_FRAG = [
   'uniform sampler2D map;',
-  'uniform float hasMap;',    // 0=placeholder, 1=texture ready
-  'uniform float composite;', // 1=2×2 sprite sheet, 0=single image
-  'uniform float time;',      // seconds, updated each frame
+  'uniform float hasMap;',   // 0=no texture (show placeholder), 1=sample atlas
+  'uniform vec4 atlasRect;', // xy=UV offset, zw=UV size within the atlas
   'uniform float opacity;',
   'varying vec2 vUv;',
   'void main(){',
-  '  vec2 uv;',
-  '  if(composite > 0.5){',
-  '    float fi = mod(floor(time * 2.0), 4.0);', // 2 flips per second
-  '    float col = mod(fi, 2.0);',
-  '    float row = floor(fi / 2.0);',
-  '    uv = vUv * 0.5 + vec2(col * 0.5, (1.0 - row) * 0.5);',
-  '  } else {',
-  '    uv = vUv;',
-  '  }',
   '  if(hasMap < 0.5){',
   '    gl_FragColor = vec4(0.1, 0.1, 0.1, opacity);',
   '  } else {',
+  '    vec2 uv = atlasRect.xy + vUv * atlasRect.zw;',
   '    gl_FragColor = vec4(texture2D(map, uv).rgb, opacity);',
   '  }',
   '}'
@@ -446,6 +469,7 @@ function init() {
   });
 
   initScrub();
+  loadAtlas();
   loadGraph();
 }
 
@@ -744,29 +768,6 @@ function folderBBox(folderNode) {
 
 var THUMB_W = 96, THUMB_H = 54;
 
-// Area-normalised AR scale factors so all thumbs have similar visual weight.
-// Reference area = THUMB_W * THUMB_H.  For 16:9 both = 1.0.
-function thumbScales(ar) {
-  var area = THUMB_W * THUMB_H;
-  return {
-    x: Math.sqrt(area * ar) / THUMB_W,
-    y: Math.sqrt(area / ar) / THUMB_H
-  };
-}
-
-// Draw img into a canvas whose dimensions match the image AR (no black bars).
-function imgToCanvas(img) {
-  var iw = img.naturalWidth  || img.width  || 1;
-  var ih = img.naturalHeight || img.height || 1;
-  var ar = iw / ih;
-  var refArea = 192 * 108;
-  var cw = Math.max(1, Math.round(Math.sqrt(refArea * ar)));
-  var ch = Math.max(1, Math.round(Math.sqrt(refArea / ar)));
-  var c  = document.createElement('canvas');
-  c.width = cw; c.height = ch;
-  c.getContext('2d').drawImage(img, 0, 0, iw, ih, 0, 0, cw, ch);
-  return { canvas: c, ar: ar };
-}
 
 function makeOutline(w, h) {
   var pts = new Float32Array([-w/2,-h/2,0.1, w/2,-h/2,0.1, w/2,h/2,0.1, -w/2,h/2,0.1]);
@@ -814,20 +815,6 @@ function buildNodeMesh(n) {
     n._baseOpacity = 0.9;
     n.outlineLine = makeOutline(THUMB_W, THUMB_H);
 
-    (function(nd, m) {
-      getThumbImg(nd.fileId, nd.thumbFallback, function(result) {
-        if (!result) return;
-        var ci = imgToCanvas(result.img);
-        if (!result.isTiny) {
-          var sc = thumbScales(ci.ar);
-          nd.thumbScaleX = sc.x; nd.thumbScaleY = sc.y;
-        }
-        m.map = new THREE.CanvasTexture(ci.canvas);
-        m.color.set(0xffffff);
-        m.needsUpdate = true;
-      });
-    })(n, mat);
-
   } else if (n.type === 'slideshow') {
     mat  = new THREE.MeshBasicMaterial({ color: 0x181818, transparent: true, opacity: 0.9 });
     mesh = new THREE.Mesh(new THREE.PlaneGeometry(THUMB_W * 1.8, THUMB_H * 1.8), mat);
@@ -836,49 +823,13 @@ function buildNodeMesh(n) {
     n.targetScale = 1;
     n.outlineLine = makeOutline(THUMB_W * 1.8, THUMB_H * 1.8);
 
-    (function(nd, m) {
-      var imgs = nd._ssImages;
-      var textures = [];
-      var loaded = 0;
-      function tryAdvance() {
-        if (textures.length === 0) return;
-        var idx = nd._ssIndex % textures.length;
-        if (textures[idx]) {
-          m.map = textures[idx];
-          m.color.set(0xffffff);
-          m.needsUpdate = true;
-        }
-        nd._ssIndex++;
-        nd._ssTimer = setTimeout(tryAdvance, 2500);
-      }
-      imgs.forEach(function(img, i) {
-        getThumbImg(img.id, img.thumbnailLink || null, function(result) {
-          if (result && !result.isTiny) {
-            var ci = imgToCanvas(result.img);
-            if (!nd.thumbScaleX) {
-              var sc = thumbScales(ci.ar);
-              nd.thumbScaleX = sc.x; nd.thumbScaleY = sc.y;
-            }
-            var tex = new THREE.CanvasTexture(ci.canvas);
-            tex.generateMipmaps = false;
-            tex.minFilter = THREE.LinearFilter;
-            tex.magFilter = THREE.LinearFilter;
-            textures.push(tex);
-          }
-          if (result && !result.isTiny) loaded++;
-          if (loaded === imgs.length && !nd._ssTimer) tryAdvance();
-        });
-      });
-      nd._ssTextures = textures;
-    })(n, mat);
 
-  } else { // frame — GPU flipbook sprite-sheet, one texture upload, shader animates UV
+  } else { // frame — atlas-sampled thumbnail tile
     mat = new THREE.ShaderMaterial({
       uniforms: {
         map:       { value: null  },
         hasMap:    { value: 0.0  },
-        composite: { value: 0.0  },
-        time:      { value: 0.0  },
+        atlasRect: { value: new THREE.Vector4(0, 0, 1, 1) },
         opacity:   { value: 0.9  }
       },
       vertexShader:   FLIPBOOK_VERT,
@@ -888,29 +839,9 @@ function buildNodeMesh(n) {
     mesh = new THREE.Mesh(new THREE.PlaneGeometry(THUMB_W, THUMB_H), mat);
     n.mat = mat;
     n._baseOpacity = 0.9;
-    n.isFlipbook = true;
     n.targetScale = 1;
-
-    (function(nd, m) {
-      var _fallback = nd.parentNode ? nd.parentNode.thumbFallback : null;
-      getThumbImg(nd.videoId, _fallback, function(result) {
-        if (!result) return;
-        var tex = new THREE.CanvasTexture(result.img);
-        tex.generateMipmaps = false;
-        tex.minFilter = THREE.LinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        m.uniforms.map.value       = tex;
-        m.uniforms.hasMap.value    = 1.0;
-        m.uniforms.composite.value = result.isComposite ? 1.0 : 0.0;
-        if (!result.isTiny) {
-          var iw = result.img.naturalWidth || result.img.width || 1;
-          var ih = result.img.naturalHeight || result.img.height || 1;
-          // For composite 2×2: each quadrant AR = full image AR
-          var sc = thumbScales(iw / ih);
-          nd.thumbScaleX = sc.x; nd.thumbScaleY = sc.y;
-        }
-      });
-    })(n, mat);
+    // Apply atlas immediately if it already loaded; otherwise _applyAtlasToAll() handles it
+    _applyAtlasToNode(n);
   }
 
   mesh.position.set(n.x, n.y, 0);
@@ -1289,7 +1220,7 @@ function syncMeshes() {
     var _folderSel = selectedNode && selectedNode.type === 'folder' && selectedNode === _highlightFolder;
     var _dimAmt = _folderSel ? 0.15 : 0.12;
     var nodeOpc = anyHighlight ? (highlighted ? nd._baseOpacity : _dimAmt) : nd._baseOpacity;
-    if (nd.isFlipbook) {
+    if (nd.mat && nd.mat.uniforms) {
       nd.mat.uniforms.opacity.value = nodeOpc;
     } else {
       nd.mesh.material.opacity = nodeOpc;
@@ -1388,11 +1319,7 @@ function animate() {
 
   // video now plays in #vid-overlay — no VideoTexture needed
 
-  // advance flipbook time uniform (float uniform = no GPU upload, just overwrites a register)
-  var _flipTime = performance.now() / 1000;
-  for (var _fi = 0; _fi < nodes.length; _fi++) {
-    if (nodes[_fi].isFlipbook) nodes[_fi].mat.uniforms.time.value = _flipTime;
-  }
+
 
   if (selectedNode && selectedNode.loading && selectedNode.loadCtx) {
     var lctx = selectedNode.loadCtx;
@@ -1400,14 +1327,8 @@ function animate() {
     var lh   = selectedNode.loadCanvas.height;
     var t    = (Date.now() - selectedNode.loadStart) / 1000;
     lctx.clearRect(0, 0, lw, lh);
-    if (selectedNode.thumbCanvas) {
-      lctx.globalAlpha = 0.35;
-      lctx.drawImage(selectedNode.thumbCanvas, 0, 0, lw, lh);
-      lctx.globalAlpha = 1.0;
-    } else {
-      lctx.fillStyle = '#111';
-      lctx.fillRect(0, 0, lw, lh);
-    }
+    lctx.fillStyle = '#111';
+    lctx.fillRect(0, 0, lw, lh);
     lctx.save();
     lctx.translate(lw / 2, lh / 2);
     lctx.rotate(t * Math.PI * 2.2);
@@ -1778,15 +1699,9 @@ function stopVideo(node) {
 
 function prev_mat_reset(node) {
   if (!node.mat) return;
-  if (node.type === 'video') {
-    node.mat.map = videoLabelTex(node.name);
-    node.mat.color.set(0xffffff);
-    node.mat.opacity = 0.85;
-  } else {
-    node.mat.map = node.thumbCanvas ? new THREE.CanvasTexture(node.thumbCanvas) : null;
-    node.mat.color.set(node.thumbCanvas ? 0xffffff : 0x181818);
-    node.mat.opacity = 0.9;
-  }
+  node.mat.map = videoLabelTex(node.name);
+  node.mat.color.set(0xffffff);
+  node.mat.opacity = 0.85;
   node.mat.needsUpdate = true;
 }
 
