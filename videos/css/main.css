@@ -109,6 +109,67 @@ html, body {
 }
 
 
+/* ── scrub bar ── */
+#scrub {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: 0.65rem;
+  width: min(640px, 80vw);
+  pointer-events: all;
+}
+#scrub.active { display: flex; }
+
+#scrub-play, #scrub-fs {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.8rem;
+  font-family: 'Ubuntu Mono', monospace;
+  line-height: 1;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+#scrub-play:hover, #scrub-fs:hover { color: #bbb; }
+
+#scrub-time, #scrub-dur {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: #444;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+#scrub-track {
+  flex: 1;
+  height: 2px;
+  background: #252525;
+  position: relative;
+  cursor: pointer;
+}
+#scrub-track::before {
+  content: '';
+  position: absolute;
+  inset: -8px 0;
+}
+#scrub-fill {
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  width: 0%;
+  background: #555;
+  pointer-events: none;
+  transition: background 0.1s;
+}
+#scrub-track:hover #scrub-fill { background: #aaa; }
+
 /* ── in-scene video overlay ── */
 #vid-overlay {
   display: none;

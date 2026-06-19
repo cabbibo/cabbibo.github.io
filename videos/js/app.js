@@ -487,7 +487,74 @@ function init() {
     if (e.key === 'Escape') goUpOne();
   });
 
+  initScrub();
   loadGraph();
+}
+
+// ── scrub bar ─────────────────────────────────────────────────────
+var _scrubEl = null, _scrubFillEl = null, _scrubTimeEl = null, _scrubDurEl = null, _scrubPlayEl = null;
+var _scrubDragging = false;
+
+function _fmtTime(t) {
+  var m = Math.floor(t / 60), s = Math.floor(t % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function initScrub() {
+  _scrubEl     = document.getElementById('scrub');
+  _scrubFillEl = document.getElementById('scrub-fill');
+  _scrubTimeEl = document.getElementById('scrub-time');
+  _scrubDurEl  = document.getElementById('scrub-dur');
+  _scrubPlayEl = document.getElementById('scrub-play');
+  if (!_scrubEl) return;
+
+  var track  = document.getElementById('scrub-track');
+  var vidEl  = document.getElementById('vid');
+
+  function doSeek(cx) {
+    if (!vidEl || !isFinite(vidEl.duration)) return;
+    var rect = track.getBoundingClientRect();
+    var pct  = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+    vidEl.currentTime = vidEl.duration * pct;
+  }
+
+  track.addEventListener('mousedown', function(e) { e.stopPropagation(); _scrubDragging = true; doSeek(e.clientX); });
+  window.addEventListener('mousemove', function(e) { if (_scrubDragging) doSeek(e.clientX); });
+  window.addEventListener('mouseup',   function()  { _scrubDragging = false; });
+  track.addEventListener('touchstart', function(e) { e.stopPropagation(); _scrubDragging = true; doSeek(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchmove', function(e) { if (_scrubDragging) doSeek(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchend',  function()  { _scrubDragging = false; });
+
+  _scrubPlayEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!vidEl) return;
+    if (vidEl.paused) vidEl.play().catch(function() {});
+    else vidEl.pause();
+  });
+
+  document.getElementById('scrub-fs').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  });
+
+  vidEl.addEventListener('play',  function() { if (_scrubPlayEl) _scrubPlayEl.textContent = '⏸'; });
+  vidEl.addEventListener('pause', function() { if (_scrubPlayEl) _scrubPlayEl.textContent = '▶'; });
+}
+
+function updateScrub() {
+  if (!_scrubEl) return;
+  var vidEl  = document.getElementById('vid');
+  var active = selectedNode && selectedNode.type === 'video' && !selectedNode.loading && vidEl && vidEl.src;
+  if (!active) { _scrubEl.classList.remove('active'); return; }
+  _scrubEl.classList.add('active');
+  if (!isFinite(vidEl.duration) || vidEl.duration === 0) return;
+  var pct = vidEl.currentTime / vidEl.duration;
+  _scrubFillEl.style.width = (pct * 100) + '%';
+  _scrubTimeEl.textContent = _fmtTime(vidEl.currentTime);
+  _scrubDurEl.textContent  = _fmtTime(vidEl.duration);
+  _scrubPlayEl.textContent = vidEl.paused ? '▶' : '⏸';
 }
 
 // ── graph loading ─────────────────────────────────────────────────
@@ -1411,6 +1478,7 @@ function animate() {
 
   // ── UI updates ──
   updateFolderTree();
+  updateScrub();
 
   if (!_vidLoadingEl) _vidLoadingEl = document.getElementById('vid-loading');
   if (_vidLoadingEl) {
