@@ -1,0 +1,128 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #080808;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+#c {
+  display: block;
+  position: fixed;
+  inset: 0;
+}
+
+#vid {
+  display: none;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+}
+
+#site-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60vw;
+  pointer-events: all;
+}
+#site-title .bc-part { color: #333; }
+#site-title .bc-sep  { color: #252525; }
+#site-title .bc-leaf { color: #888; }
+#site-title .bc-root { color: #333; }
+#site-title .bc-clickable { cursor: pointer; transition: color 0.12s; }
+#site-title .bc-clickable:hover { color: #bbb !important; }
+
+#breadcrumb { display: none; }
+
+#now-playing { pointer-events: all; cursor: pointer; }
+
+#now-playing {
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: #ccc;
+  text-align: center;
+  text-shadow: 0 0 24px rgba(0,0,0,0.9);
+}
+
+/* ── folder tree top-left ── */
+#folder-tree {
+  position: fixed;
+  top: 3rem;
+  left: 1.5rem;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.ft-item {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.9;
+  transition: color 0.15s;
+}
+
+.ft-clickable {
+  pointer-events: all;
+  cursor: pointer;
+}
+.ft-clickable:hover { color: #ccc !important; }
+
+/* ── video loading indicator ── */
+#vid-loading {
+  position: fixed;
+  bottom: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #555;
+  pointer-events: none;
+  display: none;
+}
+
+#vid-loading.active {
+  display: block;
+  animation: vidpulse 1s ease-in-out infinite;
+}
+
+@keyframes vidpulse {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.8; }
+}
+
+
+/* ── in-scene video overlay ── */
+#vid-overlay {
+  display: none;
+  position: fixed;
+  z-index: 50;
+  pointer-events: all;
+  overflow: hidden;
+  cursor: default;
+}
+
+#vid-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #000;
+}
