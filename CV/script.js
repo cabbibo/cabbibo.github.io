@@ -157,7 +157,7 @@ const CATEGORIES = [
       { title: "Looking Glass — WebGL Goo Ball", year: "2019", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1092908849546153984" }] },
       { title: "Magic Leap — Depth Scanner", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1038613210323017728" }] },
       { title: "Magic Leap — In World Sliders", thumb: "assets/magicLeapSliders.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1041827813962113025" }] },
-      { title: "Catenaries", thumb: "assets/catenaries.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1039966943887810560" }] },
+      { title: "Magic Leap — Catenaries", thumb: "assets/catenaries.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1039966943887810560" }] },
     ],
   },
 
