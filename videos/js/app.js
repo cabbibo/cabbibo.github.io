@@ -1775,7 +1775,8 @@ function deselect() {
   panDest.x = 0; panDest.y = 0; zoomDest = 5000;
   updateHierarchyPanel(null);
   setBreadcrumb(null);
-  setStatus('');
+  var _remaining = _folderActive + _folderQueue.length;
+  setStatus(_remaining > 0 ? 'loading… (' + _remaining + ' remaining)' : '');
 }
 
 function setStatus(msg) {
