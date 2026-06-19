@@ -84,12 +84,10 @@ var _bubbleT0      = null;
 var _tinyImgCache = {};
 
 function getThumbImg(videoId, fallbackUrl, cb) {
-  // Return cached result immediately
   if (videoId in _tinyImgCache) {
     if (_tinyImgCache[videoId]) cb(_tinyImgCache[videoId]);
     return;
   }
-  // Try tiny thumb first; only fall back to Google URL if tiny doesn't exist
   var tiny = new Image();
   tiny.onload = function() {
     _tinyImgCache[videoId] = { img: tiny, isComposite: false, isTiny: true };
@@ -97,12 +95,7 @@ function getThumbImg(videoId, fallbackUrl, cb) {
   };
   tiny.onerror = function() {
     _tinyImgCache[videoId] = null;
-    if (!fallbackUrl) { cb(null); return; }
-    var img2 = new Image();
-    img2.crossOrigin = 'anonymous';
-    img2.onload  = function() { _tinyImgCache[videoId] = { img: img2, isComposite: false }; cb(_tinyImgCache[videoId]); };
-    img2.onerror = function() { cb(null); };
-    img2.src = fallbackUrl;
+    cb(null);
   };
   tiny.src = 'thumbs/tiny/' + videoId + '.jpg';
 }
