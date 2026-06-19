@@ -12,6 +12,7 @@ html, body {
   display: block;
   position: fixed;
   inset: 0;
+  touch-action: none;
 }
 
 #vid {
@@ -205,3 +206,14 @@ html, body {
   transition: background 0.1s;
 }
 #scrub-track:hover #scrub-fill { background: #aaa; }
+
+/* ── mobile ── */
+@media (max-width: 768px) {
+  #site-title,
+  #folder-tree,
+  #now-playing { display: none !important; }
+
+  #scrub { width: 92vw; gap: 0.75rem; margin-top: 1rem; }
+  #scrub-time, #scrub-dur { font-size: 0.7rem; }
+  #scrub-play, #scrub-fs  { font-size: 1.1rem; }
+}

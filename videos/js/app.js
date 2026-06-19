@@ -483,6 +483,9 @@ function init() {
   document.addEventListener('mouseup',   onMouseUp);
   document.addEventListener('wheel',     onWheel, { passive: true });
   renderer.domElement.addEventListener('click', onClick);
+  renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+  renderer.domElement.addEventListener('touchmove',  onTouchMove,  { passive: false });
+  renderer.domElement.addEventListener('touchend',   onTouchEnd,   { passive: false });
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') goUpOne();
   });
@@ -1522,6 +1525,81 @@ function onMouseUp() { _mouseDown = false; }
 function onWheel(e) {
   // ortho: larger zoomDest = more world units = more zoomed out
   zoomDest = Math.max(200, Math.min(14000, zoomDest * (1 + e.deltaY * 0.0018)));
+}
+
+// ── touch (pan + pinch-zoom + tap) ───────────────────────────────
+var _touchPinchDist = 0;
+var _touchDragged   = false;
+var _touchStartPos  = null;
+
+function onTouchStart(e) {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    _touchDragged    = false;
+    _touchStartPos   = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    _dragOriginMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    _dragOriginPan   = { x: panDest.x, y: panDest.y };
+    _touchPinchDist  = 0;
+  } else if (e.touches.length === 2) {
+    _touchDragged = true;
+    var t1 = e.touches[0], t2 = e.touches[1];
+    var dx = t2.clientX - t1.clientX, dy = t2.clientY - t1.clientY;
+    _touchPinchDist  = Math.sqrt(dx*dx + dy*dy);
+    _dragOriginMouse = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+    _dragOriginPan   = { x: panDest.x, y: panDest.y };
+  }
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  if (e.touches.length === 1 && _touchPinchDist === 0) {
+    var t  = e.touches[0];
+    var dx = t.clientX - _dragOriginMouse.x;
+    var dy = t.clientY - _dragOriginMouse.y;
+    if (Math.abs(dx) + Math.abs(dy) > 6) _touchDragged = true;
+    if (_touchDragged) {
+      var scale = worldUnitsPerPx();
+      panDest.x = _dragOriginPan.x - dx * scale;
+      panDest.y = _dragOriginPan.y + dy * scale;
+      panCur.x  = panDest.x;
+      panCur.y  = panDest.y;
+    }
+  } else if (e.touches.length >= 2) {
+    var t1 = e.touches[0], t2 = e.touches[1];
+    var dx = t2.clientX - t1.clientX, dy = t2.clientY - t1.clientY;
+    var newDist = Math.sqrt(dx*dx + dy*dy);
+    if (_touchPinchDist > 0 && newDist > 0) {
+      zoomDest = Math.max(200, Math.min(14000, zoomDest * (_touchPinchDist / newDist)));
+    }
+    _touchPinchDist = newDist;
+    // pan by midpoint movement
+    var midX = (t1.clientX + t2.clientX) / 2;
+    var midY = (t1.clientY + t2.clientY) / 2;
+    var ddx  = midX - _dragOriginMouse.x;
+    var ddy  = midY - _dragOriginMouse.y;
+    var scale = worldUnitsPerPx();
+    panDest.x = _dragOriginPan.x - ddx * scale;
+    panDest.y = _dragOriginPan.y + ddy * scale;
+    panCur.x  = panDest.x;
+    panCur.y  = panDest.y;
+    _dragOriginMouse = { x: midX, y: midY };
+    _dragOriginPan   = { x: panDest.x, y: panDest.y };
+  }
+}
+
+function onTouchEnd(e) {
+  if (!_touchDragged && _touchStartPos && e.changedTouches.length > 0) {
+    var t = e.changedTouches[0];
+    var prev = _hasDragged;
+    _hasDragged = false;
+    onClick({ clientX: t.clientX, clientY: t.clientY });
+    _hasDragged = prev;
+  }
+  if (e.touches.length === 0) {
+    _touchPinchDist = 0;
+    _touchDragged   = false;
+    _touchStartPos  = null;
+  }
 }
 
 function onMouseMove(e) {
