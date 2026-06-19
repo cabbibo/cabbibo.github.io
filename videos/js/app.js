@@ -94,23 +94,31 @@ fetch('thumbs/manifest.json')
 var _tinyImgCache = {};
 
 function getThumbImg(videoId, fallbackUrl, cb) {
-  var hasLocal = !_thumbManifest || _thumbManifest.has(videoId);
+  // hasLocalFull: whether thumbs/{id}.jpg is expected to exist
+  // null manifest = still loading; treat as unknown (try full anyway)
+  var hasLocalFull = !_thumbManifest || _thumbManifest.has(videoId);
+
+  function tryFallback() {
+    // Skip the remote Google URL if a tiny is already cached — avoids 404s
+    if (_tinyImgCache[videoId]) {
+      _thumbImgCache[videoId] = _tinyImgCache[videoId];
+      return;
+    }
+    if (fallbackUrl) {
+      var img2 = new Image();
+      img2.crossOrigin = 'anonymous';
+      img2.onload  = function() { _thumbImgCache[videoId] = { img: img2, isComposite: false }; cb(_thumbImgCache[videoId]); };
+      img2.onerror = function() { _thumbImgCache[videoId] = null; cb(null); };
+      img2.src = fallbackUrl;
+    } else {
+      _thumbImgCache[videoId] = null; cb(null);
+    }
+  }
 
   // --- full-size loader (called after tiny, or directly if no tiny) ---
   function loadFull() {
     if (videoId in _thumbImgCache) { cb(_thumbImgCache[videoId]); return; }
-    function tryFallback() {
-      if (fallbackUrl) {
-        var img2 = new Image();
-        img2.crossOrigin = 'anonymous';
-        img2.onload  = function() { _thumbImgCache[videoId] = { img: img2, isComposite: false }; cb(_thumbImgCache[videoId]); };
-        img2.onerror = function() { _thumbImgCache[videoId] = null; cb(null); };
-        img2.src = fallbackUrl;
-      } else {
-        _thumbImgCache[videoId] = null; cb(null);
-      }
-    }
-    if (!hasLocal) { tryFallback(); return; }
+    if (!hasLocalFull) { tryFallback(); return; }
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload  = function() {
@@ -122,9 +130,7 @@ function getThumbImg(videoId, fallbackUrl, cb) {
     img.src = 'thumbs/' + videoId + '.jpg';
   }
 
-  // --- tiny placeholder (64×36) first ---
-  if (!hasLocal) { loadFull(); return; }
-
+  // --- always try tiny first, regardless of hasLocalFull ---
   if (videoId in _tinyImgCache) {
     if (_tinyImgCache[videoId]) cb(_tinyImgCache[videoId]);
     loadFull();
