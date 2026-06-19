@@ -34,7 +34,6 @@ const CATEGORIES = [
       { title: "PhysicsRenderer", thumb: "../img/sites/physicsRenderer.png", desc: "three.js GPGPU utils — 221★", links: [{ label: "GitHub", url: "https://github.com/cabbibo/PhysicsRenderer" }] },
       { title: "ARQUA!", thumb: "assets/arqua.png", collab: "Viacom NEXT", year: "2017", desc: "AR aquarium builder for iOS.", links: [{ label: "Site", url: "https://cabbi.bo/arqua/" }] },
       { title: "Face! Plant!", thumb: "assets/faceplant.png", year: "2019", desc: "AR face-tracking experiments.", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1141030277948436485" }] },
-      { title: "Shattering Reality", thumb: "assets/shatteringReality.png", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/900396800816799744" }] },
       { title: "Responsive Bridge Design", thumb: "assets/responsiveBridgeDesign.png", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1034184124796260353" }] },
     ],
   },
@@ -49,6 +48,7 @@ const CATEGORIES = [
       { title: "Warka Flarka Flim Flam", links: [{ label: "Steam", url: "https://store.steampowered.com/app/573360/Warka_Flarka_Flim_Flam/" }] },
       { title: "My Lil' Donut", collab: "Tool of North America", links: [{ label: "Steam", url: "https://store.steampowered.com/app/506280/My_Lil_Donut/" }] },
       { title: "Audio Forager", collab: "Kyle McDonald", links: [{ label: "Steam", url: "https://store.steampowered.com/app/694550/Audio_Forager/" }] },
+      { title: "Jellyfish Island", thumb: "assets/jellyfishIsland.jpg", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/874800872802340864" }] },
     ],
   },
 
@@ -144,6 +144,8 @@ const CATEGORIES = [
       { title: "AR with Markers", thumb: "assets/arMarkers.jpg", year: "2018", desc: "Marker-based AR instruments & animations.", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1019722235030908928" }] },
       { title: "Forward Facing AR", year: "2017", desc: "A/V painting, meshing, refraction on iPhone.", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/900853174575153152" }] },
       { title: "Human Segmentation", thumb: "assets/humanSeg.jpg", year: "2020", desc: "Real-time ML person segmentation effects.", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1232844575363887104" }] },
+      { title: "Skull Island", thumb: "assets/skullIsland.jpg", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/894042349461950464" }] },
+      { title: "Shattering Reality", thumb: "assets/shatteringReality.png", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/900396800816799744" }] },
     ],
   },
 
@@ -155,6 +157,7 @@ const CATEGORIES = [
       { title: "Looking Glass — WebGL Goo Ball", year: "2019", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1092908849546153984" }] },
       { title: "Magic Leap — Depth Scanner", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1038613210323017728" }] },
       { title: "Magic Leap — In World Sliders", thumb: "assets/magicLeapSliders.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1041827813962113025" }] },
+      { title: "Catenaries", thumb: "assets/catenaries.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1039966943887810560" }] },
     ],
   },
 
@@ -163,14 +166,10 @@ const CATEGORIES = [
     meta: "GPU / GLSL / Twitter",
     items: [
       { title: "Responsive Bridge Design", thumb: "assets/responsiveBridgeDesign.png", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1034184124796260353" }] },
-      { title: "Shattering Reality", thumb: "assets/shatteringReality.png", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/900396800816799744" }] },
       { title: "Painting Density → Mesh", thumb: "assets/paintingDensity.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/988196621878886400" }] },
       { title: "Paint Vector Field → Blow", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/987423544744206336" }] },
-      { title: "Catenaries", thumb: "assets/catenaries.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1039966943887810560" }] },
-      { title: "Skull Island", thumb: "assets/skullIsland.jpg", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/894042349461950464" }] },
       { title: "Arbitrary Caustics", thumb: "assets/caustics.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1072223840313298945" }] },
       { title: "3D Fluid Sim with Isosurface", thumb: "assets/fluidSim.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/989686836955037696" }] },
-      { title: "Jellyfish Island", thumb: "assets/jellyfishIsland.jpg", year: "2017", links: [{ label: "Twitter", url: "https://twitter.com/Cabbibo/status/874800872802340864" }] },
     ],
   },
 
