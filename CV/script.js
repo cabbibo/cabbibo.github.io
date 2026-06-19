@@ -154,8 +154,8 @@ const CATEGORIES = [
     meta: "Looking Glass · Magic Leap",
     items: [
       { title: "Looking Glass — Dreams Shader Set", thumb: "assets/lookingGlassDreams.jpg", year: "2019", desc: "WebGL shaders on holographic display.", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1103355179586347008" }] },
-      { title: "Looking Glass — WebGL Goo Ball", year: "2019", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1092908849546153984" }] },
-      { title: "Magic Leap — Depth Scanner", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1038613210323017728" }] },
+      { title: "Looking Glass — WebGL Goo Ball", thumb: "assets/webgooball.png", year: "2019", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1092908849546153984" }] },
+      { title: "Magic Leap — Depth Scanner", thumb: "assets/depthScanner.png", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1038613210323017728" }] },
       { title: "Magic Leap — In World Sliders", thumb: "assets/magicLeapSliders.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1041827813962113025" }] },
       { title: "Magic Leap — Catenaries", thumb: "assets/catenaries.jpg", year: "2018", links: [{ label: "Twitter", url: "https://twitter.com/cabbibo/status/1039966943887810560" }] },
     ],
