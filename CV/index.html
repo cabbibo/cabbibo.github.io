@@ -374,6 +374,233 @@
   }
 
   buildOrganizer();
+
+  // ---- Tag connection graph ----
+  function buildTagGraph() {
+    const map = loadOrg();
+
+    // Collect tagged/starred items (skip My Favs to avoid dupes)
+    const seen = new Set();
+    const nodeData = [];
+    (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []).forEach(cat => {
+      if (cat.name === 'My Favs') return;
+      cat.items.forEach(item => {
+        if (seen.has(item.title)) return;
+        seen.add(item.title);
+        const d = getItem(map, item.title);
+        if (!d.tags.length && !d.stars) return;
+        nodeData.push({ title: item.title, tags: d.tags, stars: d.stars || 0, links: item.links });
+      });
+    });
+
+    // Section shell
+    const sec = document.createElement('section');
+    sec.id = 'tag-graph';
+    sec.style.cssText = 'margin:60px 0 0;padding:32px;background:#0a0a0a;border:1px solid #222;border-radius:8px';
+
+    const heading = document.createElement('h2');
+    heading.textContent = 'Connections';
+    heading.style.cssText = 'font:700 13px/1 monospace;letter-spacing:.1em;color:#555;text-transform:uppercase;margin:0 0 12px';
+    sec.appendChild(heading);
+
+    if (!nodeData.length) {
+      const msg = document.createElement('p');
+      msg.textContent = 'Tag items in the organizer above to see connections.';
+      msg.style.cssText = 'font:11px/1.5 monospace;color:#444;margin:0';
+      sec.appendChild(msg);
+      document.querySelector('footer').before(sec);
+      return;
+    }
+
+    // Legend — only tags that are actually used
+    const legend = document.createElement('div');
+    legend.style.cssText = 'display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px';
+    TAGS.forEach(tag => {
+      if (!nodeData.some(n => n.tags.includes(tag))) return;
+      const chip = document.createElement('span');
+      chip.textContent = tag;
+      chip.style.cssText = `padding:2px 8px;border-radius:999px;font:600 9px/1 monospace;letter-spacing:.08em;text-transform:uppercase;background:${TAG_ACTIVE[tag]};color:#000;opacity:.85`;
+      legend.appendChild(chip);
+    });
+    sec.appendChild(legend);
+
+    // Canvas wrapper
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;width:100%;height:480px;border-radius:4px;overflow:hidden;background:#0a0a0a';
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'display:block;width:100%;height:100%';
+    wrap.appendChild(canvas);
+    sec.appendChild(wrap);
+    document.querySelector('footer').before(sec);
+
+    const ctx = canvas.getContext('2d');
+    const H = 480;
+    const getW = () => wrap.offsetWidth;
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width  = getW() * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Build nodes
+    const nodes = nodeData.map(d => ({
+      title: d.title, tags: d.tags, stars: d.stars, links: d.links,
+      x: getW() * 0.1 + Math.random() * getW() * 0.8,
+      y: H * 0.1 + Math.random() * H * 0.8,
+      vx: 0, vy: 0,
+      r: 3 + d.stars * 2.2,
+    }));
+
+    // Build edges (pairs with shared tags)
+    const edges = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const shared = nodes[i].tags.filter(t => nodes[j].tags.includes(t));
+        if (shared.length) edges.push({ i, j, count: shared.length, tag: shared[0] });
+      }
+    }
+
+    // Mouse tracking
+    let mouse = null, hovIdx = -1;
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      mouse = { x: mx, y: my };
+      hovIdx = -1;
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i], dx = n.x - mx, dy = n.y - my;
+        if (dx*dx + dy*dy < (n.r + 8) * (n.r + 8)) { hovIdx = i; break; }
+      }
+      canvas.style.cursor = hovIdx >= 0 && nodes[hovIdx].links && nodes[hovIdx].links[0] ? 'pointer' : 'default';
+    });
+    canvas.addEventListener('mouseleave', () => { mouse = null; hovIdx = -1; });
+    canvas.addEventListener('click', () => {
+      if (hovIdx >= 0 && nodes[hovIdx].links && nodes[hovIdx].links[0])
+        window.open(nodes[hovIdx].links[0].url, '_blank', 'noopener');
+    });
+
+    // Physics step
+    function step() {
+      const w = getW(), cx = w / 2, cy = H / 2;
+      const K_REP = 3800, K_ATT = 0.003, REST = 65, DAMP = 0.87, GRAV = 0.002;
+
+      // Repulsion — all pairs
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
+          const f = K_REP / d2, fx = (dx/d)*f, fy = (dy/d)*f;
+          a.vx -= fx; a.vy -= fy;
+          b.vx += fx; b.vy += fy;
+        }
+      }
+
+      // Attraction — shared-tag edges (stronger for more overlap)
+      edges.forEach(e => {
+        const a = nodes[e.i], b = nodes[e.j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const d = Math.sqrt(dx*dx + dy*dy) || 1;
+        if (d > REST) {
+          const f = K_ATT * e.count * (d - REST);
+          const fx = (dx/d)*f, fy = (dy/d)*f;
+          a.vx += fx; a.vy += fy;
+          b.vx -= fx; b.vy -= fy;
+        }
+      });
+
+      // Soft center gravity
+      nodes.forEach(n => {
+        n.vx += (cx - n.x) * GRAV;
+        n.vy += (cy - n.y) * GRAV;
+      });
+
+      // Mouse repulsion (cursor pushes nodes away)
+      if (mouse) nodes.forEach(n => {
+        const dx = n.x - mouse.x, dy = n.y - mouse.y;
+        const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
+        if (d < 130) { const f = 2800 / d2; n.vx += (dx/d)*f; n.vy += (dy/d)*f; }
+      });
+
+      // Integrate
+      nodes.forEach(n => {
+        n.vx *= DAMP; n.vy *= DAMP;
+        n.x += n.vx;  n.y += n.vy;
+        n.x = Math.max(n.r + 4, Math.min(w - n.r - 4, n.x));
+        n.y = Math.max(n.r + 4, Math.min(H - n.r - 4, n.y));
+      });
+    }
+
+    // Render frame
+    function draw() {
+      const w = getW();
+      ctx.clearRect(0, 0, w, H);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, w, H);
+
+      // Edges
+      edges.forEach(e => {
+        const a = nodes[e.i], b = nodes[e.j];
+        const col = TAG_ACTIVE[e.tag] || '#fff';
+        const alpha = Math.min(0.08 + e.count * 0.08, 0.5);
+        ctx.strokeStyle = col + Math.round(alpha * 255).toString(16).padStart(2, '0');
+        ctx.lineWidth = 0.4 + e.count * 0.35;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+
+      // Nodes
+      nodes.forEach((n, i) => {
+        const col = n.tags.length ? (TAG_ACTIVE[n.tags[0]] || '#888') : '#555';
+        const hov = i === hovIdx;
+
+        // Glow
+        if (hov || n.stars >= 4) {
+          const gr = n.r * (hov ? 4.5 : 2.8);
+          const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, gr);
+          grd.addColorStop(0, col + (hov ? '77' : '33'));
+          grd.addColorStop(1, 'transparent');
+          ctx.fillStyle = grd;
+          ctx.beginPath(); ctx.arc(n.x, n.y, gr, 0, Math.PI*2); ctx.fill();
+        }
+
+        // Dot
+        ctx.fillStyle = hov ? '#fff' : col;
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+
+        // Label — always for hovered, for 4+ stars otherwise
+        const label = n.title.length > 24 ? n.title.slice(0, 22) + '…' : n.title;
+        if (hov) {
+          ctx.font = 'bold 10px monospace';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, n.x, n.y - n.r - 6);
+        } else if (n.stars >= 4) {
+          ctx.font = '8px monospace';
+          ctx.fillStyle = '#888';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, n.x, n.y + n.r + 10);
+        }
+      });
+    }
+
+    // Animation loop — pauses when off-screen
+    let running = false;
+    function loop() {
+      if (!running) return;
+      step(); draw();
+      requestAnimationFrame(loop);
+    }
+    const obs = new IntersectionObserver(([e]) => {
+      running = e.isIntersecting;
+      if (running) loop();
+    }, { threshold: 0.05 });
+    obs.observe(canvas);
+  }
+  buildTagGraph();
   </script>
 
   <script>
