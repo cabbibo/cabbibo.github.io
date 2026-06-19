@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Isaac Cohen / Cabbibo — CV</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: #111;
+      background: #fff;
+      margin: 0;
+      padding: 4rem 2rem;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Header */
+    .cv-name    { font-size: 2.2rem; font-weight: bold; margin: 0 0 0.2rem; letter-spacing: -0.02em; }
+    .cv-sub     { font-size: 0.95rem; color: #555; margin: 0 0 0.5rem; }
+    .cv-contact { font-size: 0.9rem; color: #555; margin: 0 0 3.5rem; }
+    .cv-contact a { color: #111; }
+
+    /* Section headings */
+    h2 {
+      font-family: -apple-system, Helvetica, Arial, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #999;
+      margin: 3.5rem 0 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    /* Category */
+    .cat { margin-bottom: 2.5rem; }
+    .cat-name {
+      font-family: -apple-system, Helvetica, Arial, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #333;
+      margin: 0 0 0.15rem;
+    }
+    .cat-meta {
+      font-family: -apple-system, Helvetica, Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #aaa;
+      margin: 0 0 0.75rem;
+    }
+
+    /* Items */
+    ul.items { list-style: none; padding: 0; margin: 0; }
+    ul.items li {
+      padding: 0.22rem 0;
+      font-size: 0.93rem;
+      color: #111;
+    }
+    .dim { color: #777; }
+    .sep { color: #bbb; margin: 0 0.2em; }
+
+    /* Press */
+    ul.press { list-style: none; padding: 0; margin: 0; }
+    ul.press li {
+      padding: 0.6rem 0;
+      border-top: 1px solid #efefef;
+    }
+    ul.press li:last-child { border-bottom: 1px solid #efefef; }
+    .press-outlet {
+      font-family: -apple-system, Helvetica, Arial, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #aaa;
+      margin-bottom: 0.1rem;
+    }
+    .press-title { font-size: 0.93rem; color: #111; }
+    .press-title a { color: #111; text-decoration: underline; text-underline-offset: 2px; }
+    .press-title a:hover { color: #555; }
+
+    @media print {
+      body { padding: 2rem; font-size: 11pt; }
+      h2 { margin-top: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden placeholders so ../CV/script.js bootstrap doesn't throw -->
+  <div id="work-categories" style="display:none"></div>
+  <ul id="press-list" style="display:none"></ul>
+  <ul id="contact-links" style="display:none"></ul>
+  <span id="year" style="display:none"></span>
+  <button class="nav-toggle" style="display:none" aria-expanded="false" aria-controls="nav-links"></button>
+  <ul id="nav-links" style="display:none"></ul>
+
+  <div id="app"></div>
+
+  <script src="../CV/script.js"></script>
+  <script>
+  const WORKING_URLS = new Set([
+    "https://voicesofvr.com/336-surreal-experimental-art-blarps-unique-physics-based-game-mechanic/",
+    "http://voicesofvr.com/512-experiential-poems-exploring-emotions-embodied-vulnerability-with-cabbibo/",
+    "https://voicesofvr.com/579-using-ar-to-recontextualize-our-relationship-to-reality-with-cabibbos-arqua/",
+    "https://www.rockpapershotgun.com/isaac-cohen-vr-work",
+    "https://thenextweb.com/news/this-amazing-interactive-picture-book-for-the-web-makes-me-jealous-of-kids-these-days",
+    "https://thefwa.com/interviews/issac-cohen",
+    "https://www.museumor.com/blog/spotlight-isaac-cohen-and-the-telescope-for-the-mind",
+    "https://boingboing.net/2015/07/21/lose-yourself-in-this-trippy.html",
+    "https://www.vice.com/en/article/jpv98d/this-is-what-pong-would-be-like-in-vr",
+    "https://www.vice.com/en/article/pgqky7/i-used-leap-motion-to-touch-a-virtual-rainbow-universe",
+    "https://www.vice.com/en/article/ez5b9k/dive-into-a-deep-sea-digital-picture-book",
+    "https://flash---art.com/2022/10/hayden-dunham/",
+    "https://theasc.com/articles/spatial-reality-at-ayzenburg",
+  ]);
+
+  function t(tag, cls, html) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (html != null) el.innerHTML = html;
+    return el;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+
+    // ---- Header ----
+    app.appendChild(t('h1', 'cv-name', 'Isaac Cohen'));
+    app.appendChild(t('p', 'cv-sub', 'Cabbibo &nbsp;·&nbsp; Simulation Artist &nbsp;·&nbsp; Los Angeles, CA'));
+    app.appendChild(t('p', 'cv-sub', 'Physics &amp; Religious Studies &nbsp;·&nbsp; Residencies: Unity · Adobe · Google · Dynamicland'));
+    app.appendChild(t('p', 'cv-contact', 'isaaclandoncohen@gmail.com &nbsp;·&nbsp; <a href="https://cabbi.bo">cabbi.bo</a>'));
+
+    // ---- Work ----
+    app.appendChild(t('h2', null, 'Work'));
+
+    CATEGORIES.forEach(cat => {
+      const div = t('div', 'cat');
+      div.appendChild(t('div', 'cat-name', cat.name));
+      if (cat.meta) div.appendChild(t('div', 'cat-meta', cat.meta));
+
+      const ul = t('ul', 'items');
+      cat.items.forEach(item => {
+        const li = document.createElement('li');
+        let html = `<strong>${item.title}</strong>`;
+        const parts = [];
+        if (item.collab) parts.push(`w/ ${item.collab}`);
+        if (item.year)   parts.push(item.year);
+        if (item.desc)   parts.push(item.desc);
+        if (parts.length) html += ` <span class="dim">${parts.join(' · ')}</span>`;
+        li.innerHTML = html;
+        ul.appendChild(li);
+      });
+      div.appendChild(ul);
+      app.appendChild(div);
+    });
+
+    // ---- Press ----
+    app.appendChild(t('h2', null, 'Selected Press'));
+    const pressUl = t('ul', 'press');
+    PRESS.forEach(p => {
+      const li = document.createElement('li');
+      const url = p.links && p.links[0] ? p.links[0].url : null;
+      const live = url && WORKING_URLS.has(url);
+      const titleHtml = live
+        ? `<a href="${url}" target="_blank" rel="noopener">${p.title}</a>`
+        : p.title;
+      li.innerHTML = `<div class="press-outlet">${p.outlet}</div><div class="press-title">${titleHtml}</div>`;
+      pressUl.appendChild(li);
+    });
+    app.appendChild(pressUl);
+  });
+  </script>
+</body>
+</html>

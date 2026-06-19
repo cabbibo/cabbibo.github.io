@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cabbibo — Isaac Cohen · Simulation Artist</title>
+  <meta name="description" content="Cabbibo (Isaac Cohen) — Simulation Artist based in Los Angeles. Work in VR/spatial art, web/interactive, music videos, live performance, open-source graphics tools, and writing." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cabbibo — Isaac Cohen · Simulation Artist" />
+  <meta property="og:description" content="Wild colors, non-PBR rendering and motion. Portfolio of Isaac Cohen / Cabbibo." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ============================================================
+       NAV — anchor links to each section
+       ============================================================ -->
+  <nav class="nav" aria-label="Primary">
+    <a href="#top" class="nav-brand">CABBIBO</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <ul id="nav-links" class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#press">Press</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <header id="top" class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner" id="hero-default">
+      <p class="hero-eyebrow">Isaac Cohen ·  Los Angeles</p>
+      <h1 class="hero-name">CABBIBO</h1>
+      <p class="hero-role">Simulation Artist</p>
+      <p class="hero-thesis">Wild colors, non-PBR rendering and motion.</p>
+      <a href="#about" class="hero-scroll" aria-label="Scroll to content">
+        <span>scroll</span>
+        <span class="hero-scroll-arrow" aria-hidden="true">↓</span>
+      </a>
+    </div>
+    <div id="favs-grid" class="favs-grid" style="display:none"></div>
+  </header>
+
+  <main>
+    <!-- ============================================================
+         ABOUT
+         ============================================================ -->
+    <section id="about" class="section section--about">
+      <h2 class="section-title">About</h2>
+      <div class="about-grid">
+        <p class="about-bio">
+          Cabbibo is a Simulation Artist based in Los Angeles. Their work focuses on the
+          physicality of our digital environments, the beauty of movement, and the
+          synesthetic properties of code — audiovisual experiences, interactive pieces
+          built from recursive algorithms, real-time procedural music worlds, VR/spatial
+          art, live performance, and open-source graphics tools.
+        </p>
+        <p class="about-bio">
+          They have exhibited at SFMoMA, sp[a]ce, the Museum of Other Realities, Sundance,
+          and Acute Art, and collaborated with artists including Olafur Eliasson, Chris Milk,
+          SOPHIE and Jónsi. They have completed commissions and residencies for Unity
+          (first VR Artist in Residence), Adobe, Google, and Dynamicland.
+        </p>
+        <dl class="about-meta">
+          <dt>Based</dt><dd>Los Angeles, CA</dd>
+          <dt>Studied</dt><dd>Physics &amp; Religious Studies</dd>
+          <dt>Residencies</dt><dd>Unity · Adobe · Google · Dynamicland</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         WORK — sections rendered from data in script.js
+         ============================================================ -->
+    <section id="work" class="section section--work">
+      <h2 class="section-title">Work</h2>
+      <div id="work-categories" class="work-categories">
+        <!-- populated by script.js -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PRESS
+         ============================================================ -->
+    <section id="press" class="section section--press">
+      <h2 class="section-title">Selected Press</h2>
+      <ul id="press-list" class="press-list">
+        <!-- populated by script.js -->
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         CONTACT / ELSEWHERE
+         ============================================================ -->
+    <section id="contact" class="section section--contact">
+      <h2 class="section-title">Contact &amp; Elsewhere</h2>
+      <p class="contact-lede">
+        For commissions, exhibitions, and press: <a href="mailto:isaaclandoncohen@gmail.com">isaaclandoncohen@gmail.com</a>
+      </p>
+      <ul id="contact-links" class="contact-links">
+        <!-- populated by script.js -->
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Isaac Cohen / Cabbibo. Built statically — no tracking, no scripts you don't see.</p>
+  </footer>
+
+  <script src="script.js"></script>
+
+  <script>
+  // ---- shared helpers (all pages) ----
+  const ORG_KEY = 'cv-organizer-v3';
+  function loadOrg() { try { return JSON.parse(localStorage.getItem(ORG_KEY) || '{}'); } catch { return {}; } }
+  function saveOrg(map) { localStorage.setItem(ORG_KEY, JSON.stringify(map)); }
+  function getItem(map, title) { return map[title] || { tags: [], stars: 0 }; }
+
+  // ---- 5-star hero grid (all pages) ----
+  (function buildFavsGrid() {
+    const map = loadOrg();
+    const highStars = Object.entries(map)
+      .filter(([, v]) => v && v.stars >= 4)
+      .sort(([, a], [, b]) => b.stars - a.stars)
+      .map(([title]) => title);
+    if (!highStars.length) return;
+
+    const thumbs = {}, links = {};
+    (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []).forEach(cat => {
+      cat.items.forEach(item => {
+        if (item.thumb && !thumbs[item.title]) thumbs[item.title] = item.thumb;
+        if (item.links && item.links[0] && !links[item.title]) links[item.title] = item.links[0].url;
+      });
+    });
+
+    const cells = highStars.filter(t => thumbs[t]);
+    if (!cells.length) return;
+
+    const hero = document.getElementById('top');
+    hero.classList.add('hero--grid');
+    document.getElementById('hero-default').style.display = 'none';
+    const grid = document.getElementById('favs-grid');
+    grid.style.display = '';
+
+    cells.forEach(title => {
+      const url = links[title];
+      const cell = url ? document.createElement('a') : document.createElement('div');
+      cell.className = 'favs-cell';
+      if (url) { cell.href = url; cell.target = '_blank'; cell.rel = 'noopener'; }
+      const img = document.createElement('img');
+      img.src = thumbs[title];
+      img.alt = title;
+      img.loading = 'lazy';
+      const label = document.createElement('div');
+      label.className = 'favs-cell-title';
+      label.textContent = title;
+      cell.appendChild(img);
+      cell.appendChild(label);
+      grid.appendChild(cell);
+    });
+  })();
+
+  // ---- tag organizer (all pages) ----
+  const TAGS = ['work', 'art', 'experiments', 'animation', 'games', 'music', 'web', 'vr', 'ar', 'writing', 'talk', 'research', 'open source', 'tool'];
+  const TAG_ACTIVE = {
+    work: '#4a8cff', art: '#cc44ff', experiments: '#44ff99', animation: '#ff8844',
+    games: '#44ffcc', music: '#ff44cc', web: '#ffee44', vr: '#44ddff', ar: '#ff44aa',
+    writing: '#ff9944', talk: '#ff6688', research: '#88ff44', 'open source': '#aaffdd', tool: '#ddaaff',
+  };
+  const YEAR_HINTS = {
+    'BLARP!': 2016, 'L U N E': 2017, "Delila's Gift": 2017,
+    'Warka Flarka Flim Flam': 2016, "My Lil' Donut": 2016, 'Audio Forager': 2017,
+    'Saturnalia': 2022, 'Wanderstop': 2025,
+    'SOPHIE — FACESHOPPING': 2018, 'ENOUGH': 2015,
+    'AFK': 2016, 'Lazarus Under Lights': 2015,
+    'Face! Plant!': 2019, 'AR Face Tracking — Facestrument': 2018,
+    'AR with Markers': 2018, 'Forward Facing AR': 2017, 'Human Segmentation': 2020,
+    'Looking Glass — Dreams Shader Set': 2019, 'Looking Glass — WebGL Goo Ball': 2019,
+    'Magic Leap — Depth Scanner': 2018, 'Magic Leap — In World Sliders': 2018,
+    'Responsive Bridge Design': 2018, 'Shattering Reality': 2017,
+    'Painting Density → Mesh': 2018, 'Paint Vector Field → Blow': 2018,
+    'Catenaries': 2018, 'Skull Island': 2017, 'Arbitrary Caustics': 2018,
+    '3D Fluid Sim with Isosurface': 2018, 'Jellyfish Island': 2017,
+    'Lil Data × Cabbibo live': 2020, 'PhysicsRenderer': 2014,
+    'Math, Nature and Thievery': 2014, 'Bee Two Bee': 2020,
+    'H E N G E': 2019, 'The Anatomy of a Jellyfish': 2016, 'ARQUA!': 2017,
+  };
+
+  const btnMap = new Map();
+
+  function setTagActive(title, tag, on) {
+    const btn = btnMap.get(`${title}::${tag}`);
+    if (btn) {
+      btn.style.background  = on ? TAG_ACTIVE[tag] : 'transparent';
+      btn.style.borderColor = on ? TAG_ACTIVE[tag] : '#222';
+      btn.style.color       = on ? '#000' : '#444';
+    }
+    const chip = document.querySelector(`[data-chip="${CSS.escape(title)}::${CSS.escape(tag)}"]`);
+    if (on && !chip) {
+      const zone = document.querySelector(`[data-dropzone="${CSS.escape(tag)}"]`);
+      if (zone) appendChip(zone, title, tag);
+    } else if (!on && chip) {
+      chip.remove();
+    }
+  }
+
+  function appendChip(zone, title, tag) {
+    const chip = document.createElement('div');
+    chip.dataset.chip = `${title}::${tag}`;
+    chip.textContent = title;
+    chip.title = title;
+    chip.style.cssText = `padding:2px 6px;background:#1a1a1a;border:1px solid ${TAG_ACTIVE[tag]}44;border-radius:3px;font:10px/1.4 monospace;color:#888;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%`;
+    chip.addEventListener('click', () => {
+      const cur = loadOrg();
+      const entry = getItem(cur, title);
+      const idx = entry.tags.indexOf(tag);
+      if (idx !== -1) entry.tags.splice(idx, 1);
+      if (entry.tags.length || entry.stars) cur[title] = entry; else delete cur[title];
+      saveOrg(cur);
+      setTagActive(title, tag, false);
+    });
+    chip.addEventListener('mouseenter', () => { chip.style.borderColor = TAG_ACTIVE[tag]; chip.style.color = '#ccc'; });
+    chip.addEventListener('mouseleave', () => { chip.style.borderColor = `${TAG_ACTIVE[tag]}44`; chip.style.color = '#888'; });
+    zone.appendChild(chip);
+  }
+
+  function buildOrganizer() {
+    const map = loadOrg();
+    const sec = document.createElement('section');
+    sec.id = 'organizer';
+    sec.style.cssText = 'margin:60px 0;padding:32px;background:#0a0a0a;border:1px solid #222;border-radius:8px';
+
+    const h = document.createElement('h2');
+    h.textContent = 'Tagger';
+    h.style.cssText = 'font:700 13px/1 monospace;letter-spacing:.1em;color:#555;text-transform:uppercase;margin:0 0 8px';
+    sec.appendChild(h);
+
+    const legend = document.createElement('div');
+    legend.style.cssText = 'display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px';
+    TAGS.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.textContent = tag;
+      chip.style.cssText = `padding:2px 8px;border-radius:999px;font:600 9px/1 monospace;letter-spacing:.08em;text-transform:uppercase;background:${TAG_ACTIVE[tag]};color:#000`;
+      legend.appendChild(chip);
+    });
+    sec.appendChild(legend);
+
+    const hoverLabel = document.createElement('div');
+    hoverLabel.style.cssText = 'font:12px/1 monospace;color:#666;min-height:16px;margin-bottom:12px;transition:color .1s';
+    sec.appendChild(hoverLabel);
+
+    const seen = new Set();
+    (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []).forEach(category => {
+      if (category.name === 'My Favs') return;
+      const catHead = document.createElement('div');
+      catHead.textContent = category.name;
+      catHead.style.cssText = 'font:700 9px/1 monospace;letter-spacing:.12em;text-transform:uppercase;color:#444;margin-top:14px;margin-bottom:2px;padding:3px 0;border-bottom:1px solid #1e1e1e';
+      sec.appendChild(catHead);
+
+      category.items.forEach(item => {
+        if (seen.has(item.title)) return;
+        seen.add(item.title);
+        const d = getItem(map, item.title);
+        const year = item.year || YEAR_HINTS[item.title] || '';
+
+        const row = document.createElement('div');
+        row.draggable = true;
+        row.dataset.orgTitle = item.title;
+        row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid #161616;cursor:grab';
+        row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', item.title); row.style.opacity = '0.35'; });
+        row.addEventListener('dragend', () => { row.style.opacity = '1'; });
+        row.addEventListener('mouseenter', () => { hoverLabel.textContent = `${item.title}  ·  ${category.name}`; hoverLabel.style.color = '#aaa'; });
+        row.addEventListener('mouseleave', () => { hoverLabel.textContent = ''; hoverLabel.style.color = '#666'; });
+        if (item.links && item.links[0]) {
+          row.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') return;
+            window.open(item.links[0].url, '_blank', 'noopener');
+          });
+        }
+
+        const starRow = document.createElement('div');
+        starRow.style.cssText = 'display:flex;gap:1px;flex-shrink:0';
+        for (let s = 1; s <= 5; s++) {
+          const star = document.createElement('button');
+          star.textContent = s <= d.stars ? '★' : '☆';
+          star.style.cssText = `background:transparent;border:0;font-size:13px;line-height:1;cursor:pointer;color:${s <= d.stars ? '#ffcc00' : '#333'};padding:0 1px`;
+          star.addEventListener('click', () => {
+            const cur = loadOrg(); const entry = getItem(cur, item.title);
+            entry.stars = entry.stars === s ? 0 : s;
+            cur[item.title] = entry; saveOrg(cur);
+            starRow.querySelectorAll('button').forEach((b, i) => {
+              b.textContent = i + 1 <= entry.stars ? '★' : '☆';
+              b.style.color = i + 1 <= entry.stars ? '#ffcc00' : '#333';
+            });
+          });
+          starRow.appendChild(star);
+        }
+        row.appendChild(starRow);
+
+        const yearEl = document.createElement('span');
+        yearEl.textContent = year || '—';
+        yearEl.style.cssText = 'font:10px/1 monospace;color:#3a3a3a;width:34px;flex-shrink:0;text-align:right';
+        row.appendChild(yearEl);
+
+        const name = document.createElement('span');
+        name.style.cssText = 'font:11px/1 monospace;color:#666;width:160px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        name.textContent = item.title;
+        row.appendChild(name);
+
+        const tagRow = document.createElement('div');
+        tagRow.style.cssText = 'display:flex;gap:3px;flex:1;flex-wrap:wrap';
+        TAGS.forEach(tag => {
+          const active = d.tags.includes(tag);
+          const btn = document.createElement('button');
+          btn.textContent = tag;
+          btn.style.cssText = `padding:1px 6px;border-radius:999px;border:1px solid ${active ? TAG_ACTIVE[tag] : '#222'};font:600 8px/1.4 monospace;letter-spacing:.05em;text-transform:uppercase;background:${active ? TAG_ACTIVE[tag] : 'transparent'};color:${active ? '#000' : '#444'};cursor:pointer`;
+          btnMap.set(`${item.title}::${tag}`, btn);
+          btn.addEventListener('click', () => {
+            const cur = loadOrg(); const entry = getItem(cur, item.title);
+            const idx = entry.tags.indexOf(tag);
+            if (idx === -1) entry.tags.push(tag); else entry.tags.splice(idx, 1);
+            if (entry.tags.length || entry.stars) cur[item.title] = entry; else delete cur[item.title];
+            saveOrg(cur);
+            setTagActive(item.title, tag, entry.tags.includes(tag));
+          });
+          tagRow.appendChild(btn);
+        });
+        row.appendChild(tagRow);
+        sec.appendChild(row);
+      });
+    });
+
+    const divider = document.createElement('div');
+    divider.style.cssText = 'margin:24px 0 16px;border-top:1px solid #222;padding-top:16px;font:700 10px/1 monospace;letter-spacing:.12em;color:#444;text-transform:uppercase';
+    divider.textContent = 'Drop zones — drag rows above into a tag';
+    sec.appendChild(divider);
+
+    const dropGrid = document.createElement('div');
+    dropGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px';
+    sec.appendChild(dropGrid);
+
+    TAGS.forEach(tag => {
+      const col = document.createElement('div');
+      const head = document.createElement('div');
+      head.textContent = tag;
+      head.style.cssText = `font:700 9px/1 monospace;letter-spacing:.1em;text-transform:uppercase;padding:4px 6px;background:${TAG_ACTIVE[tag]};color:#000;border-radius:3px 3px 0 0`;
+      col.appendChild(head);
+      const dropZone = document.createElement('div');
+      dropZone.dataset.dropzone = tag;
+      dropZone.style.cssText = 'min-height:48px;background:#111;border:1px solid #1e1e1e;border-top:0;border-radius:0 0 3px 3px;padding:4px;display:flex;flex-direction:column;gap:3px;transition:border-color .1s';
+      col.appendChild(dropZone);
+      Object.entries(map).forEach(([title, data]) => {
+        if (data && Array.isArray(data.tags) && data.tags.includes(tag)) appendChip(dropZone, title, tag);
+      });
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = TAG_ACTIVE[tag]; });
+      dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#1e1e1e'; });
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.style.borderColor = '#1e1e1e';
+        const title = e.dataTransfer.getData('text/plain');
+        const cur = loadOrg(); const entry = getItem(cur, title);
+        if (!entry.tags.includes(tag)) { entry.tags.push(tag); cur[title] = entry; saveOrg(cur); setTagActive(title, tag, true); }
+      });
+      dropGrid.appendChild(col);
+    });
+
+    document.querySelector('footer').before(sec);
+  }
+
+  buildOrganizer();
+  </script>
+
+  <script>
+  // ---- localhost only ----
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    // paste zone
+    const zone = document.createElement('div');
+    zone.id = 'paste-zone';
+    zone.textContent = '⌘V  paste screenshot';
+    zone.style.cssText = 'position:fixed;bottom:16px;right:16px;padding:8px 14px;border-radius:6px;font:12px/1 monospace;z-index:9999;background:#111;color:#555;border:1px solid #333;cursor:pointer;user-select:none';
+    document.body.appendChild(zone);
+    zone.addEventListener('click', () => zone.focus());
+
+    const toast = (msg, ok = true) => {
+      zone.textContent = msg;
+      zone.style.color = ok ? '#00ff99' : '#ff4444';
+      setTimeout(() => { zone.textContent = '⌘V  paste screenshot'; zone.style.color = '#555'; }, 3000);
+    };
+
+    async function handleImage(item) {
+      const ext = item.type === 'image/png' ? 'png' : 'jpg';
+      const name = prompt('Save as (in CV/assets/):', `screenshot.${ext}`);
+      if (!name) return;
+      const blob = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const res = await fetch('/save-asset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: name, data: reader.result }) });
+          const json = await res.json();
+          toast('✓ ' + json.path);
+        } catch (err) { toast('✗ ' + err.message, false); }
+      };
+      reader.readAsDataURL(blob);
+    }
+
+    function onPaste(e) {
+      const items = Array.from(e.clipboardData?.items || []);
+      const img = items.find(i => i.type.startsWith('image/'));
+      if (!img) { toast('no image in clipboard', false); return; }
+      e.preventDefault();
+      handleImage(img);
+    }
+    document.addEventListener('paste', onPaste);
+    zone.setAttribute('tabindex', '0');
+    zone.addEventListener('paste', onPaste);
+    zone.addEventListener('keydown', (e) => { if (e.key === 'v' && (e.metaKey || e.ctrlKey)) onPaste(e); });
+
+    // edit / view toggle
+    let editing = true;
+    const orgToggle = document.createElement('button');
+    orgToggle.textContent = 'editing';
+    orgToggle.style.cssText = 'position:fixed;bottom:16px;left:16px;padding:8px 14px;border-radius:6px;font:12px/1 monospace;z-index:9999;background:#111;color:#00ff99;border:1px solid #00ff9944;cursor:pointer';
+    orgToggle.addEventListener('click', () => {
+      editing = !editing;
+      orgToggle.textContent = editing ? 'editing' : 'viewing';
+      orgToggle.style.color = editing ? '#00ff99' : '#555';
+      orgToggle.style.borderColor = editing ? '#00ff9944' : '#333';
+    });
+    document.body.appendChild(orgToggle);
+  }
+  </script>
+</body>
+</html>
