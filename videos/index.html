@@ -10,7 +10,6 @@
 <body>
 
   <canvas id="c"></canvas>
-  <video id="vid" playsinline crossorigin="anonymous" style="position:fixed;left:-1px;width:1px;height:1px;opacity:0;pointer-events:none"></video>
 
   <div id="ui">
     <div id="site-title"></div>
@@ -19,17 +18,19 @@
   </div>
 
   <div id="folder-tree"></div>
-  <div id="vid-loading">loading</div>
 
-  <div id="scrub">
-    <button id="scrub-play">▶</button>
-    <span id="scrub-time">0:00</span>
-    <div id="scrub-track"><div id="scrub-fill"></div></div>
-    <span id="scrub-dur">0:00</span>
-    <button id="scrub-fs">⤢</button>
+  <div id="vid-overlay">
+    <button id="vid-close">✕</button>
+    <video id="vid" playsinline crossorigin="anonymous"></video>
+    <div id="vid-loading">loading</div>
+    <div id="scrub">
+      <button id="scrub-play">▶</button>
+      <span id="scrub-time">0:00</span>
+      <div id="scrub-track"><div id="scrub-fill"></div></div>
+      <span id="scrub-dur">0:00</span>
+      <button id="scrub-fs">⤢</button>
+    </div>
   </div>
-
-
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script src="config/secrets.js"></script>

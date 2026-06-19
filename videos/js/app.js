@@ -508,8 +508,9 @@ function initScrub() {
   _scrubPlayEl = document.getElementById('scrub-play');
   if (!_scrubEl) return;
 
-  var track  = document.getElementById('scrub-track');
-  var vidEl  = document.getElementById('vid');
+  var track   = document.getElementById('scrub-track');
+  var vidEl   = document.getElementById('vid');
+  var overlay = document.getElementById('vid-overlay');
 
   function doSeek(cx) {
     if (!vidEl || !isFinite(vidEl.duration)) return;
@@ -534,22 +535,34 @@ function initScrub() {
 
   document.getElementById('scrub-fs').addEventListener('click', function(e) {
     e.stopPropagation();
-    var el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    if (vidEl && vidEl.requestFullscreen) vidEl.requestFullscreen();
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
   });
+
+  // Close button and overlay background both deselect
+  document.getElementById('vid-close').addEventListener('click', function(e) {
+    e.stopPropagation();
+    deselect();
+  });
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) deselect();
+    });
+  }
+
+  // Stop clicks on video/scrub from bubbling to overlay background
+  if (vidEl) vidEl.addEventListener('click', function(e) { e.stopPropagation(); });
+  _scrubEl.addEventListener('click', function(e) { e.stopPropagation(); });
 
   vidEl.addEventListener('play',  function() { if (_scrubPlayEl) _scrubPlayEl.textContent = '⏸'; });
   vidEl.addEventListener('pause', function() { if (_scrubPlayEl) _scrubPlayEl.textContent = '▶'; });
 }
 
 function updateScrub() {
-  if (!_scrubEl) return;
-  var vidEl  = document.getElementById('vid');
-  var active = selectedNode && selectedNode.type === 'video' && !selectedNode.loading && vidEl && vidEl.src;
-  if (!active) { _scrubEl.classList.remove('active'); return; }
-  _scrubEl.classList.add('active');
-  if (!isFinite(vidEl.duration) || vidEl.duration === 0) return;
+  if (!_scrubEl || !_scrubFillEl) return;
+  var vidEl = document.getElementById('vid');
+  if (!vidEl || !isFinite(vidEl.duration) || vidEl.duration === 0) return;
   var pct = vidEl.currentTime / vidEl.duration;
   _scrubFillEl.style.width = (pct * 100) + '%';
   _scrubTimeEl.textContent = _fmtTime(vidEl.currentTime);
@@ -1415,10 +1428,7 @@ function animate() {
   camera.zoom = W / zoomCur;
   camera.updateProjectionMatrix();
 
-  if (selectedNode && selectedNode.videoTex && selectedNode.videoEl) {
-    var ve = selectedNode.videoEl;
-    if (ve.readyState >= 2 && ve.src && !ve.paused) selectedNode.videoTex.needsUpdate = true;
-  }
+  // video now plays in #vid-overlay — no VideoTexture needed
 
   // advance flipbook time uniform (float uniform = no GPU upload, just overwrites a register)
   var _flipTime = performance.now() / 1000;
@@ -1658,25 +1668,16 @@ function selectNode(node) {
 // seekFraction: null = beginning, 0–1 = seek after loadedmetadata
 function startVideoOnNode(node, seekFraction) {
   var vidEl = document.getElementById('vid');
+  var overlay = document.getElementById('vid-overlay');
 
   function doLoad() {
     vidEl.removeAttribute('src');
     vidEl.load();
     vidEl.crossOrigin = 'anonymous';
-    vidEl.src = '/proxy/' + node.videoId;
+    vidEl.src = mediaUrl(node.videoId);
 
-    vidEl.addEventListener('loadedmetadata', function onMetaAspect() {
-      vidEl.removeEventListener('loadedmetadata', onMetaAspect);
-      if (vidEl.videoWidth && vidEl.videoHeight) {
-        node.aspectScale = (vidEl.videoWidth / vidEl.videoHeight) / (THUMB_W / THUMB_H);
-        if (node === selectedNode) {
-          node.targetScale = VIDEO_SCALE * Math.min(1.0, 1.5 / node.aspectScale);
-          var ts = node.targetScale, as = node.aspectScale;
-          zoomDest = Math.max(THUMB_W * ts * as, THUMB_H * ts * (W / H)) * 1.15;
-          panDest.x = centeredPanX(node.x, zoomDest);
-          panDest.y = node.y;
-        }
-      }
+    vidEl.addEventListener('loadedmetadata', function onMeta() {
+      vidEl.removeEventListener('loadedmetadata', onMeta);
       if (isFinite(vidEl.duration) && vidEl.duration > 0) {
         var dur = vidEl.duration;
         var mm = Math.floor(dur / 60), ss = Math.floor(dur % 60);
@@ -1704,57 +1705,27 @@ function startVideoOnNode(node, seekFraction) {
     doLoad();
   }
 
-  var lc = document.createElement('canvas');
-  lc.width = 192; lc.height = 108;
-  node.loadCtx    = lc.getContext('2d');
-  node.loadCanvas = lc;
-  node.loadStart  = Date.now();
-  node.loading    = true;
+  // Show video in overlay immediately
+  if (overlay) overlay.classList.add('active');
+  node.loading = true;
 
-  var loadTex = new THREE.CanvasTexture(lc);
-  if (node.mat) {
-    node.mat.map     = loadTex;
-    node.mat.color.set(0xffffff);
-    node.mat.opacity = 1.0;
-    node.mat.needsUpdate = true;
-    node.loadTex = loadTex;
-  }
-
-  function swapToVideo() {
-    vidEl.removeEventListener('timeupdate', swapToVideo);
-    vidEl.removeEventListener('canplay',    swapToVideo);
-    vidEl.removeEventListener('error',      onVideoError);
+  function onVideoReady() {
+    vidEl.removeEventListener('canplay', onVideoReady);
+    vidEl.removeEventListener('error',   onVideoError);
     if (selectedNode !== node) return;
     node.loading = false;
-    if (node.loadTex) { node.loadTex.dispose(); node.loadTex = null; }
-    node.loadCanvas = null; node.loadCtx = null;
-    var tex = new THREE.VideoTexture(vidEl);
-    tex.minFilter = THREE.LinearFilter;
-    if (node.mat) {
-      node.mat.map = tex;
-      node.mat.needsUpdate = true;
-      node.videoTex = tex;
-      node.videoEl  = vidEl;
-    }
   }
 
   function onVideoError() {
-    vidEl.removeEventListener('timeupdate', swapToVideo);
-    vidEl.removeEventListener('canplay',    swapToVideo);
-    vidEl.removeEventListener('error',      onVideoError);
+    vidEl.removeEventListener('canplay', onVideoReady);
+    vidEl.removeEventListener('error',   onVideoError);
     if (selectedNode !== node) return;
     node.loading = false;
-    if (node.loadTex) { node.loadTex.dispose(); node.loadTex = null; }
-    node.loadCanvas = null; node.loadCtx = null;
-    if (node.mat) {
-      prev_mat_reset(node);
-    }
     setStatus(node.name + ' — unavailable');
   }
 
-  vidEl.addEventListener('timeupdate', swapToVideo);
-  vidEl.addEventListener('canplay',    swapToVideo);
-  vidEl.addEventListener('error',      onVideoError);
+  vidEl.addEventListener('canplay', onVideoReady);
+  vidEl.addEventListener('error',   onVideoError);
 }
 
 function stopVideo(node) {
@@ -1766,6 +1737,9 @@ function stopVideo(node) {
   vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load();
   node.videoEl = null;
   if (node.videoTex) { node.videoTex.dispose(); node.videoTex = null; }
+
+  var overlay = document.getElementById('vid-overlay');
+  if (overlay) overlay.classList.remove('active');
 
   prev_mat_reset(node);
 }
