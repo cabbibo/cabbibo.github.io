@@ -1775,12 +1775,23 @@ function deselect() {
   panDest.x = 0; panDest.y = 0; zoomDest = 5000;
   updateHierarchyPanel(null);
   setBreadcrumb(null);
-  var _remaining = _folderActive + _folderQueue.length;
-  setStatus(_remaining > 0 ? 'loading… (' + _remaining + ' remaining)' : '');
+  setStatus('');
 }
 
+var _nowPlayingEl = null;
+var _vidOverlayEl = null;
 function setStatus(msg) {
-  document.getElementById('now-playing').textContent = msg || '';
+  if (!_nowPlayingEl) _nowPlayingEl = document.getElementById('now-playing');
+  if (!_vidOverlayEl) _vidOverlayEl = document.getElementById('vid-overlay');
+  var videoOpen = _vidOverlayEl && _vidOverlayEl.classList.contains('active');
+  if (!videoOpen) {
+    var _remaining = _folderActive + _folderQueue.length;
+    if (_remaining > 0) {
+      _nowPlayingEl.textContent = 'loading… (' + _remaining + ' remaining)';
+      return;
+    }
+  }
+  if (_nowPlayingEl) _nowPlayingEl.textContent = msg || '';
 }
 
 function setBreadcrumb(parts) {
