@@ -85,6 +85,7 @@ var _bubbleT0      = null;
 
 var _atlasTexture  = null;
 var _atlasManifest = null;
+var _atlasReady    = false; // true once atlas has loaded (or definitively failed)
 
 function loadAtlas() {
   fetch('thumbs/atlas.json')
@@ -99,12 +100,13 @@ function loadAtlas() {
         _atlasTexture.minFilter = THREE.LinearFilter;
         _atlasTexture.magFilter = THREE.LinearFilter;
         _atlasTexture.needsUpdate = true;
+        _atlasReady = true;
         _applyAtlasToAll();
       };
-      img.onerror = function() {};
+      img.onerror = function() { _atlasReady = true; _applyAtlasToAll(); };
       img.src = 'thumbs/atlas.jpg';
     })
-    .catch(function() {});
+    .catch(function() { _atlasReady = true; _applyAtlasToAll(); });
 }
 
 // Returns a THREE.Vector4 with UV (offset.xy, size.zw) for a given videoId,
@@ -128,8 +130,9 @@ function _applyAtlasToNode(nd) {
       return;
     }
   }
-  // Not in atlas — queue a throttled fallback load from Drive thumbnailLink
-  _queueFallback(nd);
+  // Only fall back to individual load once we know the atlas is fully ready.
+  // If atlas is still loading, _applyAtlasToAll() will come back and handle this node.
+  if (_atlasReady) _queueFallback(nd);
 }
 
 function _applyAtlasToAll() {
