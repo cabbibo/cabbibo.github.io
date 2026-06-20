@@ -118,18 +118,62 @@ function _atlasRect(videoId) {
 }
 
 function _applyAtlasToNode(nd) {
-  if (!nd.mat || !nd.mat.uniforms || !_atlasTexture) return;
-  var rect = _atlasRect(nd.videoId);
-  if (!rect) return;
-  nd.mat.uniforms.map.value = _atlasTexture;
-  nd.mat.uniforms.hasMap.value = 1.0;
-  nd.mat.uniforms.atlasRect.value.copy(rect);
+  if (!nd.mat || !nd.mat.uniforms) return;
+  if (_atlasTexture) {
+    var rect = _atlasRect(nd.videoId);
+    if (rect) {
+      nd.mat.uniforms.map.value = _atlasTexture;
+      nd.mat.uniforms.hasMap.value = 1.0;
+      nd.mat.uniforms.atlasRect.value.copy(rect);
+      return;
+    }
+  }
+  // Not in atlas — queue a throttled fallback load from Drive thumbnailLink
+  _queueFallback(nd);
 }
 
 function _applyAtlasToAll() {
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].type === 'frame') _applyAtlasToNode(nodes[i]);
   }
+}
+
+// ── throttled fallback thumbnails (for videos not in atlas) ──────
+// Loads thumbnailLink images one at a time (~5/sec) to avoid 429s.
+var _fbQueue = [];
+var _fbTimer = null;
+
+function _queueFallback(nd) {
+  var url = nd.parentNode && nd.parentNode.thumbFallback;
+  if (!url || nd._fbQueued) return;
+  nd._fbQueued = true;
+  _fbQueue.push(nd);
+  if (!_fbTimer) _drainFallback();
+}
+
+function _drainFallback() {
+  _fbTimer = null;
+  if (_fbQueue.length === 0) return;
+  var nd = _fbQueue.shift();
+  if (!nd.mat || !nd.mat.uniforms) { _drainFallback(); return; }
+  var url = nd.parentNode && nd.parentNode.thumbFallback;
+  if (!url) { _drainFallback(); return; }
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    if (!nd.mat || !nd.mat.uniforms) return;
+    var tex = new THREE.Texture(img);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    nd.mat.uniforms.map.value = tex;
+    nd.mat.uniforms.hasMap.value = 1.0;
+    nd.mat.uniforms.atlasRect.value.set(0, 0, 1, 1);
+    nd._fbTex = tex;
+  };
+  img.onerror = function() {};
+  img.src = url;
+  _fbTimer = setTimeout(_drainFallback, 200); // ~5 per second
 }
 
 function bubbleIn(nd) {
