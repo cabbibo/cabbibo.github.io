@@ -389,7 +389,7 @@
         seen.add(item.title);
         const d = getItem(map, item.title);
         if (!d.tags.length && !d.stars) return;
-        nodeData.push({ title: item.title, tags: d.tags, stars: d.stars || 0, links: item.links });
+        nodeData.push({ title: item.title, tags: d.tags, stars: d.stars || 0, links: item.links, cat: cat.name });
       });
     });
 
@@ -448,21 +448,30 @@
 
     // Build nodes
     const nodes = nodeData.map(d => ({
-      title: d.title, tags: d.tags, stars: d.stars, links: d.links,
+      title: d.title, tags: d.tags, stars: d.stars, links: d.links, cat: d.cat,
       x: getW() * 0.1 + Math.random() * getW() * 0.8,
       y: H * 0.1 + Math.random() * H * 0.8,
       vx: 0, vy: 0,
       r: 3 + d.stars * 2.2,
     }));
 
-    // Build edges (pairs with shared tags)
-    const edges = [];
+    // Build edges — shared tags + same section
+    const edgeMap = new Map();
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const shared = nodes[i].tags.filter(t => nodes[j].tags.includes(t));
-        if (shared.length) edges.push({ i, j, count: shared.length, tag: shared[0] });
+        const sameSection = nodes[i].cat && nodes[i].cat === nodes[j].cat;
+        if (shared.length || sameSection) {
+          edgeMap.set(`${i},${j}`, {
+            i, j,
+            count: shared.length + (sameSection ? 0.4 : 0),
+            tag: shared[0] || null,
+            sameSection,
+          });
+        }
       }
     }
+    const edges = [...edgeMap.values()];
 
     // Mouse tracking
     let mouse = null, hovIdx = -1;
@@ -486,17 +495,20 @@
     // Physics step
     function step() {
       const w = getW(), cx = w / 2, cy = H / 2;
-      const K_REP = 3800, K_ATT = 0.003, REST = 65, DAMP = 0.87, GRAV = 0.002;
+      const K_REP = 700, K_ATT = 0.0008, REST = 110, DAMP = 0.65, GRAV = 0.0008;
 
-      // Repulsion — all pairs
+      // Reset per-frame accumulators
+      nodes.forEach(n => { n.fx = 0; n.fy = 0; });
+
+      // Repulsion — all pairs (clamped min distance to avoid explosion)
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
-          const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
+          const d2 = Math.max(dx*dx + dy*dy, 900), d = Math.sqrt(d2);
           const f = K_REP / d2, fx = (dx/d)*f, fy = (dy/d)*f;
-          a.vx -= fx; a.vy -= fy;
-          b.vx += fx; b.vy += fy;
+          a.fx -= fx; a.fy -= fy;
+          b.fx += fx; b.fy += fy;
         }
       }
 
@@ -508,28 +520,32 @@
         if (d > REST) {
           const f = K_ATT * e.count * (d - REST);
           const fx = (dx/d)*f, fy = (dy/d)*f;
-          a.vx += fx; a.vy += fy;
-          b.vx -= fx; b.vy -= fy;
+          a.fx += fx; a.fy += fy;
+          b.fx -= fx; b.fy -= fy;
         }
       });
 
       // Soft center gravity
       nodes.forEach(n => {
-        n.vx += (cx - n.x) * GRAV;
-        n.vy += (cy - n.y) * GRAV;
+        n.fx += (cx - n.x) * GRAV;
+        n.fy += (cy - n.y) * GRAV;
       });
 
       // Mouse repulsion (cursor pushes nodes away)
       if (mouse) nodes.forEach(n => {
         const dx = n.x - mouse.x, dy = n.y - mouse.y;
-        const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
-        if (d < 130) { const f = 2800 / d2; n.vx += (dx/d)*f; n.vy += (dy/d)*f; }
+        const d2 = Math.max(dx*dx + dy*dy, 900), d = Math.sqrt(d2);
+        if (d < 120) { const f = 400 / d2; n.fx += (dx/d)*f; n.fy += (dy/d)*f; }
       });
 
-      // Integrate
+      // Integrate — apply forces, damp, clamp velocity, update position
+      const MAX_V = 4;
       nodes.forEach(n => {
-        n.vx *= DAMP; n.vy *= DAMP;
-        n.x += n.vx;  n.y += n.vy;
+        n.vx = (n.vx + n.fx) * DAMP;
+        n.vy = (n.vy + n.fy) * DAMP;
+        n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
+        n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
+        n.x += n.vx; n.y += n.vy;
         n.x = Math.max(n.r + 4, Math.min(w - n.r - 4, n.x));
         n.y = Math.max(n.r + 4, Math.min(H - n.r - 4, n.y));
       });
@@ -545,10 +561,10 @@
       // Edges
       edges.forEach(e => {
         const a = nodes[e.i], b = nodes[e.j];
-        const col = TAG_ACTIVE[e.tag] || '#fff';
-        const alpha = Math.min(0.08 + e.count * 0.08, 0.5);
+        const col = e.tag ? (TAG_ACTIVE[e.tag] || '#fff') : '#444';
+        const alpha = e.tag ? Math.min(0.08 + e.count * 0.08, 0.5) : 0.12;
         ctx.strokeStyle = col + Math.round(alpha * 255).toString(16).padStart(2, '0');
-        ctx.lineWidth = 0.4 + e.count * 0.35;
+        ctx.lineWidth = e.tag ? (0.4 + e.count * 0.35) : 0.5;
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       });
 
