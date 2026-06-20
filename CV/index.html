@@ -473,24 +473,63 @@
     }
     const edges = [...edgeMap.values()];
 
-    // Mouse tracking
-    let mouse = null, hovIdx = -1;
-    canvas.addEventListener('mousemove', e => {
+    // Mouse / touch tracking + drag
+    let mouse = null, hovIdx = -1, dragIdx = -1, dragMoved = false;
+
+    function evPos(e) {
       const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      mouse = { x: mx, y: my };
-      hovIdx = -1;
+      const src = e.touches ? e.touches[0] : e;
+      return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+    }
+    function hitNode(mx, my) {
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i], dx = n.x - mx, dy = n.y - my;
-        if (dx*dx + dy*dy < (n.r + 8) * (n.r + 8)) { hovIdx = i; break; }
+        if (dx*dx + dy*dy < (n.r + 10) * (n.r + 10)) return i;
       }
-      canvas.style.cursor = hovIdx >= 0 && nodes[hovIdx].links && nodes[hovIdx].links[0] ? 'pointer' : 'default';
+      return -1;
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      const { x: mx, y: my } = evPos(e);
+      const idx = hitNode(mx, my);
+      if (idx >= 0) { dragIdx = idx; dragMoved = false; e.preventDefault(); }
     });
-    canvas.addEventListener('mouseleave', () => { mouse = null; hovIdx = -1; });
-    canvas.addEventListener('click', () => {
-      if (hovIdx >= 0 && nodes[hovIdx].links && nodes[hovIdx].links[0])
-        window.open(nodes[hovIdx].links[0].url, '_blank', 'noopener');
+    canvas.addEventListener('mousemove', e => {
+      const { x: mx, y: my } = evPos(e);
+      mouse = { x: mx, y: my };
+      if (dragIdx >= 0) {
+        nodes[dragIdx].x = mx; nodes[dragIdx].y = my;
+        nodes[dragIdx].vx = 0;  nodes[dragIdx].vy = 0;
+        dragMoved = true;
+        canvas.style.cursor = 'grabbing';
+        return;
+      }
+      hovIdx = hitNode(mx, my);
+      canvas.style.cursor = hovIdx >= 0 ? 'grab' : 'default';
     });
+    canvas.addEventListener('mouseup', () => {
+      if (dragIdx >= 0 && !dragMoved && nodes[dragIdx].links && nodes[dragIdx].links[0])
+        window.open(nodes[dragIdx].links[0].url, '_blank', 'noopener');
+      dragIdx = -1;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse = null; if (dragIdx < 0) hovIdx = -1; });
+
+    // Touch drag
+    canvas.addEventListener('touchstart', e => {
+      const { x: mx, y: my } = evPos(e);
+      const idx = hitNode(mx, my);
+      if (idx >= 0) { dragIdx = idx; dragMoved = false; e.preventDefault(); }
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+      if (dragIdx < 0) return;
+      e.preventDefault();
+      const { x: mx, y: my } = evPos(e);
+      mouse = { x: mx, y: my };
+      nodes[dragIdx].x = mx; nodes[dragIdx].y = my;
+      nodes[dragIdx].vx = 0;  nodes[dragIdx].vy = 0;
+      dragMoved = true;
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => { dragIdx = -1; });
 
     // Physics step
     function step() {
@@ -540,7 +579,8 @@
 
       // Integrate — apply forces, damp, clamp velocity, update position
       const MAX_V = 4;
-      nodes.forEach(n => {
+      nodes.forEach((n, i) => {
+        if (i === dragIdx) return; // held node stays put
         n.vx = (n.vx + n.fx) * DAMP;
         n.vy = (n.vy + n.fy) * DAMP;
         n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
