@@ -121,6 +121,9 @@ function _atlasRect(videoId) {
 
 function _applyAtlasToNode(nd) {
   if (!nd.mat || !nd.mat.uniforms) return;
+  // Don't do anything until atlas is definitively done loading.
+  // _applyAtlasToAll() will be called once it finishes.
+  if (!_atlasReady) return;
   if (_atlasTexture) {
     var rect = _atlasRect(nd.videoId);
     if (rect) {
@@ -130,9 +133,9 @@ function _applyAtlasToNode(nd) {
       return;
     }
   }
-  // Only fall back to individual load once we know the atlas is fully ready.
-  // If atlas is still loading, _applyAtlasToAll() will come back and handle this node.
-  if (_atlasReady) _queueFallback(nd);
+  // Not in atlas — record the URL so we can bulk-download later, but don't fetch now.
+  var url = nd.parentNode && nd.parentNode.thumbFallback;
+  if (url) _missingThumbURLs[nd.videoId] = url;
 }
 
 function _applyAtlasToAll() {
@@ -141,43 +144,22 @@ function _applyAtlasToAll() {
   }
 }
 
-// ── throttled fallback thumbnails (for videos not in atlas) ──────
-// Loads thumbnailLink images one at a time (~5/sec) to avoid 429s.
-var _fbQueue = [];
-var _fbTimer = null;
+// ── missing-thumb export (run in browser console: exportMissingThumbs()) ─────
+// Collects thumbnail URLs for videos not yet in the atlas so you can run
+// download_missing_thumbs.py to bulk-download them and rebuild the atlas.
+var _missingThumbURLs = {};
 
-function _queueFallback(nd) {
-  var url = nd.parentNode && nd.parentNode.thumbFallback;
-  if (!url || nd._fbQueued) return;
-  nd._fbQueued = true;
-  _fbQueue.push(nd);
-  if (!_fbTimer) _drainFallback();
-}
-
-function _drainFallback() {
-  _fbTimer = null;
-  if (_fbQueue.length === 0) return;
-  var nd = _fbQueue.shift();
-  if (!nd.mat || !nd.mat.uniforms) { _drainFallback(); return; }
-  var url = nd.parentNode && nd.parentNode.thumbFallback;
-  if (!url) { _drainFallback(); return; }
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-    if (!nd.mat || !nd.mat.uniforms) return;
-    var tex = new THREE.Texture(img);
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.needsUpdate = true;
-    nd.mat.uniforms.map.value = tex;
-    nd.mat.uniforms.hasMap.value = 1.0;
-    nd.mat.uniforms.atlasRect.value.set(0, 0, 1, 1);
-    nd._fbTex = tex;
-  };
-  img.onerror = function() {};
-  img.src = url;
-  _fbTimer = setTimeout(_drainFallback, 200); // ~5 per second
-}
+window.exportMissingThumbs = function() {
+  var count = Object.keys(_missingThumbURLs).length;
+  if (count === 0) { console.log('No missing thumbnails — all videos are in the atlas!'); return; }
+  var json = JSON.stringify(_missingThumbURLs, null, 2);
+  var a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+  a.download = 'missing_thumbs.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  console.log('Exported ' + count + ' missing thumbnail URLs → missing_thumbs.json');
+  console.log('Now run: python3 download_missing_thumbs.py missing_thumbs.json');
+};
 
 function bubbleIn(nd) {
   if (_bubbleT0 === null) _bubbleT0 = Date.now();
