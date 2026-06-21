@@ -79,87 +79,43 @@ var FRAME_OFFSETS = [
 // ── bubble-in ────────────────────────────────────────────────────
 var _bubbleCount   = 0;
 var _bubbleT0      = null;
-// ── thumbnail atlas ───────────────────────────────────────────────
-// One image (thumbs/atlas.jpg) packs all tiny thumbs; atlas.json maps
-// videoId → pixel rect. Each frame node gets a vec4 atlasRect uniform.
+// ── throttled thumbnail loader ────────────────────────────────────
+// Loads thumbs/tiny/{videoId}.jpg for each frame node, 4 at a time,
+// one batch every 80ms so the browser stays responsive.
 
-var _atlasTexture  = null;
-var _atlasManifest = null;
-var _atlasReady    = false; // true once atlas has loaded (or definitively failed)
+var _thumbQueue   = [];
+var _thumbLoading = 0;
+var _THUMB_BATCH  = 4;
+var _thumbLoader  = new THREE.TextureLoader();
 
-function loadAtlas() {
-  fetch('thumbs/atlas.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      _atlasManifest = data;
-      var img = new Image();
-      img.onload = function() {
-        _atlasTexture = new THREE.Texture(img);
-        _atlasTexture.wrapS  = THREE.ClampToEdgeWrapping;
-        _atlasTexture.wrapT  = THREE.ClampToEdgeWrapping;
-        _atlasTexture.minFilter = THREE.LinearFilter;
-        _atlasTexture.magFilter = THREE.LinearFilter;
-        _atlasTexture.needsUpdate = true;
-        _atlasReady = true;
-        _applyAtlasToAll();
-      };
-      img.onerror = function() { _atlasReady = true; _applyAtlasToAll(); };
-      img.src = 'thumbs/atlas.jpg';
-    })
-    .catch(function() { _atlasReady = true; _applyAtlasToAll(); });
-}
-
-// Returns a THREE.Vector4 with UV (offset.xy, size.zw) for a given videoId,
-// or null if not in the manifest. Three.js texture uses flipY=true by default,
-// so v = 1 - pixelY/H (y=0 at top in pixels → v=1 in UV).
-function _atlasRect(videoId) {
-  if (!_atlasManifest || !_atlasManifest.thumbs[videoId]) return null;
-  var t = _atlasManifest.thumbs[videoId];
-  var W = _atlasManifest.size[0], H = _atlasManifest.size[1];
-  return new THREE.Vector4(t.x / W, 1 - (t.y + t.h) / H, t.w / W, t.h / H);
-}
-
-function _applyAtlasToNode(nd) {
-  if (!nd.mat || !nd.mat.uniforms) return;
-  // Don't do anything until atlas is definitively done loading.
-  // _applyAtlasToAll() will be called once it finishes.
-  if (!_atlasReady) return;
-  if (_atlasTexture) {
-    var rect = _atlasRect(nd.videoId);
-    if (rect) {
-      nd.mat.uniforms.map.value = _atlasTexture;
-      nd.mat.uniforms.hasMap.value = 1.0;
-      nd.mat.uniforms.atlasRect.value.copy(rect);
-      return;
-    }
-  }
-  // Not in atlas — record the URL so we can bulk-download later, but don't fetch now.
-  var url = nd.parentNode && nd.parentNode.thumbFallback;
-  if (url) _missingThumbURLs[nd.videoId] = url;
-}
-
-function _applyAtlasToAll() {
-  for (var i = 0; i < nodes.length; i++) {
-    if (nodes[i].type === 'frame') _applyAtlasToNode(nodes[i]);
+function _thumbTick() {
+  while (_thumbLoading < _THUMB_BATCH && _thumbQueue.length > 0) {
+    var nd = _thumbQueue.shift();
+    _thumbLoading++;
+    (function(node) {
+      _thumbLoader.load(
+        'thumbs/tiny/' + node.videoId + '.jpg',
+        function(tex) {
+          _thumbLoading--;
+          if (node.mat && node.mat.uniforms) {
+            node.mat.uniforms.map.value  = tex;
+            node.mat.uniforms.hasMap.value = 1.0;
+          }
+        },
+        undefined,
+        function() { _thumbLoading--; }
+      );
+    })(nd);
   }
 }
 
-// ── missing-thumb export (run in browser console: exportMissingThumbs()) ─────
-// Collects thumbnail URLs for videos not yet in the atlas so you can run
-// download_missing_thumbs.py to bulk-download them and rebuild the atlas.
-var _missingThumbURLs = {};
+function queueThumb(nd) {
+  _thumbQueue.push(nd);
+}
 
-window.exportMissingThumbs = function() {
-  var count = Object.keys(_missingThumbURLs).length;
-  if (count === 0) { console.log('No missing thumbnails — all videos are in the atlas!'); return; }
-  var json = JSON.stringify(_missingThumbURLs, null, 2);
-  var a = document.createElement('a');
-  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
-  a.download = 'missing_thumbs.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  console.log('Exported ' + count + ' missing thumbnail URLs → missing_thumbs.json');
-  console.log('Now run: python3 download_missing_thumbs.py missing_thumbs.json');
-};
+function startThumbLoader() {
+  setInterval(_thumbTick, 80);
+}
 
 function bubbleIn(nd) {
   if (_bubbleT0 === null) _bubbleT0 = Date.now();
@@ -198,16 +154,14 @@ var FLIPBOOK_VERT = [
 
 var FLIPBOOK_FRAG = [
   'uniform sampler2D map;',
-  'uniform float hasMap;',   // 0=no texture (show placeholder), 1=sample atlas
-  'uniform vec4 atlasRect;', // xy=UV offset, zw=UV size within the atlas
+  'uniform float hasMap;',
   'uniform float opacity;',
   'varying vec2 vUv;',
   'void main(){',
   '  if(hasMap < 0.5){',
   '    gl_FragColor = vec4(0.1, 0.1, 0.1, opacity);',
   '  } else {',
-  '    vec2 uv = atlasRect.xy + vUv * atlasRect.zw;',
-  '    gl_FragColor = vec4(texture2D(map, uv).rgb, opacity);',
+  '    gl_FragColor = vec4(texture2D(map, vUv).rgb, opacity);',
   '  }',
   '}'
 ].join('\n');
@@ -498,7 +452,7 @@ function init() {
   });
 
   initScrub();
-  loadAtlas();
+  startThumbLoader();
   loadGraph();
 }
 
@@ -853,13 +807,12 @@ function buildNodeMesh(n) {
     n.outlineLine = makeOutline(THUMB_W * 1.8, THUMB_H * 1.8);
 
 
-  } else { // frame — atlas-sampled thumbnail tile
+  } else { // frame — tiny thumbnail tile
     mat = new THREE.ShaderMaterial({
       uniforms: {
-        map:       { value: null  },
-        hasMap:    { value: 0.0  },
-        atlasRect: { value: new THREE.Vector4(0, 0, 1, 1) },
-        opacity:   { value: 0.9  }
+        map:    { value: null },
+        hasMap: { value: 0.0 },
+        opacity:{ value: 0.9 }
       },
       vertexShader:   FLIPBOOK_VERT,
       fragmentShader: FLIPBOOK_FRAG,
@@ -869,8 +822,7 @@ function buildNodeMesh(n) {
     n.mat = mat;
     n._baseOpacity = 0.9;
     n.targetScale = 1;
-    // Apply atlas immediately if it already loaded; otherwise _applyAtlasToAll() handles it
-    _applyAtlasToNode(n);
+    queueThumb(n);
   }
 
   mesh.position.set(n.x, n.y, 0);
