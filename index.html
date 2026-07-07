@@ -158,6 +158,7 @@
 
     G.shaders.load('vs-text', 'text', 'vertex');
     G.shaders.load('fs-text', 'text', 'fragment');
+    G.shaders.load('ss-text', 'text', 'simulation'); // GPGPU physics-text simulation
 
     G.shaders.shaderSetLoaded = function () {
       G.loader.onLoad();
@@ -205,8 +206,31 @@
       var vs = G.shaders.vertexShaders.text;
       var fs = G.shaders.fragmentShaders.text;
 
+      // ---- GPGPU physics-text setup (drives Link.info, à la cabbi.bo/Text) ----
+      // Body factory: builds the glyph mesh whose positions are driven by the soul sim.
+      G.text = Object.create(TextParticles.prototype);
+      G.text.font           = G.font;
+      G.text.texture        = G.font.texture;
+      G.text.vertexShader   = vs;
+      G.text.fragmentShader = fs;
+      G.text.letterWidth    = 10;
+      G.text.lineLength     = 70;
+      G.text.lineHeight     = G.text.letterWidth * 2.4;
+      G.text.width          = G.text.letterWidth * G.text.lineLength;
+      G.text.createTextParticles = function (string) {
+        // Inject the time/startTime uniforms the text vertex/fragment shaders expect.
+        return TextParticles.prototype.createTextParticles.call(this, string, {
+          uniforms: { time: G.timer, startTime: { type: "f", value: 0 } },
+          color: 0xffffff,
+          opacity: 1
+        });
+      };
 
-
+      // This page has no VR hands; PhysicsText repels from these + G.iPoint (the cursor).
+      // Park the hands far away so only the cursor (iPoint) pushes the letters around.
+      var farAway = new THREE.Vector3(1e9, 1e9, 1e9);
+      G.rHand = { hand: { position: farAway.clone() } };
+      G.lHand = { hand: { position: farAway.clone() } };
 
       G.audio.mute.gain.value = .05;
 

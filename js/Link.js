@@ -14,22 +14,22 @@ function Link( id , params ){
 
   this.mesh = G.textCreator.createMesh( this.params.name );
 
-  var vs = G.shaders.vertexShaders.text;
-  var fs = G.shaders.fragmentShaders.text;
-
-  if( this.params.info ){
-  this.info =  new TextParticles( this.params.info , G.font , vs , fs , {
-         letterWidth: 10,
-         lineLength: 70,
-        });
-  this.info.visible = false;
-  this.info.position.x = -300;
-  this.info.position.y = 200;
-
-G.scene.add( this.info );
-}else{
-  this.info = { visible : false }
-}
+  // Info shows as GPGPU physics text (see js/PhysicsText.js) — but only when the
+  // link actually has real copy, not a placeholder. Built lazily; hidden until hover.
+  this._infoActive = false;
+  this._hasInfo = false;
+  if( Link.hasRealInfo( this.params.info ) ){
+    try{
+      this.info = new PhysicsText( this.params.info );
+      this.info.deactivate(); // not in the scene until hovered
+      this._hasInfo = true;
+    }catch( e ){
+      console.warn( 'PhysicsText init failed for "' + this.params.name + '":', e );
+      this.info = Link.noopInfo();
+    }
+  }else{
+    this.info = Link.noopInfo();
+  }
 
 
 
@@ -137,7 +137,25 @@ G.scene.add( this.info );
 }
 
 
+// True only when the link has real copy worth showing (not a placeholder stub).
+Link.hasRealInfo = function( info ){
+  if( !info ) return false;
+  var s = ( '' + info ).trim();
+  if( s.length < 13 ) return false;           // drops "Made for" and similar stubs
+  if( /^i am info/i.test( s ) ) return false; // drops the "I am infoN" placeholders
+  return true;
+};
+
+// Stand-in when there's no info, so hover code can call the same methods safely.
+Link.noopInfo = function(){
+  var noop = function(){};
+  return { update:noop, activate:noop, deactivate:noop, live:noop, kill:noop, instant:noop };
+};
+
 Link.prototype.update = function(){
+
+  // Step the physics-text sim while its info panel is on screen.
+  if( this._infoActive && this.info && this.info.update ){ this.info.update(); }
 
   if( !this.params.sm ){
 
@@ -230,7 +248,6 @@ Link.prototype.hoverOver = function( recursed ){
   if( G.activeLink && G.activeLink !== this ){
     G.activeLink.mesh.material.opacity = .5;
     G.activeLink.img.material.opacity = .5;
-    if( G.activeLink.info ){ G.activeLink.info.visible = false; }
   }
   G.activeLink = this;
 
@@ -247,11 +264,34 @@ if( this.screenshots ){
 }
 
 if( this.background ){ this.background.visible = true; }
-if( this.info ){ this.info.visible = true;
-  if( this.info.material){ this.info.material.uniforms.startTime.value = G.timer.value; }
+
+// Info panel stays up until a *different* info-bearing item is hovered.
+// Hovering a blank item leaves whatever text is already showing in place.
+if( this._hasInfo ){
+  if( G.activeInfoLink && G.activeInfoLink !== this ){ G.activeInfoLink.hideInfo(); }
+  G.activeInfoLink = this;
+  this.showInfo();
 }
 
 }
+
+// Reveal the physics text: add it to the scene, seed the sim, and restart the fade-in.
+Link.prototype.showInfo = function(){
+  if( !this.info || this._infoActive ) return;
+  this._infoActive = true;
+  this.info.activate();   // adds particles to scene + sets alive
+  if( this.info.instant ){ this.info.instant(); } // snap sim to a valid state first frame
+  if( this.info.uniforms && this.info.uniforms.startTime ){
+    this.info.uniforms.startTime.value = G.timer.value;
+  }
+};
+
+// Hide the physics text and stop stepping its sim.
+Link.prototype.hideInfo = function(){
+  if( !this.info || !this._infoActive ) return;
+  this._infoActive = false;
+  this.info.deactivate();
+};
 
 Link.prototype._hoverOut = function(){
 
@@ -271,6 +311,9 @@ Link.prototype.hoverOut = function( recursed ){
   }
 
   if( this.background ){ this.background.visible = false; }
+
+  // NOTE: info stays up on hover-out — it's only swapped when another
+  // info-bearing item is hovered (see hoverOver / G.activeInfoLink).
 
 }
 
