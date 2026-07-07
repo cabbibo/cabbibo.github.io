@@ -209,7 +209,6 @@ const CATEGORIES = [
       { title: "Lil Data", thumb: "assets/lilDataLive.jpg", desc: "Live visuals.", links: [{ label: "Drive", url: "https://drive.google.com/file/d/13KdjOfMhgzRwnNW4nuJ2w_ffH7HF5IqE/view" }] },
       { title: "Fake and Gay", thumb: "assets/fakeAndGay.png", collab: "Adam Kraft", desc: "Club visuals.", links: [{ label: "Drive", url: "https://drive.google.com/drive/folders/1S1lU7QrVSglrndVI3mdjkAT9j8522a9I" }] },
       { title: "SKSKSKS", thumb: "assets/sksksksk.png", collab: "TheLimitDoesNotExist", desc: "Club visuals.", links: [{ label: "Drive", url: "https://drive.google.com/drive/folders/1U5yLcNfIpXWt0yTp5lDOzYijhVMSlhci" }] },
-      { title: "Easyfun Viz", thumb: "assets/easyfunViz.png", collab: "Easyfun / Finn Keane / PC Music", links: [{ label: "Drive", url: "https://drive.google.com/drive/folders/1fUoeUmipivlSZsn-zFqGEyNLo4tiq_ac" }] },
       { title: "Makk Mikkeal", thumb: "assets/makk.png", desc: "Visuals.", links: [{ label: "Drive", url: "https://drive.google.com/drive/folders/1C4tEsNqwbTcQhRIlQ8nYMV9WU9eqV-qH" }] },
     ],
   },
@@ -559,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // work categories
   const workRoot = document.getElementById("work-categories");
-  CATEGORIES.forEach((cat) => workRoot.appendChild(renderCategory(cat)));
+  CATEGORIES.forEach((cat) => { if (cat.name === 'My Favs') return; workRoot.appendChild(renderCategory(cat)); });
 
   // press
   const pressRoot = document.getElementById("press-list");

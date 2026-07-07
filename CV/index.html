@@ -444,7 +444,9 @@
     document.querySelector('footer').before(sec);
   }
 
-  buildOrganizer();
+  // Tagger (editing UI) only on localhost — the live site is view-only.
+  const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (IS_LOCAL) buildOrganizer();
 
   // ---- Data-type tab switching ----
   (function initTabs() {
