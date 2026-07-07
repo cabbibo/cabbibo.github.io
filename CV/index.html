@@ -12,6 +12,58 @@
   <meta property="og:type" content="website" />
 
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .dt-bar {
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+      padding: 0 0 20px; border-bottom: 1px solid #1a1a1a; margin-bottom: 28px;
+    }
+    .dt-label {
+      font: 600 9px/1 monospace; letter-spacing: .14em; text-transform: uppercase;
+      color: #444; margin-right: 8px;
+    }
+    .dt-tab {
+      padding: 5px 14px; background: transparent; border: 1px solid #252525;
+      border-radius: 3px; color: #555; font: 600 9px/1 monospace;
+      letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .dt-tab:hover { border-color: #444; color: #888; }
+    .dt-tab--active { background: #e8e8e8; color: #000; border-color: #e8e8e8; }
+    .dt-view { display: none; }
+    .dt-view--active { display: block; }
+
+    /* Hits view */
+    .hits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; padding: 0; }
+    .hits-card { background: #111; border: 1px solid #1e1e1e; border-radius: 4px; overflow: hidden; }
+    .hits-card img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #1a1a1a; }
+    .hits-card-body { padding: 12px 14px 14px; }
+    .hits-card-title { font: 600 13px/1.3 -apple-system,sans-serif; color: #ccc; margin: 0 0 4px; }
+    .hits-card-meta { font: 10px/1 monospace; color: #444; margin: 0 0 8px; letter-spacing: .06em; }
+    .hits-card-desc { font: 11px/1.55 -apple-system,sans-serif; color: #666; margin: 0 0 10px; }
+    .hits-card-link { display: inline-block; padding: 4px 10px; border: 1px solid #333; border-radius: 2px;
+      font: 600 8px/1 monospace; letter-spacing: .1em; text-transform: uppercase; color: #888;
+      text-decoration: none; transition: background .15s, color .15s; }
+    .hits-card-link:hover { background: #fff; color: #000; border-color: #fff; }
+
+    /* Tag view */
+    .tagview-filters { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 20px; }
+    .tagview-pill {
+      padding: 3px 10px; border-radius: 999px; font: 600 9px/1 monospace;
+      letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+      border: 1px solid transparent; transition: opacity .15s, transform .1s;
+      opacity: .5;
+    }
+    .tagview-pill--active { opacity: 1; transform: scale(1.06); }
+    .tagview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .tagview-card { background: #111; border: 1px solid #1e1e1e; border-radius: 4px; overflow: hidden; }
+    .tagview-card img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #1a1a1a; }
+    .tagview-card-body { padding: 8px 10px 10px; }
+    .tagview-card-title { font: 600 11px/1.3 -apple-system,sans-serif; color: #bbb; margin: 0 0 5px; }
+    .tagview-card-tags { display: flex; gap: 3px; flex-wrap: wrap; }
+    .tagview-card-tag { padding: 1px 5px; border-radius: 999px; font: 600 8px/1 monospace; letter-spacing: .05em; text-transform: uppercase; color: #000; }
+    .tagview-card a { text-decoration: none; color: inherit; }
+    .tagview-card a:hover .tagview-card-title { color: #fff; }
+  </style>
 </head>
 <body>
   <!-- ============================================================
@@ -80,10 +132,22 @@
          WORK — sections rendered from data in script.js
          ============================================================ -->
     <section id="work" class="section section--work">
-      <h2 class="section-title">Work</h2>
-      <div id="work-categories" class="work-categories">
-        <!-- populated by script.js -->
+      <div class="dt-bar">
+        <span class="dt-label">Data Type</span>
+        <button class="dt-tab dt-tab--active" data-view="list">List</button>
+        <button class="dt-tab" data-view="hits">Greatest Hits</button>
+        <button class="dt-tab" data-view="tags">Tag View</button>
+        <button class="dt-tab" data-view="graph">Force Directed Graph</button>
       </div>
+      <div id="view-list" class="dt-view dt-view--active">
+        <h2 class="section-title">Work</h2>
+        <div id="work-categories" class="work-categories">
+          <!-- populated by script.js -->
+        </div>
+      </div>
+      <div id="view-hits" class="dt-view"></div>
+      <div id="view-tags" class="dt-view"></div>
+      <div id="view-graph" class="dt-view"></div>
     </section>
 
     <!-- ============================================================
@@ -115,11 +179,18 @@
   </footer>
 
   <script src="script.js"></script>
+  <script src="organizer-data.js"></script>
 
   <script>
   // ---- shared helpers (all pages) ----
   const ORG_KEY = 'cv-organizer-v3';
-  function loadOrg() { try { return JSON.parse(localStorage.getItem(ORG_KEY) || '{}'); } catch { return {}; } }
+  function loadOrg() {
+    try {
+      const local = JSON.parse(localStorage.getItem(ORG_KEY) || 'null');
+      if (!local) return window.ORG_DATA || {};
+      return Object.assign({}, window.ORG_DATA || {}, local);
+    } catch { return window.ORG_DATA || {}; }
+  }
   function saveOrg(map) { localStorage.setItem(ORG_KEY, JSON.stringify(map)); }
   function getItem(map, title) { return map[title] || { tags: [], stars: 0 }; }
 
@@ -375,6 +446,193 @@
 
   buildOrganizer();
 
+  // ---- Data-type tab switching ----
+  (function initTabs() {
+    // Helper: get/derive thumb URL
+    function getThumb(item) {
+      if (item.thumb) return item.thumb;
+      const link = item.links && item.links[0];
+      if (!link) return null;
+      const url = link.url;
+      const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      if (yt) return `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
+      const steam = url.match(/store\.steampowered\.com\/app\/(\d+)/);
+      if (steam) return `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${steam[1]}/header.jpg`;
+      const gh = url.match(/github\.com\/([^/]+)\/([^/?#]+)/);
+      if (gh) return `https://opengraph.githubassets.com/1/${gh[1]}/${gh[2]}`;
+      const vimeo = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeo) return `https://vumbnail.com/${vimeo[1]}.jpg`;
+      return null;
+    }
+
+    function buildHitsView() {
+      const viewEl = document.getElementById('view-hits');
+      if (viewEl.children.length) return;
+      const map = loadOrg();
+      const seen = new Set();
+      const items = [];
+      (CATEGORIES || []).forEach(cat => {
+        if (cat.name === 'My Favs') return;
+        cat.items.forEach(item => {
+          if (seen.has(item.title)) return;
+          seen.add(item.title);
+          const d = getItem(map, item.title);
+          if (d.stars >= 4) items.push({ ...item, stars: d.stars });
+        });
+      });
+      items.sort((a, b) => b.stars - a.stars);
+
+      const h = document.createElement('h2');
+      h.className = 'section-title';
+      h.textContent = 'Greatest Hits';
+      viewEl.appendChild(h);
+
+      if (!items.length) {
+        const msg = document.createElement('p');
+        msg.style.cssText = 'font:11px/1.6 monospace;color:#444;padding:20px 0';
+        msg.textContent = 'No 4-5 star items yet — star items in the tagger below.';
+        viewEl.appendChild(msg);
+        return;
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'hits-grid';
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'hits-card';
+        const thumb = getThumb(item);
+        if (thumb) {
+          const img = document.createElement('img');
+          img.src = thumb; img.alt = item.title; img.loading = 'lazy';
+          card.appendChild(img);
+        }
+        const body = document.createElement('div');
+        body.className = 'hits-card-body';
+        const title = document.createElement('p'); title.className = 'hits-card-title'; title.textContent = item.title;
+        body.appendChild(title);
+        const meta = [item.collab, item.year].filter(Boolean).join(' · ');
+        if (meta) { const m = document.createElement('p'); m.className = 'hits-card-meta'; m.textContent = meta; body.appendChild(m); }
+        if (item.desc) { const d = document.createElement('p'); d.className = 'hits-card-desc'; d.textContent = item.desc; body.appendChild(d); }
+        if (item.links && item.links[0]) {
+          const a = document.createElement('a');
+          a.className = 'hits-card-link'; a.href = item.links[0].url; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = item.links[0].label || 'View';
+          body.appendChild(a);
+        }
+        card.appendChild(body);
+        grid.appendChild(card);
+      });
+      viewEl.appendChild(grid);
+    }
+
+    function buildTagView() {
+      const viewEl = document.getElementById('view-tags');
+      if (viewEl.children.length) return;
+      const map = loadOrg();
+      const seen = new Set();
+      const allItems = [];
+      (CATEGORIES || []).forEach(cat => {
+        if (cat.name === 'My Favs') return;
+        cat.items.forEach(item => {
+          if (seen.has(item.title)) return;
+          seen.add(item.title);
+          const d = getItem(map, item.title);
+          if (!d.tags.length && !d.stars) return;
+          allItems.push({ ...item, tags: d.tags, stars: d.stars || 0 });
+        });
+      });
+
+      const h = document.createElement('h2');
+      h.className = 'section-title'; h.textContent = 'Tag View';
+      viewEl.appendChild(h);
+
+      if (!allItems.length) {
+        const msg = document.createElement('p');
+        msg.style.cssText = 'font:11px/1.6 monospace;color:#444;padding:20px 0';
+        msg.textContent = 'Tag items in the organizer below to see them here.';
+        viewEl.appendChild(msg);
+        return;
+      }
+
+      const usedTags = TAGS.filter(t => allItems.some(i => i.tags.includes(t)));
+      const activeTags = new Set();
+
+      const filterBar = document.createElement('div');
+      filterBar.className = 'tagview-filters';
+
+      const grid = document.createElement('div');
+      grid.className = 'tagview-grid';
+
+      function renderGrid() {
+        grid.innerHTML = '';
+        const filtered = activeTags.size
+          ? allItems.filter(i => i.tags.some(t => activeTags.has(t)))
+          : allItems;
+        filtered.forEach(item => {
+          const wrap = item.links && item.links[0] ? document.createElement('a') : document.createElement('div');
+          wrap.className = 'tagview-card';
+          if (item.links && item.links[0]) { wrap.href = item.links[0].url; wrap.target = '_blank'; wrap.rel = 'noopener'; }
+          const thumb = getThumb(item);
+          if (thumb) {
+            const img = document.createElement('img');
+            img.src = thumb; img.alt = item.title; img.loading = 'lazy';
+            wrap.appendChild(img);
+          }
+          const body = document.createElement('div'); body.className = 'tagview-card-body';
+          const title = document.createElement('p'); title.className = 'tagview-card-title'; title.textContent = item.title;
+          body.appendChild(title);
+          if (item.tags.length) {
+            const tagRow = document.createElement('div'); tagRow.className = 'tagview-card-tags';
+            item.tags.forEach(t => {
+              const chip = document.createElement('span'); chip.className = 'tagview-card-tag';
+              chip.textContent = t; chip.style.background = TAG_ACTIVE[t] || '#555';
+              tagRow.appendChild(chip);
+            });
+            body.appendChild(tagRow);
+          }
+          wrap.appendChild(body);
+          grid.appendChild(wrap);
+        });
+      }
+
+      usedTags.forEach(tag => {
+        const pill = document.createElement('button');
+        pill.className = 'tagview-pill';
+        pill.textContent = tag;
+        pill.style.background = TAG_ACTIVE[tag] || '#555'; pill.style.color = '#000';
+        pill.addEventListener('click', () => {
+          if (activeTags.has(tag)) { activeTags.delete(tag); pill.classList.remove('tagview-pill--active'); }
+          else { activeTags.add(tag); pill.classList.add('tagview-pill--active'); }
+          renderGrid();
+        });
+        filterBar.appendChild(pill);
+      });
+
+      viewEl.appendChild(filterBar);
+      renderGrid();
+      viewEl.appendChild(grid);
+    }
+
+    let graphBuilt = false;
+    function ensureGraph() {
+      if (graphBuilt) return;
+      graphBuilt = true;
+      buildTagGraph();
+    }
+
+    document.querySelectorAll('.dt-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.dt-tab').forEach(b => b.classList.remove('dt-tab--active'));
+        document.querySelectorAll('.dt-view').forEach(v => v.classList.remove('dt-view--active'));
+        btn.classList.add('dt-tab--active');
+        document.getElementById('view-' + btn.dataset.view).classList.add('dt-view--active');
+        if (btn.dataset.view === 'hits')  buildHitsView();
+        if (btn.dataset.view === 'tags')  buildTagView();
+        if (btn.dataset.view === 'graph') ensureGraph();
+      });
+    });
+  })();
+
   // ---- Tag connection graph ----
   function buildTagGraph() {
     const map = loadOrg();
@@ -408,7 +666,7 @@
       msg.textContent = 'Tag items in the organizer above to see connections.';
       msg.style.cssText = 'font:11px/1.5 monospace;color:#444;margin:0';
       sec.appendChild(msg);
-      document.querySelector('footer').before(sec);
+      document.getElementById('view-graph').appendChild(sec);
       return;
     }
 
@@ -431,7 +689,69 @@
     canvas.style.cssText = 'display:block;width:100%;height:100%';
     wrap.appendChild(canvas);
     sec.appendChild(wrap);
-    document.querySelector('footer').before(sec);
+
+    // Detail panel — shown below canvas on click
+    const detailPanel = document.createElement('div');
+    detailPanel.style.cssText = 'min-height:48px;padding:0;margin-top:12px;font:11px/1.6 monospace;color:#666;transition:opacity .2s';
+    detailPanel.innerHTML = '<span style="color:#333">click a node to see details</span>';
+    sec.appendChild(detailPanel);
+
+    function showDetail(n) {
+      const item = nodeData.find(d => d.title === n.title);
+      const parts = [];
+      if (item && item.links && item.links[0]) {
+        const link = item.links[0];
+        parts.push(`<a href="${link.url}" target="_blank" rel="noopener" style="color:#aaa;text-decoration:underline;text-underline-offset:2px">${n.title}</a>`);
+      } else {
+        parts.push(`<span style="color:#aaa">${n.title}</span>`);
+      }
+      const meta = [];
+      if (item && item.collab) meta.push(item.collab);
+      if (item && item.year)   meta.push(item.year);
+      if (meta.length) parts.push(`<span style="color:#555"> · ${meta.join(' · ')}</span>`);
+      if (item && item.desc)   parts.push(`<br><span style="color:#555">${item.desc}</span>`);
+      if (n.tags.length) {
+        const chips = n.tags.map(t => `<span style="padding:1px 6px;border-radius:999px;background:${TAG_ACTIVE[t]};color:#000;font-size:8px;letter-spacing:.06em;text-transform:uppercase">${t}</span>`).join(' ');
+        parts.push(`<br><span style="display:inline-flex;gap:4px;flex-wrap:wrap;margin-top:4px">${chips}</span>`);
+      }
+      detailPanel.innerHTML = parts.join('');
+    }
+
+    // Physics sliders — values persist in localStorage
+    const PARAMS_KEY = 'cv-graph-params';
+    const savedParams = (() => { try { return JSON.parse(localStorage.getItem(PARAMS_KEY) || '{}'); } catch { return {}; } })();
+    const params = Object.assign({ K_REP: 1000, K_SEC: 6, K_TAG: 0.00001, DAMP: 0.65, GRAV: 0.0008 }, savedParams);
+    const sliderDefs = [
+      { key: 'K_REP', label: 'repulsion', min: 0,    max: 20000,  step: 100,     fmt: v => Math.round(v) },
+      { key: 'K_SEC', label: 'per group', min: 0,    max: 100,    step: 1,       fmt: v => v.toFixed(1) },
+      { key: 'K_TAG', label: 'per tag',   min: 0,    max: 0.01,   step: 0.0001,  fmt: v => v.toFixed(4) },
+      { key: 'DAMP',  label: 'damping',   min: 0,    max: 0.99,   step: 0.01,    fmt: v => v.toFixed(2) },
+      { key: 'GRAV',  label: 'gravity',   min: 0,    max: 0.05,   step: 0.001,   fmt: v => v.toFixed(3) },
+    ];
+    const sliderPanel = document.createElement('div');
+    sliderPanel.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 20px;margin-top:16px';
+    sliderDefs.forEach(def => {
+      const row = document.createElement('div');
+      const labelEl = document.createElement('div');
+      labelEl.style.cssText = 'display:flex;justify-content:space-between;font:10px/1 monospace;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em';
+      const nameEl = document.createElement('span'); nameEl.textContent = def.label;
+      const valEl  = document.createElement('span'); valEl.style.color = '#888'; valEl.textContent = def.fmt(params[def.key]);
+      labelEl.appendChild(nameEl); labelEl.appendChild(valEl);
+      const input = document.createElement('input');
+      input.type = 'range'; input.min = def.min; input.max = def.max; input.step = def.step; input.value = params[def.key];
+      input.style.cssText = 'width:100%;accent-color:#555;cursor:pointer';
+      input.addEventListener('input', () => {
+        params[def.key] = parseFloat(input.value);
+        valEl.textContent = def.fmt(params[def.key]);
+        try { localStorage.setItem(PARAMS_KEY, JSON.stringify(params)); } catch {}
+        alpha = 1;
+      });
+      row.appendChild(labelEl); row.appendChild(input);
+      sliderPanel.appendChild(row);
+    });
+    sec.appendChild(sliderPanel);
+
+    document.getElementById('view-graph').appendChild(sec);
 
     const ctx = canvas.getContext('2d');
     const H = 480;
@@ -446,35 +766,40 @@
     resize();
     window.addEventListener('resize', resize);
 
-    // Build nodes
-    const nodes = nodeData.map(d => ({
+    // Build nodes — each item floats freely, rendered as a circle with tag dots on the rim
+    const w0 = Math.max(getW(), 300);
+    const cols = Math.ceil(Math.sqrt(nodeData.length * (w0 / H)));
+    const cellW = w0 / cols;
+    const rows = Math.ceil(nodeData.length / cols);
+    const cellH = H / rows;
+    const nodes = nodeData.map((d, i) => ({
       title: d.title, tags: d.tags, stars: d.stars, links: d.links, cat: d.cat,
-      x: getW() * 0.1 + Math.random() * getW() * 0.8,
-      y: H * 0.1 + Math.random() * H * 0.8,
+      x: (i % cols + 0.5 + (Math.random() - 0.5) * 0.4) * cellW,
+      y: (Math.floor(i / cols) + 0.5 + (Math.random() - 0.5) * 0.4) * cellH,
       vx: 0, vy: 0,
-      r: 3 + d.stars * 2.2,
+      r: 4 + d.stars,
     }));
 
-    // Build edges — shared tags + same section
-    const edgeMap = new Map();
+    // Shared-tag edges (attract only, physics)
+    const tagEdges = [];
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
-        const shared = nodes[i].tags.filter(t => nodes[j].tags.includes(t));
-        const sameSection = nodes[i].cat && nodes[i].cat === nodes[j].cat;
-        if (shared.length || sameSection) {
-          edgeMap.set(`${i},${j}`, {
-            i, j,
-            count: shared.length + (sameSection ? 0.4 : 0),
-            tag: shared[0] || null,
-            sameSection,
-          });
-        }
+        const a = nodes[i], b = nodes[j];
+        const shared = a.tags.filter(t => b.tags.includes(t)).length;
+        if (shared) tagEdges.push([i, j, shared]);
       }
     }
-    const edges = [...edgeMap.values()];
 
-    // Mouse / touch tracking + drag
-    let mouse = null, hovIdx = -1, dragIdx = -1, dragMoved = false;
+    // Section groups for centroid-based attraction + edge drawing
+    const secGroups = new Map();
+    nodes.forEach((n, i) => {
+      if (!n.cat) return;
+      if (!secGroups.has(n.cat)) secGroups.set(n.cat, []);
+      secGroups.get(n.cat).push(i);
+    });
+
+    // Interaction state
+    let mouse = null, hovNode = null, dragIdx = -1, dragMoved = false, alpha = 1;
 
     function evPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -484,7 +809,7 @@
     function hitNode(mx, my) {
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i], dx = n.x - mx, dy = n.y - my;
-        if (dx*dx + dy*dy < (n.r + 10) * (n.r + 10)) return i;
+        if (dx*dx + dy*dy < (n.r + 8) * (n.r + 8)) return i;
       }
       return -1;
     }
@@ -498,23 +823,24 @@
       const { x: mx, y: my } = evPos(e);
       mouse = { x: mx, y: my };
       if (dragIdx >= 0) {
-        nodes[dragIdx].x = mx; nodes[dragIdx].y = my;
-        nodes[dragIdx].vx = 0;  nodes[dragIdx].vy = 0;
+        const n = nodes[dragIdx], w = getW();
+        n.x = Math.max(n.r + 4, Math.min(w - n.r - 4, mx));
+        n.y = Math.max(n.r + 4, Math.min(H - n.r - 4, my));
+        n.vx = 0; n.vy = 0;
         dragMoved = true;
         canvas.style.cursor = 'grabbing';
         return;
       }
-      hovIdx = hitNode(mx, my);
-      canvas.style.cursor = hovIdx >= 0 ? 'grab' : 'default';
+      const idx = hitNode(mx, my);
+      hovNode = idx >= 0 ? nodes[idx] : null;
+      canvas.style.cursor = hovNode ? 'grab' : 'default';
     });
     canvas.addEventListener('mouseup', () => {
-      if (dragIdx >= 0 && !dragMoved && nodes[dragIdx].links && nodes[dragIdx].links[0])
-        window.open(nodes[dragIdx].links[0].url, '_blank', 'noopener');
-      dragIdx = -1;
+      if (dragIdx >= 0 && !dragMoved) showDetail(nodes[dragIdx]);
+      dragIdx = -1; alpha = 1;
     });
-    canvas.addEventListener('mouseleave', () => { mouse = null; if (dragIdx < 0) hovIdx = -1; });
+    canvas.addEventListener('mouseleave', () => { mouse = null; if (dragIdx < 0) hovNode = null; });
 
-    // Touch drag
     canvas.addEventListener('touchstart', e => {
       const { x: mx, y: my } = evPos(e);
       const idx = hitNode(mx, my);
@@ -524,121 +850,149 @@
       if (dragIdx < 0) return;
       e.preventDefault();
       const { x: mx, y: my } = evPos(e);
-      mouse = { x: mx, y: my };
-      nodes[dragIdx].x = mx; nodes[dragIdx].y = my;
-      nodes[dragIdx].vx = 0;  nodes[dragIdx].vy = 0;
+      const n = nodes[dragIdx], w = getW();
+      n.x = Math.max(n.r + 4, Math.min(w - n.r - 4, mx));
+      n.y = Math.max(n.r + 4, Math.min(H - n.r - 4, my));
+      n.vx = 0; n.vy = 0;
       dragMoved = true;
     }, { passive: false });
     canvas.addEventListener('touchend', () => { dragIdx = -1; });
 
-    // Physics step
+    // Physics — individual node forces
     function step() {
+      alpha = dragIdx >= 0 ? Math.min(alpha * 1.08, 3.0) : Math.max(0.001, alpha * 0.98);
       const w = getW(), cx = w / 2, cy = H / 2;
-      const K_REP = 700, K_ATT = 0.0008, REST = 110, DAMP = 0.65, GRAV = 0.0008;
+      const { K_REP, K_SEC, K_TAG, DAMP, GRAV } = params;
+      const REST_SEC = 80, REST_TAG = 120;
 
-      // Reset per-frame accumulators
       nodes.forEach(n => { n.fx = 0; n.fy = 0; });
 
-      // Repulsion — all pairs (clamped min distance to avoid explosion)
+      // Repulsion — all pairs, min distance = sum of radii so nodes never overlap
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
-          const d2 = Math.max(dx*dx + dy*dy, 900), d = Math.sqrt(d2);
+          const minD = a.r + b.r + 8;
+          const d2 = Math.max(dx*dx + dy*dy, minD * minD * 0.25), d = Math.sqrt(d2);
           const f = K_REP / d2, fx = (dx/d)*f, fy = (dy/d)*f;
-          a.fx -= fx; a.fy -= fy;
-          b.fx += fx; b.fy += fy;
+          a.fx -= fx; a.fy -= fy; b.fx += fx; b.fy += fy;
         }
       }
 
-      // Attraction — shared-tag edges (stronger for more overlap)
-      edges.forEach(e => {
-        const a = nodes[e.i], b = nodes[e.j];
+      // Same-section attraction — each node pulled toward its section centroid
+      secGroups.forEach(indices => {
+        let cx2 = 0, cy2 = 0;
+        indices.forEach(i => { cx2 += nodes[i].x; cy2 += nodes[i].y; });
+        cx2 /= indices.length; cy2 /= indices.length;
+        indices.forEach(i => {
+          const n = nodes[i];
+          const dx = cx2 - n.x, dy = cy2 - n.y;
+          const d = Math.sqrt(dx*dx + dy*dy) || 1;
+          if (d > REST_SEC) {
+            const f = K_SEC * (d - REST_SEC);
+            n.fx += (dx/d)*f; n.fy += (dy/d)*f;
+          }
+        });
+      });
+
+      // Shared-tag attraction
+      tagEdges.forEach(([i, j, shared]) => {
+        const a = nodes[i], b = nodes[j];
         const dx = b.x - a.x, dy = b.y - a.y;
         const d = Math.sqrt(dx*dx + dy*dy) || 1;
-        if (d > REST) {
-          const f = K_ATT * e.count * (d - REST);
-          const fx = (dx/d)*f, fy = (dy/d)*f;
-          a.fx += fx; a.fy += fy;
-          b.fx -= fx; b.fy -= fy;
+        if (d > REST_TAG) {
+          const f = K_TAG * shared * (d - REST_TAG), fx = (dx/d)*f, fy = (dy/d)*f;
+          a.fx += fx; a.fy += fy; b.fx -= fx; b.fy -= fy;
         }
       });
 
-      // Soft center gravity
+      // Center gravity + wall repulsion + mouse repulsion
       nodes.forEach(n => {
         n.fx += (cx - n.x) * GRAV;
         n.fy += (cy - n.y) * GRAV;
+        const pad = n.r + 20, WK = 0.5;
+        if (n.x < pad)     n.fx += (pad - n.x) * WK;
+        if (n.x > w - pad) n.fx -= (n.x - (w - pad)) * WK;
+        if (n.y < pad)     n.fy += (pad - n.y) * WK;
+        if (n.y > H - pad) n.fy -= (n.y - (H - pad)) * WK;
       });
-
-      // Mouse repulsion (cursor pushes nodes away)
       if (mouse) nodes.forEach(n => {
         const dx = n.x - mouse.x, dy = n.y - mouse.y;
         const d2 = Math.max(dx*dx + dy*dy, 900), d = Math.sqrt(d2);
-        if (d < 120) { const f = 400 / d2; n.fx += (dx/d)*f; n.fy += (dy/d)*f; }
+        if (d < 130) { const f = 400 / d2; n.fx += (dx/d)*f; n.fy += (dy/d)*f; }
       });
 
-      // Integrate — apply forces, damp, clamp velocity, update position
       const MAX_V = 4;
       nodes.forEach((n, i) => {
-        if (i === dragIdx) return; // held node stays put
-        n.vx = (n.vx + n.fx) * DAMP;
-        n.vy = (n.vy + n.fy) * DAMP;
+        if (i === dragIdx) return;
+        n.vx = (n.vx + n.fx * alpha) * DAMP; n.vy = (n.vy + n.fy * alpha) * DAMP;
         n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
         n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
         n.x += n.vx; n.y += n.vy;
-        n.x = Math.max(n.r + 4, Math.min(w - n.r - 4, n.x));
-        n.y = Math.max(n.r + 4, Math.min(H - n.r - 4, n.y));
+        const w2 = getW();
+        n.x = Math.max(n.r + 4, Math.min(w2 - n.r - 4, n.x));
+        n.y = Math.max(n.r + 4, Math.min(H  - n.r - 4, n.y));
       });
+
+      // Hard sphere-collision correction — resolve overlaps by pushing positions apart
+      const GAP = 4;
+      for (let iter = 0; iter < 3; iter++) {
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i], b = nodes[j];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const minD = a.r + b.r + GAP;
+            const d2 = dx*dx + dy*dy;
+            if (d2 < minD * minD && d2 > 0) {
+              const d = Math.sqrt(d2);
+              const push = (minD - d) * 0.5;
+              const nx = dx / d, ny = dy / d;
+              if (i !== dragIdx) { a.x -= nx * push; a.y -= ny * push; }
+              if (j !== dragIdx) { b.x += nx * push; b.y += ny * push; }
+            }
+          }
+        }
+      }
     }
 
-    // Render frame
     function draw() {
       const w = getW();
       ctx.clearRect(0, 0, w, H);
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, w, H);
+      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, w, H);
 
-      // Edges
-      edges.forEach(e => {
-        const a = nodes[e.i], b = nodes[e.j];
-        const col = e.tag ? (TAG_ACTIVE[e.tag] || '#fff') : '#444';
-        const alpha = e.tag ? Math.min(0.08 + e.count * 0.08, 0.5) : 0.12;
-        ctx.strokeStyle = col + Math.round(alpha * 255).toString(16).padStart(2, '0');
-        ctx.lineWidth = e.tag ? (0.4 + e.count * 0.35) : 0.5;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      // Section edges — draw from each node to its section centroid
+      ctx.strokeStyle = '#222'; ctx.lineWidth = 0.5;
+      secGroups.forEach(indices => {
+        if (indices.length < 2) return;
+        let cx2 = 0, cy2 = 0;
+        indices.forEach(i => { cx2 += nodes[i].x; cy2 += nodes[i].y; });
+        cx2 /= indices.length; cy2 /= indices.length;
+        indices.forEach(i => {
+          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(cx2, cy2); ctx.stroke();
+        });
       });
 
-      // Nodes
-      nodes.forEach((n, i) => {
+      // Nodes — single colored dot
+      nodes.forEach(n => {
         const col = n.tags.length ? (TAG_ACTIVE[n.tags[0]] || '#888') : '#555';
-        const hov = i === hovIdx;
+        const hov = n === hovNode;
 
-        // Glow
         if (hov || n.stars >= 4) {
-          const gr = n.r * (hov ? 4.5 : 2.8);
+          const gr = n.r * (hov ? 4 : 2.5);
           const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, gr);
-          grd.addColorStop(0, col + (hov ? '77' : '33'));
-          grd.addColorStop(1, 'transparent');
+          grd.addColorStop(0, col + (hov ? '66' : '28')); grd.addColorStop(1, 'transparent');
           ctx.fillStyle = grd;
           ctx.beginPath(); ctx.arc(n.x, n.y, gr, 0, Math.PI*2); ctx.fill();
         }
 
-        // Dot
         ctx.fillStyle = hov ? '#fff' : col;
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
 
-        // Label — always for hovered, for 4+ stars otherwise
-        const label = n.title.length > 24 ? n.title.slice(0, 22) + '…' : n.title;
         if (hov) {
-          ctx.font = 'bold 10px monospace';
-          ctx.fillStyle = '#fff';
-          ctx.textAlign = 'center';
+          const label = n.title.length > 26 ? n.title.slice(0, 24) + '…' : n.title;
+          ctx.font = 'bold 10px monospace'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
           ctx.fillText(label, n.x, n.y - n.r - 6);
-        } else if (n.stars >= 4) {
-          ctx.font = '8px monospace';
-          ctx.fillStyle = '#888';
-          ctx.textAlign = 'center';
-          ctx.fillText(label, n.x, n.y + n.r + 10);
         }
       });
     }
@@ -656,7 +1010,6 @@
     }, { threshold: 0.05 });
     obs.observe(canvas);
   }
-  buildTagGraph();
   </script>
 
   <script>
@@ -703,6 +1056,30 @@
     zone.setAttribute('tabindex', '0');
     zone.addEventListener('paste', onPaste);
     zone.addEventListener('keydown', (e) => { if (e.key === 'v' && (e.metaKey || e.ctrlKey)) onPaste(e); });
+
+    // save tags to file
+    const saveOrgBtn = document.createElement('button');
+    saveOrgBtn.textContent = 'save tags to file';
+    saveOrgBtn.style.cssText = 'position:fixed;bottom:48px;left:16px;padding:8px 14px;border-radius:6px;font:12px/1 monospace;z-index:9999;background:#111;color:#44ddff;border:1px solid #44ddff44;cursor:pointer';
+    saveOrgBtn.addEventListener('click', async () => {
+      const data = loadOrg();
+      try {
+        const res = await fetch('/save-org', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const json = await res.json();
+        if (json.ok) {
+          // Write back so file and localStorage are in sync
+          saveOrg(data);
+          saveOrgBtn.textContent = `✓ saved (${Object.keys(data).length} items)`;
+          saveOrgBtn.style.color = '#00ff99';
+          setTimeout(() => { saveOrgBtn.textContent = 'save tags to file'; saveOrgBtn.style.color = '#44ddff'; }, 3000);
+        }
+      } catch (err) {
+        saveOrgBtn.textContent = '✗ ' + err.message;
+        saveOrgBtn.style.color = '#ff4444';
+        setTimeout(() => { saveOrgBtn.textContent = 'save tags to file'; saveOrgBtn.style.color = '#44ddff'; }, 3000);
+      }
+    });
+    document.body.appendChild(saveOrgBtn);
 
     // edit / view toggle
     let editing = true;
