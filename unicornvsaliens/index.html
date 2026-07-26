@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Unicorns vs Aliens</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --space: #0a0d26;
+    --space-deep: #060818;
+    --uni-pink: #ff6fb5;
+    --uni-gold: #ffd166;
+    --uni-lav: #c9a7ff;
+    --alien-green: #8aff5b;
+    --alien-cyan: #4de3ff;
+    --ink: #f2f0ff;
+    --ink-dim: #9a96c0;
+    --display: 'Arial Black', 'Arial Bold', Impact, 'Helvetica Neue', sans-serif;
+    --body: 'Avenir Next', Avenir, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--space);
+    color: var(--ink);
+    font-family: var(--body);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .screen {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Title ---------- */
+
+  header {
+    text-align: center;
+    padding: clamp(16px, 3vh, 36px) 16px 0;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin: 0 0 6px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(28px, 6vw, 64px);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    text-transform: uppercase;
+  }
+  h1 .uni { color: var(--uni-pink); text-shadow: 0 0 24px rgba(255, 111, 181, 0.55); }
+  h1 .vs-word { color: var(--ink-dim); font-size: 0.55em; vertical-align: middle; padding: 0 0.15em; }
+  h1 .ali { color: var(--alien-green); text-shadow: 0 0 24px rgba(138, 255, 91, 0.45); }
+
+  .prompt {
+    margin: 10px 0 0;
+    color: var(--ink-dim);
+    font-size: clamp(14px, 1.8vw, 17px);
+  }
+  .prompt kbd {
+    font-family: inherit;
+    border: 1px solid rgba(154, 150, 192, 0.5);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-size: 0.85em;
+  }
+
+  /* ---------- Split select ---------- */
+
+  .arena {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    padding: clamp(12px, 3vh, 32px) clamp(12px, 3vw, 40px) clamp(16px, 4vh, 40px);
+    gap: 0;
+    position: relative;
+  }
+
+  .side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 2vh, 18px);
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: flex-grow 0.35s ease, background 0.25s ease, border-color 0.25s ease;
+    padding: 20px;
+    font: inherit;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .side:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: -6px;
+  }
+
+  .side--unicorn {
+    clip-path: polygon(0 0, 100% 0, calc(100% - clamp(24px, 6vw, 90px)) 100%, 0 100%);
+    margin-right: calc(clamp(24px, 6vw, 90px) * -0.5);
+  }
+  .side--alien {
+    clip-path: polygon(clamp(24px, 6vw, 90px) 0, 100% 0, 100% 100%, 0 100%);
+    margin-left: calc(clamp(24px, 6vw, 90px) * -0.5);
+  }
+
+  .side--unicorn:hover, .side--unicorn.is-hot {
+    background: rgba(255, 111, 181, 0.08);
+    flex-grow: 1.18;
+  }
+  .side--alien:hover, .side--alien.is-hot {
+    background: rgba(138, 255, 91, 0.07);
+    flex-grow: 1.18;
+  }
+
+  .fighter {
+    font-size: clamp(72px, 16vh, 150px);
+    line-height: 1;
+    transition: transform 0.25s ease;
+  }
+  .side--unicorn .fighter { filter: drop-shadow(0 0 28px rgba(255, 111, 181, 0.7)); }
+  .side--alien .fighter { filter: drop-shadow(0 0 28px rgba(138, 255, 91, 0.6)); transform: scaleX(-1); }
+  .side--unicorn:hover .fighter, .side--unicorn.is-hot .fighter { transform: scale(1.12) rotate(-4deg); }
+  .side--alien:hover .fighter, .side--alien.is-hot .fighter { transform: scaleX(-1) scale(1.12) rotate(-4deg); }
+
+  .side-name {
+    font-family: var(--display);
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: clamp(20px, 3.4vw, 40px);
+    letter-spacing: 0.02em;
+  }
+  .side--unicorn .side-name { color: var(--uni-pink); }
+  .side--alien .side-name { color: var(--alien-green); }
+
+  .side-tag {
+    color: var(--ink-dim);
+    font-size: clamp(13px, 1.6vw, 16px);
+    max-width: 34ch;
+    text-align: center;
+    margin: 0;
+  }
+
+  .side-stats {
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .side-stats b { display: block; font-size: 16px; letter-spacing: 0; text-align: center; }
+  .side--unicorn .side-stats b { color: var(--uni-gold); }
+  .side--alien .side-stats b { color: var(--alien-cyan); }
+
+  .vs-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-6deg);
+    z-index: 2;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(28px, 5vw, 56px);
+    background: var(--space-deep);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    width: clamp(68px, 11vw, 120px);
+    height: clamp(68px, 11vw, 120px);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 0 6px rgba(6, 8, 24, 0.8), 0 0 40px rgba(242, 240, 255, 0.25);
+    pointer-events: none;
+  }
+
+  /* ---------- Chosen state ---------- */
+
+  .chosen {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(6, 8, 24, 0.88);
+    backdrop-filter: blur(6px);
+  }
+  .chosen.is-open { display: flex; }
+
+  .chosen .fighter { font-size: clamp(100px, 24vh, 200px); }
+  .chosen.team-unicorn .fighter { filter: drop-shadow(0 0 40px rgba(255, 111, 181, 0.8)); }
+  .chosen.team-alien .fighter { filter: drop-shadow(0 0 40px rgba(138, 255, 91, 0.7)); transform: scaleX(-1); }
+
+  .chosen-title {
+    font-family: var(--display);
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: clamp(28px, 6vw, 60px);
+    margin: 0;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .chosen.team-unicorn .chosen-title { color: var(--uni-pink); text-shadow: 0 0 30px rgba(255, 111, 181, 0.5); }
+  .chosen.team-alien .chosen-title { color: var(--alien-green); text-shadow: 0 0 30px rgba(138, 255, 91, 0.45); }
+
+  .chosen-sub { color: var(--ink-dim); margin: 0; font-size: clamp(14px, 2vw, 18px); max-width: 44ch; }
+
+  .btn-row { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+
+  .btn {
+    font-family: var(--display);
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: clamp(15px, 2vw, 19px);
+    letter-spacing: 0.04em;
+    padding: 13px 26px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn { touch-action: manipulation; }
+  .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .btn--go { color: var(--space-deep); }
+  .chosen.team-unicorn .btn--go { background: var(--uni-pink); box-shadow: 0 0 26px rgba(255, 111, 181, 0.45); }
+  .chosen.team-alien .btn--go { background: var(--alien-green); box-shadow: 0 0 26px rgba(138, 255, 91, 0.4); }
+
+  .btn--back {
+    background: transparent;
+    color: var(--ink-dim);
+    border-color: rgba(154, 150, 192, 0.45);
+  }
+  .btn--back:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ---------- Battle ---------- */
+
+  .battle {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+    background: rgba(6, 8, 24, 0.55);
+  }
+  .battle.is-open { display: flex; }
+
+  .hud {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(12px, 3vw, 28px);
+    padding: clamp(12px, 3vh, 24px) clamp(16px, 4vw, 44px) 0;
+  }
+  .hp { flex: 1; min-width: 0; }
+  .hp-label {
+    font-family: var(--display);
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: clamp(12px, 1.6vw, 16px);
+    display: block;
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+  .hp--uni .hp-label { color: var(--uni-pink); }
+  .hp--ali .hp-label { color: var(--alien-green); text-align: right; }
+  .hp-bar {
+    height: 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+  }
+  .hp-fill { height: 100%; width: 100%; transition: width 0.25s ease; }
+  .hp--uni .hp-fill { background: linear-gradient(90deg, var(--uni-gold), var(--uni-pink)); }
+  .hp--ali .hp-fill { background: linear-gradient(270deg, var(--alien-cyan), var(--alien-green)); float: right; }
+
+  .battle-msg {
+    text-align: center;
+    min-height: 2.6em;
+    margin: 8px 16px 0;
+    font-size: clamp(15px, 2.2vw, 20px);
+    color: var(--uni-gold);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .battle-field { flex: 1; position: relative; min-height: 0; }
+  .battle-field::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 30%;
+    background: linear-gradient(to top, rgba(123, 200, 90, 0.14), rgba(255, 111, 181, 0.05) 60%, transparent);
+  }
+
+  .field-flowers {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 32%;
+    pointer-events: none;
+  }
+  .field-flowers span {
+    position: absolute;
+    line-height: 1;
+    filter: drop-shadow(0 0 4px rgba(255, 111, 181, 0.35));
+  }
+
+  .combatant {
+    position: absolute;
+    bottom: 24%;
+    font-size: clamp(64px, 15vh, 130px);
+    line-height: 1;
+    z-index: 1;
+  }
+  #b-uni { left: 8%; filter: drop-shadow(0 0 26px rgba(255, 111, 181, 0.7)); }
+  #b-ali { right: 8%; filter: drop-shadow(0 0 26px rgba(138, 255, 91, 0.6)); }
+  .sword-icon {
+    position: absolute;
+    left: -0.42em;
+    top: 0.28em;
+    font-size: 0.48em;
+  }
+
+  #blast {
+    position: absolute;
+    bottom: calc(24% + 0.5em);
+    left: 14%;
+    font-size: clamp(30px, 6vh, 52px);
+    line-height: 1;
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  #blast.fly { animation: blast-fly 0.45s linear forwards; }
+  @keyframes blast-fly {
+    from { left: 14%; opacity: 1; }
+    to   { left: 80%; opacity: 1; }
+  }
+
+  #b-ali.lunge { animation: lunge 0.45s ease; }
+  @keyframes lunge {
+    40% { transform: translateX(-9vw); }
+  }
+
+  .combatant.hit { animation: shake 0.35s ease; }
+  @keyframes shake {
+    20% { transform: translateX(-8px) rotate(-5deg); }
+    60% { transform: translateX(8px) rotate(4deg); }
+  }
+
+  .petals {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .petals span {
+    position: absolute;
+    top: -10%;
+    line-height: 1;
+    animation: petal-fall linear infinite, petal-sway ease-in-out infinite;
+  }
+  @keyframes petal-fall {
+    from { top: -10%; }
+    to   { top: 110%; }
+  }
+  @keyframes petal-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50%      { transform: translateX(3vw) rotate(180deg); }
+  }
+
+  .blossoms span {
+    position: absolute;
+    font-size: clamp(24px, 4.4vh, 38px);
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 111, 181, 0.95));
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    animation: blossom-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes blossom-pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.18); }
+  }
+  .blossoms span.eaten { opacity: 0; transform: scale(0.2); animation: none; }
+
+  .oak {
+    position: absolute;
+    right: 17%;
+    bottom: 22%;
+    font-size: clamp(90px, 22vh, 190px);
+    line-height: 1;
+    cursor: pointer;
+    filter: drop-shadow(0 0 22px rgba(77, 227, 255, 0.35));
+  }
+  .oak .fruit {
+    position: absolute;
+    font-size: 0.18em;
+    filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.9));
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .oak .fruit.gone { opacity: 0; transform: scale(0.2); }
+  .oak .oak-fire {
+    position: absolute;
+    left: 22%;
+    top: 8%;
+    font-size: 0.55em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .oak.burning .oak-fire { opacity: 1; }
+  .oak.burning { filter: drop-shadow(0 0 26px rgba(255, 120, 60, 0.8)); }
+
+  #blast.fly-tree { animation: blast-fly-tree 0.45s linear forwards; }
+  @keyframes blast-fly-tree {
+    from { left: 14%; opacity: 1; }
+    to   { left: 68%; opacity: 1; }
+  }
+
+  .btn--fruit {
+    background: transparent;
+    color: var(--uni-gold);
+    border-color: var(--uni-gold);
+    box-shadow: 0 0 20px rgba(255, 209, 102, 0.25);
+  }
+  .btn--tree {
+    background: transparent;
+    color: var(--alien-cyan);
+    border-color: var(--alien-cyan);
+    box-shadow: 0 0 20px rgba(77, 227, 255, 0.25);
+  }
+
+  .btn--blossom {
+    background: transparent;
+    color: var(--uni-pink);
+    border-color: var(--uni-pink);
+    box-shadow: 0 0 20px rgba(255, 111, 181, 0.25);
+  }
+
+  .cattle {
+    position: absolute;
+    bottom: 5%;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: clamp(24px, 4.5vh, 40px);
+    letter-spacing: 0.5em;
+    filter: sepia(1) saturate(2.2) hue-rotate(-12deg) drop-shadow(0 0 12px rgba(255, 209, 102, 0.8));
+  }
+
+  .battle-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+  }
+  .btn--magic { background: var(--uni-pink); color: var(--space-deep); box-shadow: 0 0 20px rgba(255, 111, 181, 0.4); }
+  .btn--sword { background: var(--alien-green); color: var(--space-deep); box-shadow: 0 0 20px rgba(138, 255, 91, 0.35); }
+  .battle-controls .hint {
+    flex-basis: 100%;
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 13px;
+    margin: 0;
+  }
+  .battle-controls .hint kbd {
+    font-family: inherit;
+    border: 1px solid rgba(154, 150, 192, 0.5);
+    border-radius: 5px;
+    padding: 0 6px;
+  }
+
+  @media (max-width: 700px) {
+    .battle-controls { gap: 8px; padding-top: 6px; }
+    .battle-controls .btn {
+      flex: 1 1 30%;
+      padding: 15px 6px;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+    .battle-controls .hint { display: none; }
+    .hud { padding-top: 10px; gap: 10px; }
+    .hp-label { font-size: 11px; }
+    .battle-msg { font-size: 14px; min-height: 3em; margin-top: 4px; }
+    .combatant { font-size: clamp(48px, 10vh, 84px); bottom: 26%; }
+    .oak { font-size: clamp(64px, 15vh, 120px); right: 13%; bottom: 25%; }
+    #blast { font-size: 26px; bottom: calc(26% + 0.6em); }
+    .blossoms span { font-size: clamp(20px, 3.4vh, 28px); }
+    .cattle { font-size: 22px; letter-spacing: 0.3em; }
+  }
+
+  /* ---------- Story intro ---------- */
+
+  .story {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(6, 8, 24, 0.9);
+    backdrop-filter: blur(6px);
+  }
+  .story.is-open { display: flex; }
+
+  .story-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--uni-gold);
+    margin: 0;
+  }
+
+  .story-scene {
+    font-size: clamp(56px, 13vh, 110px);
+    line-height: 1.2;
+    margin: 6px 0;
+  }
+
+  .story-text {
+    font-size: clamp(17px, 2.4vw, 23px);
+    line-height: 1.55;
+    max-width: 46ch;
+    margin: 0;
+    text-wrap: balance;
+    min-height: 4.6em;
+  }
+  .story-text .gold { color: var(--uni-gold); }
+  .story-text .pink { color: var(--uni-pink); }
+  .story-text .green { color: var(--alien-green); }
+
+  .story-dots { display: flex; gap: 8px; margin-top: 6px; }
+  .story-dots span {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(154, 150, 192, 0.35);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .story-dots span.on { background: var(--uni-gold); transform: scale(1.25); }
+
+  .btn--next { background: var(--uni-gold); color: var(--space-deep); box-shadow: 0 0 26px rgba(255, 209, 102, 0.35); }
+
+  @media (max-width: 640px) {
+    .arena { flex-direction: column; padding-top: 8px; }
+    .side--unicorn {
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 34px), 0 100%);
+      margin: 0 0 -17px;
+    }
+    .side--alien {
+      clip-path: polygon(0 34px, 100% 0, 100% 100%, 0 100%);
+      margin: -17px 0 0;
+    }
+    .side-tag { display: none; }
+    .fighter { font-size: clamp(56px, 11vh, 90px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<div class="story is-open" id="story-screen" role="dialog" aria-modal="true" aria-labelledby="story-text">
+  <p class="story-eyebrow">The Legend of the Golden Cattle</p>
+  <div class="story-scene" id="story-scene" aria-hidden="true"></div>
+  <p class="story-text" id="story-text"></p>
+  <div class="story-dots" id="story-dots" aria-hidden="true"></div>
+  <div class="btn-row">
+    <button class="btn btn--next" id="btn-next">Next</button>
+    <button class="btn btn--back" id="btn-skip">Skip Story</button>
+  </div>
+</div>
+
+<div class="screen" id="select-screen">
+  <header>
+    <p class="eyebrow">Choose your fighter</p>
+    <h1><span class="uni">Unicorns</span> <span class="vs-word">vs</span> <span class="ali">Aliens</span></h1>
+    <p class="prompt"><kbd>←</kbd> <kbd>→</kbd> to aim, <kbd>Enter</kbd> to lock in — or just click a side</p>
+  </header>
+
+  <div class="arena">
+    <button class="side side--unicorn" id="pick-unicorn" data-team="unicorn">
+      <span class="fighter" aria-hidden="true">🦄</span>
+      <span class="side-name">Team Unicorn</span>
+      <p class="side-tag">Shunka's herd, keepers of the golden cattle for 60 years. Horn-lasers charged, rainbows weaponized.</p>
+      <span class="side-stats">
+        <span><b>9</b>Sparkle</span>
+        <span><b>7</b>Speed</span>
+        <span><b>6</b>Horn Pwr</span>
+      </span>
+    </button>
+
+    <div class="vs-badge">VS</div>
+
+    <button class="side side--alien" id="pick-alien" data-team="alien">
+      <span class="fighter" aria-hidden="true">👽</span>
+      <span class="side-name">Team Alien</span>
+      <p class="side-tag">The prince's army, fighting to win the golden cattle back. Saucers fueled, tractor beams humming.</p>
+      <span class="side-stats">
+        <span><b>8</b>Tech</span>
+        <span><b>6</b>Speed</span>
+        <span><b>9</b>Zap Ray</span>
+      </span>
+    </button>
+  </div>
+</div>
+
+<div class="battle" id="battle-screen">
+  <div class="hud">
+    <div class="hp hp--uni">
+      <span class="hp-label">🦄 Team Unicorn</span>
+      <div class="hp-bar"><div class="hp-fill" id="hp-uni"></div></div>
+    </div>
+    <div class="hp hp--ali">
+      <span class="hp-label">Team Alien 👽</span>
+      <div class="hp-bar"><div class="hp-fill" id="hp-ali"></div></div>
+    </div>
+  </div>
+  <p class="battle-msg" id="battle-msg"></p>
+  <div class="battle-field">
+    <span class="combatant" id="b-uni" aria-hidden="true">🦄</span>
+    <span class="combatant" id="b-ali" aria-hidden="true">👽<span class="sword-icon" id="sword-icon">🗡️</span></span>
+    <span id="blast" aria-hidden="true">🌈✨</span>
+    <div class="oak" id="oak" title="The big oak tree — full of magic fruit">🌳<span class="oak-fire" aria-hidden="true">🔥</span></div>
+    <div class="field-flowers" id="field-flowers" aria-hidden="true"></div>
+    <div class="petals" id="petals" aria-hidden="true"></div>
+    <div class="blossoms" id="blossoms" aria-hidden="true"></div>
+    <div class="cattle" aria-hidden="true">🐮🐮🐮🐮🐮</div>
+  </div>
+  <div class="battle-controls">
+    <button class="btn btn--magic" id="btn-magic">✨ Magic</button>
+    <button class="btn btn--blossom" id="btn-blossom">🌸 Blossom</button>
+    <button class="btn btn--tree" id="btn-tree">🔥 Burn Tree</button>
+    <button class="btn btn--fruit" id="btn-fruit">🍎 Fruit</button>
+    <button class="btn btn--sword" id="btn-sword">🗡️ Sword</button>
+    <p class="hint">🦄 <kbd>Space</kbd> = magic · <kbd>W</kbd> = eat blossom · <kbd>S</kbd> = burn the oak tree &nbsp;·&nbsp; 👽 <kbd>O</kbd> = sword · <kbd>Q</kbd> = eat magic fruit</p>
+  </div>
+</div>
+
+<div class="chosen" id="victory-screen" role="dialog" aria-modal="true" aria-labelledby="victory-title">
+  <span class="fighter" id="victory-fighter" aria-hidden="true"></span>
+  <h2 class="chosen-title" id="victory-title"></h2>
+  <p class="chosen-sub" id="victory-sub"></p>
+  <div class="btn-row">
+    <button class="btn btn--go" id="btn-rematch">Rematch</button>
+    <button class="btn btn--back" id="btn-teams">Choose Teams</button>
+  </div>
+</div>
+
+<div class="chosen" id="chosen-screen" role="dialog" aria-modal="true" aria-labelledby="chosen-title">
+  <span class="fighter" id="chosen-fighter" aria-hidden="true"></span>
+  <h2 class="chosen-title" id="chosen-title"></h2>
+  <p class="chosen-sub" id="chosen-sub"></p>
+  <div class="btn-row">
+    <button class="btn btn--go" id="btn-battle">Enter Battle</button>
+    <button class="btn btn--back" id="btn-back">Switch Sides</button>
+  </div>
+</div>
+
+<script>
+  // ---------- Starfield ----------
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function seedStars() {
+    canvas.width = innerWidth * devicePixelRatio;
+    canvas.height = innerHeight * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    const count = Math.floor((innerWidth * innerHeight) / 4500);
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight,
+      r: Math.random() * 1.4 + 0.3,
+      tw: Math.random() * Math.PI * 2,
+      spd: Math.random() * 0.9 + 0.25,
+    }));
+  }
+
+  function drawStars(t) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    // faint faction glow on each half of the sky
+    const gl = ctx.createRadialGradient(innerWidth * 0.15, innerHeight * 0.8, 0, innerWidth * 0.15, innerHeight * 0.8, innerWidth * 0.5);
+    gl.addColorStop(0, 'rgba(255,111,181,0.07)');
+    gl.addColorStop(1, 'rgba(255,111,181,0)');
+    ctx.fillStyle = gl;
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+    const gr = ctx.createRadialGradient(innerWidth * 0.85, innerHeight * 0.8, 0, innerWidth * 0.85, innerHeight * 0.8, innerWidth * 0.5);
+    gr.addColorStop(0, 'rgba(138,255,91,0.06)');
+    gr.addColorStop(1, 'rgba(138,255,91,0)');
+    ctx.fillStyle = gr;
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+    for (const s of stars) {
+      const a = reduceMotion ? 0.7 : 0.4 + 0.6 * Math.abs(Math.sin(s.tw + t * 0.001 * s.spd));
+      ctx.fillStyle = `rgba(242,240,255,${a.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (!reduceMotion) requestAnimationFrame(drawStars);
+  }
+
+  seedStars();
+  addEventListener('resize', seedStars);
+  requestAnimationFrame(drawStars);
+
+  // ---------- Story intro ----------
+  const STORY = [
+    {
+      scene: '👑🛸',
+      html: 'Once upon a time there was an <span class="green">alien prince</span> who had a beautiful field of <span class="gold">shiny golden cattle</span>.',
+    },
+    {
+      scene: '🦄🌾✨',
+      html: 'One day a unicorn saw the field and wanted all the cattle for herself. Her name was <span class="pink">Shunka</span>.',
+    },
+    {
+      scene: '🌙🐮💨',
+      html: 'Shunka stole the cattle at night, when no guard was looking.',
+    },
+    {
+      scene: '⚔️💥',
+      html: 'Then a war started. <span class="green">All aliens</span> vs <span class="pink">all unicorns</span> — they battled for <span class="gold">60 years</span>.',
+    },
+    {
+      scene: '🦄🤝👽',
+      html: 'But one day a <span class="pink">wise unicorn</span> and the <span class="green">wise alien prince</span> worked together on a plan to stop the battle.',
+    },
+    {
+      scene: '🕊️',
+      html: 'The plan: the prince would get the aliens to stop, and the wise unicorn would get the unicorns to stop. Will peace win? That part is up to you…',
+    },
+  ];
+
+  const storyScreen = document.getElementById('story-screen');
+  const storyScene = document.getElementById('story-scene');
+  const storyText = document.getElementById('story-text');
+  const storyDots = document.getElementById('story-dots');
+  const btnNext = document.getElementById('btn-next');
+  let page = 0;
+
+  STORY.forEach(() => storyDots.appendChild(document.createElement('span')));
+
+  function showPage(i) {
+    page = i;
+    storyScene.textContent = STORY[i].scene;
+    storyText.innerHTML = STORY[i].html;
+    [...storyDots.children].forEach((d, idx) => d.classList.toggle('on', idx === i));
+    btnNext.textContent = i === STORY.length - 1 ? 'Choose Your Side' : 'Next';
+  }
+
+  function endStory() {
+    storyScreen.classList.remove('is-open');
+  }
+
+  btnNext.addEventListener('click', () => {
+    if (page < STORY.length - 1) showPage(page + 1);
+    else endStory();
+  });
+  document.getElementById('btn-skip').addEventListener('click', endStory);
+  showPage(0);
+
+  // ---------- Team select ----------
+  const TEAMS = {
+    unicorn: {
+      emoji: '🦄',
+      title: 'You ride with Team Unicorn!',
+      sub: 'Shunka’s herd is counting on you to guard the golden cattle. Polish that horn — the saucers arrive at dawn.',
+    },
+    alien: {
+      emoji: '👽',
+      title: 'You beam down with Team Alien!',
+      sub: 'The prince wants his golden cattle back. Warm up the zap rays — those ponies sparkle back.',
+    },
+  };
+
+  const sides = [document.getElementById('pick-unicorn'), document.getElementById('pick-alien')];
+  const chosenScreen = document.getElementById('chosen-screen');
+  const chosenFighter = document.getElementById('chosen-fighter');
+  const chosenTitle = document.getElementById('chosen-title');
+  const chosenSub = document.getElementById('chosen-sub');
+  let hotIndex = -1;
+  let currentTeam = null;
+
+  function setHot(i) {
+    hotIndex = i;
+    sides.forEach((s, idx) => s.classList.toggle('is-hot', idx === i));
+  }
+
+  function choose(team) {
+    currentTeam = team;
+    const t = TEAMS[team];
+    chosenScreen.classList.remove('team-unicorn', 'team-alien');
+    chosenScreen.classList.add('team-' + team);
+    chosenFighter.textContent = t.emoji;
+    chosenTitle.textContent = t.title;
+    chosenSub.textContent = t.sub;
+    chosenScreen.classList.add('is-open');
+    document.getElementById('btn-battle').focus();
+    try { localStorage.setItem('uva-team', team); } catch (e) { /* sandboxed storage */ }
+  }
+
+  sides.forEach(s => s.addEventListener('click', () => choose(s.dataset.team)));
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    chosenScreen.classList.remove('is-open');
+    currentTeam = null;
+    setHot(-1);
+  });
+
+  // ---------- Battle ----------
+  const battleScreen = document.getElementById('battle-screen');
+  const victoryScreen = document.getElementById('victory-screen');
+  const hpUniEl = document.getElementById('hp-uni');
+  const hpAliEl = document.getElementById('hp-ali');
+  const msgEl = document.getElementById('battle-msg');
+  const bUni = document.getElementById('b-uni');
+  const bAli = document.getElementById('b-ali');
+  const blast = document.getElementById('blast');
+  const swordIcon = document.getElementById('sword-icon');
+
+  const MAX_HP_UNI = 12;
+  const MAX_HP_ALI = 12;
+  const battle = {
+    on: false, over: false,
+    hpUni: MAX_HP_UNI, hpAli: MAX_HP_ALI,
+    lastMagic: 0, lastSword: 0,
+    swordBurned: false,
+    cpuTeam: null, cpuTimer: null,
+  };
+  let victoryOpenedAt = 0;
+
+  function msg(text) { msgEl.textContent = text; }
+
+  function updateHp() {
+    hpUniEl.style.width = (100 * Math.max(0, battle.hpUni) / MAX_HP_UNI) + '%';
+    hpAliEl.style.width = (100 * Math.max(0, battle.hpAli) / MAX_HP_ALI) + '%';
+  }
+
+  function startBattle() {
+    battle.on = true;
+    battle.over = false;
+    battle.hpUni = MAX_HP_UNI;
+    battle.hpAli = MAX_HP_ALI;
+    battle.lastMagic = 0;
+    battle.lastSword = 0;
+    battle.swordBurned = false;
+    battle.cpuTeam = currentTeam === 'unicorn' ? 'alien' : 'unicorn';
+    swordIcon.textContent = '🗡️';
+    resetBlossoms();
+    resetOak();
+    updateHp();
+    chosenScreen.classList.remove('is-open');
+    victoryScreen.classList.remove('is-open');
+    battleScreen.classList.add('is-open');
+    msg('FIGHT! The golden cattle are watching. 🐮');
+    clearInterval(battle.cpuTimer);
+    battle.cpuTimer = setInterval(() => {
+      if (!battle.on || battle.over) return;
+      if (Math.random() < 0.55) {
+        if (battle.cpuTeam === 'alien') {
+          if (battle.hpAli <= MAX_HP_ALI - 4 && Math.random() < 0.4) eatFruit();
+          else swingSword();
+        } else {
+          if (battle.hpUni <= MAX_HP_UNI - 4 && Math.random() < 0.4) eatBlossom();
+          else if (!treeBurned && Math.random() < 0.15) fireTree();
+          else castMagic();
+        }
+      }
+    }, 700);
+  }
+
+  function replayAnim(el, cls) {
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+  }
+
+  function castMagic() {
+    if (battle.over) return;
+    const now = performance.now();
+    if (now - battle.lastMagic < 850) return;
+    battle.lastMagic = now;
+    blast.classList.remove('fly-tree');
+    replayAnim(blast, 'fly');
+    setTimeout(() => {
+      if (battle.over) return;
+      battle.hpAli -= 1;
+      replayAnim(bAli, 'hit');
+      if (!battle.swordBurned && Math.random() < 0.45) burnSword();
+      else msg('✨ Magic blast! Direct hit!');
+      updateHp();
+      checkWinner();
+    }, 430);
+  }
+
+  function burnSword() {
+    battle.swordBurned = true;
+    swordIcon.textContent = '🔥';
+    msg('🔥 The magic BURNED the sword! The alien needs a new one…');
+    setTimeout(() => {
+      if (battle.over) return;
+      battle.swordBurned = false;
+      swordIcon.textContent = '🗡️';
+      msg('🗡️ A fresh sword arrives from the saucer!');
+    }, 3000);
+  }
+
+  function swingSword() {
+    if (battle.over) return;
+    if (battle.swordBurned) {
+      msg('No sword! It got burned — wait for a new one! 🔥');
+      return;
+    }
+    const now = performance.now();
+    if (now - battle.lastSword < 950) return;
+    battle.lastSword = now;
+    replayAnim(bAli, 'lunge');
+    setTimeout(() => {
+      if (battle.over || battle.swordBurned) return;
+      battle.hpUni -= 2;
+      replayAnim(bUni, 'hit');
+      msg('🗡️ Sword slash! That one hurt!');
+      updateHp();
+      checkWinner();
+    }, 260);
+  }
+
+  function checkWinner() {
+    if (battle.hpUni > 0 && battle.hpAli > 0) return;
+    battle.over = true;
+    clearInterval(battle.cpuTimer);
+    const winner = battle.hpAli <= 0 ? 'unicorn' : 'alien';
+    msg(winner === 'unicorn' ? '🌈 Team Unicorn wins!' : '🗡️ Team Alien wins!');
+    setTimeout(() => {
+      victoryScreen.classList.remove('team-unicorn', 'team-alien');
+      victoryScreen.classList.add('team-' + winner);
+      document.getElementById('victory-fighter').textContent = TEAMS[winner].emoji;
+      document.getElementById('victory-title').textContent =
+        winner === 'unicorn' ? 'Team Unicorn wins!' : 'Team Alien wins!';
+      document.getElementById('victory-sub').textContent =
+        winner === 'unicorn'
+          ? 'Shunka keeps the golden cattle… for now. But remember the wise ones — maybe peace is the real victory?'
+          : 'The prince wins back his golden cattle! But remember the wise ones — maybe peace is the real victory?';
+      victoryScreen.classList.add('is-open');
+      victoryOpenedAt = performance.now();
+      document.getElementById('btn-rematch').focus();
+    }, 900);
+  }
+
+  document.getElementById('btn-battle').addEventListener('click', startBattle);
+  document.getElementById('btn-rematch').addEventListener('click', startBattle);
+  document.getElementById('btn-teams').addEventListener('click', () => {
+    battle.on = false;
+    clearInterval(battle.cpuTimer);
+    victoryScreen.classList.remove('is-open');
+    battleScreen.classList.remove('is-open');
+    currentTeam = null;
+    setHot(-1);
+  });
+  document.getElementById('btn-magic').addEventListener('click', castMagic);
+  document.getElementById('btn-sword').addEventListener('click', swingSword);
+  document.getElementById('btn-blossom').addEventListener('click', eatBlossom);
+  document.getElementById('btn-fruit').addEventListener('click', eatFruit);
+  document.getElementById('btn-tree').addEventListener('click', fireTree);
+
+  // ---------- The big oak tree (alien side only) ----------
+  const oak = document.getElementById('oak');
+  const FRUIT_SPOTS = [
+    { left: '18%', top: '16%' },
+    { left: '52%', top: '10%' },
+    { left: '66%', top: '30%' },
+    { left: '32%', top: '34%' },
+  ];
+  const fruits = FRUIT_SPOTS.map(pos => {
+    const el = document.createElement('span');
+    el.className = 'fruit';
+    el.textContent = '🍎';
+    el.style.left = pos.left;
+    el.style.top = pos.top;
+    oak.appendChild(el);
+    return { el, gone: false };
+  });
+  let lastFruit = 0;
+  let treeBurned = false;
+  let treeRegrowTimer = null;
+
+  function resetOak() {
+    treeBurned = false;
+    clearTimeout(treeRegrowTimer);
+    oak.classList.remove('burning');
+    fruits.forEach(f => { f.gone = false; f.el.classList.remove('gone'); });
+  }
+
+  function eatFruit() {
+    if (!battle.on || battle.over) return;
+    if (treeBurned) {
+      msg('The oak tree is on fire — all the magic fruit burned! 🔥');
+      return;
+    }
+    const now = performance.now();
+    if (now - lastFruit < 1200) return;
+    const f = fruits.find(f => !f.gone);
+    if (!f) {
+      msg('No magic fruit left! The oak tree is still growing more… 🌱');
+      return;
+    }
+    lastFruit = now;
+    if (battle.hpAli >= MAX_HP_ALI) {
+      msg('The alien is already at full life — save the magic fruit!');
+      return;
+    }
+    f.gone = true;
+    f.el.classList.add('gone');
+    battle.hpAli = Math.min(MAX_HP_ALI, battle.hpAli + 3);
+    replayAnim(bAli, 'hit');
+    msg('🍎 Crunch! The magic fruit gives the alien new life!');
+    updateHp();
+    setTimeout(() => {
+      if (!battle.on || treeBurned) return;
+      f.gone = false;
+      f.el.classList.remove('gone');
+    }, 7000);
+  }
+
+  function fireTree() {
+    if (!battle.on || battle.over) return;
+    if (treeBurned) {
+      msg('The oak tree is already burning! 🔥');
+      return;
+    }
+    const now = performance.now();
+    if (now - battle.lastMagic < 850) return;
+    battle.lastMagic = now;
+    blast.classList.remove('fly');
+    replayAnim(blast, 'fly-tree');
+    setTimeout(() => {
+      if (battle.over) return;
+      treeBurned = true;
+      oak.classList.add('burning');
+      fruits.forEach(f => { f.gone = true; f.el.classList.add('gone'); });
+      msg('🔥 The magic set the oak tree on fire! ALL the magic fruit burned up!');
+      treeRegrowTimer = setTimeout(() => {
+        if (!battle.on) return;
+        resetOak();
+        msg('🌳 The oak tree recovered and grew fresh magic fruit!');
+      }, 9000);
+    }, 430);
+  }
+  oak.addEventListener('click', fireTree);
+
+  // ---------- The blossom field ----------
+  const fieldBox = document.getElementById('field-flowers');
+  const FLOWER_KINDS = ['🌸', '🌸', '🌸', '🌸', '🌺', '🌼'];
+  for (let i = 0; i < 70; i++) {
+    const f = document.createElement('span');
+    f.textContent = FLOWER_KINDS[Math.floor(Math.random() * FLOWER_KINDS.length)];
+    const depth = Math.random(); // 0 = far away (high, small), 1 = up close (low, big)
+    f.style.left = Math.random() * 98 + '%';
+    f.style.bottom = (4 + (1 - depth) * 80) + '%';
+    f.style.fontSize = (8 + depth * 16) + 'px';
+    f.style.opacity = (0.4 + depth * 0.5).toFixed(2);
+    fieldBox.appendChild(f);
+  }
+
+  // ---------- Falling blossom petals ----------
+  const petalBox = document.getElementById('petals');
+  if (!reduceMotion) {
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('span');
+      p.textContent = '🌸';
+      p.style.left = Math.random() * 96 + '%';
+      p.style.fontSize = (11 + Math.random() * 12) + 'px';
+      p.style.opacity = (0.35 + Math.random() * 0.45).toFixed(2);
+      const fall = 7 + Math.random() * 8;
+      p.style.animationDuration = fall + 's, ' + (3 + Math.random() * 3) + 's';
+      p.style.animationDelay = (-Math.random() * fall) + 's, 0s';
+      petalBox.appendChild(p);
+    }
+  }
+
+  // ---------- Blossoms (unicorn side only) ----------
+  const blossomBox = document.getElementById('blossoms');
+  const BLOSSOM_SPOTS = [
+    { left: '6%', bottom: '10%' },
+    { left: '15%', bottom: '14%' },
+    { left: '24%', bottom: '9%' },
+    { left: '33%', bottom: '15%' },
+    { left: '42%', bottom: '10%' },
+  ];
+  const blossoms = BLOSSOM_SPOTS.map(pos => {
+    const el = document.createElement('span');
+    el.textContent = '🌸';
+    el.style.left = pos.left;
+    el.style.bottom = pos.bottom;
+    blossomBox.appendChild(el);
+    return { el, eaten: false };
+  });
+  let lastBlossom = 0;
+
+  function resetBlossoms() {
+    blossoms.forEach(b => { b.eaten = false; b.el.classList.remove('eaten'); });
+  }
+
+  function eatBlossom() {
+    if (!battle.on || battle.over) return;
+    const now = performance.now();
+    if (now - lastBlossom < 1200) return;
+    const b = blossoms.find(b => !b.eaten);
+    if (!b) {
+      msg('No blossoms left! New ones are still growing… 🌱');
+      return;
+    }
+    lastBlossom = now;
+    if (battle.hpUni >= MAX_HP_UNI) {
+      msg('The unicorn is already at full life — save the blossoms!');
+      return;
+    }
+    b.eaten = true;
+    b.el.classList.add('eaten');
+    battle.hpUni = Math.min(MAX_HP_UNI, battle.hpUni + 3);
+    replayAnim(bUni, 'hit');
+    msg('🌸 Yum! The special blossom gives the unicorn new life!');
+    updateHp();
+    setTimeout(() => {
+      if (!battle.on) return;
+      b.eaten = false;
+      b.el.classList.remove('eaten');
+    }, 7000);
+  }
+
+  addEventListener('keydown', (e) => {
+    if (storyScreen.classList.contains('is-open')) {
+      if (e.key === 'Enter' || e.key === 'ArrowRight' || e.key === ' ') {
+        if (document.activeElement.tagName !== 'BUTTON') btnNext.click();
+      } else if (e.key === 'ArrowLeft' && page > 0) showPage(page - 1);
+      return;
+    }
+    if (victoryScreen.classList.contains('is-open')) {
+      // Space is the magic key — swallow it here so button-mashing can't
+      // instantly restart the match. Click or Enter (after a beat) instead.
+      if (e.key === ' ' || performance.now() - victoryOpenedAt < 900) e.preventDefault();
+      return;
+    }
+    if (battleScreen.classList.contains('is-open')) {
+      if (e.key === ' ') { e.preventDefault(); castMagic(); }
+      else if (e.key === 'o' || e.key === 'O') swingSword();
+      else if (e.key === 'w' || e.key === 'W') eatBlossom();
+      else if (e.key === 'q' || e.key === 'Q') eatFruit();
+      else if (e.key === 's' || e.key === 'S') fireTree();
+      return;
+    }
+    if (chosenScreen.classList.contains('is-open')) {
+      if (e.key === 'Escape') document.getElementById('btn-back').click();
+      return;
+    }
+    if (e.key === 'ArrowLeft') setHot(0);
+    else if (e.key === 'ArrowRight') setHot(1);
+    else if (e.key === 'Enter' && hotIndex >= 0 && document.activeElement.tagName !== 'BUTTON') {
+      choose(sides[hotIndex].dataset.team);
+    }
+  });
+</script>
+
+</body>
+</html>
