@@ -5,6 +5,38 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>The Phase Cascade</title>
 <link rel="stylesheet" href="../assets/css/base.css">
+<style>
+  /* the hover card carries the whole explanation */
+  #tip{max-width:352px;padding:12px 14px 13px;}
+  #tip .t{font-size:13px;}
+
+  .tw-rate{font-size:10.5px;color:rgba(255,255,255,.55);margin-bottom:9px;}
+  .tw-rate em{font-style:normal;color:#fff;font-weight:600;}
+  .tw-rate b{color:var(--accent-lt);font-weight:600;}
+  .tw-ask{font-size:11px;line-height:1.45;color:rgba(255,255,255,.8);
+          padding:7px 0 0;border-top:1px solid rgba(255,255,255,.13);margin-bottom:2px;}
+
+  ul.tw{list-style:none;margin:8px 0 0;padding:0;}
+  ul.tw li{position:relative;padding-left:13px;margin-bottom:5px;
+           font-size:10.8px;line-height:1.42;color:rgba(255,255,255,.66);}
+  ul.tw li:last-child{margin-bottom:0;}
+  ul.tw li::before{content:'';position:absolute;left:2px;top:6px;width:4px;height:4px;
+                   border-radius:50%;background:rgba(255,255,255,.28);}
+  /* base.css styles #tip b pink; reserve that for the headline reason */
+  #tip ul.tw li b{color:#fff;font-weight:600;}
+  #tip ul.tw li.lead b{color:var(--accent-lt);}
+  ul.tw li.lead::before{background:var(--accent-lt);}
+  ul.tw li.lead{color:rgba(255,255,255,.88);}
+
+  /* funnel rows drive the same highlight */
+  .frow{cursor:pointer;padding:5px 7px;margin:0 -7px 2px;border-radius:7px;transition:background .14s;}
+  .frow:hover{background:rgba(13,22,31,.045);}
+  .frow.on{background:rgba(216,37,145,.07);}
+  .frow .ftop{display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px;}
+  .frow .fbar{height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden;}
+  .frow .fbar i{display:block;height:100%;border-radius:2px;}
+  .frow .fnote{font-size:10px;margin-top:3px;color:var(--faint);line-height:1.35;}
+</style>
 </head>
 <body>
 <div id="boot">Seeding candidates<div class="bar"><i></i></div></div>
@@ -28,7 +60,8 @@
   <hr class="sep">
   <div id="funnel"></div>
   <hr class="sep">
-  <p class="note">Defaults are industry transition rates for 2011&ndash;2020 (BIO / Informa / QLS, 12,728 transitions). Overall Phase&nbsp;I &rarr; approval is <b>7.9%</b>.</p>
+  <p class="note"><b>Hover any band of the column</b> to see what gets candidates thrown out at that gate.<br><br>
+  Rates are industry transition rates for 2011&ndash;2020 (BIO / Informa / QLS, 12,728 transitions). Overall Phase&nbsp;I &rarr; approval is <b>7.9%</b>.</p>
 </div>
 
 <script src="../assets/vendor/three.min.js"></script>
@@ -39,11 +72,71 @@
 LM.chrome('01-trial-phases');
 
 var GATES = [
-  {name:'Preclinical → IND', short:'IND',  p:0.100, y: 5.0, col:LM.C.slate,  note:'Tox, CMC, IND-enabling'},
-  {name:'Phase I → II',      short:'PH I', p:0.520, y: 2.5, col:LM.C.teal,   note:'Safety, PK, dose finding'},
-  {name:'Phase II → III',    short:'PH II',p:0.289, y: 0.0, col:LM.C.violet, note:'Proof of concept — the killing field'},
-  {name:'Phase III → NDA',   short:'PH III',p:0.578,y:-2.5, col:LM.C.amber,  note:'Confirmatory, pivotal'},
-  {name:'NDA/BLA → Approval',short:'NDA',  p:0.906, y:-5.0, col:LM.C.accent, note:'Regulatory review'}
+  {name:'Preclinical → IND', short:'IND',  p:0.100, y: 5.0, col:LM.C.slate,
+   note:'Tox, CMC, IND-enabling',
+   asks:'Is it safe enough, and can we even make it?',
+   why:[
+    ['Organ toxicity in GLP studies','liver, kidney or cardiac findings in 28- and 90-day tox'],
+    ['No therapeutic window','the NOAEL sits too close to the efficacious dose'],
+    ['Genotoxicity','a positive Ames or micronucleus result ends it outright'],
+    ['hERG inhibition','a QT-prolongation liability nobody wants to carry forward'],
+    ['Poor ADME','low bioavailability, clearance too fast, or it misses the compartment'],
+    ['CMC failure','cannot be synthesised at scale, or is unstable or unformulable'],
+    ['Weak selectivity','off-target promiscuity makes the safety case unarguable']
+   ]},
+
+  {name:'Phase I → II',      short:'PH I', p:0.520, y: 2.5, col:LM.C.teal,
+   note:'Safety, PK, dose finding',
+   asks:'Can a human tolerate a dose that could plausibly work?',
+   why:[
+    ['Dose-limiting toxicity too early','DLTs arrive before the predicted efficacious exposure'],
+    ['PK does not translate','human exposure is lower or far more variable than the animal data promised'],
+    ['Hepatotoxicity','Hy’s law cases are close to unrecoverable'],
+    ['QTc prolongation','a positive thorough-QT study caps the dose'],
+    ['Immunogenicity','anti-drug antibodies neutralise the biologic'],
+    ['No target engagement','PD biomarkers do not move, so the mechanism is unproven'],
+    ['Impractical dosing','food effects or drug–drug interactions make a regimen unusable']
+   ]},
+
+  {name:'Phase II → III',    short:'PH II',p:0.289, y: 0.0, col:LM.C.violet,
+   note:'Proof of concept — the killing field',
+   asks:'Does it actually work, in the right people, at the right dose?',
+   why:[
+    ['Lack of efficacy','roughly half of all Phase II failures. The drug simply does not work.', true],
+    ['Effect too small','real but not worth the price of a Phase III'],
+    ['Wrong dose carried forward','under-powered dose-ranging picks badly and poisons Phase III'],
+    ['Placebo response','in CNS, pain and psychiatry it routinely swamps the signal'],
+    ['Population too broad','no biomarker to enrich for the patients who would respond'],
+    ['Endpoint problems','not sensitive enough, or not one a regulator will accept'],
+    ['Late safety signal','longer exposure surfaces what Phase I was too short to see'],
+    ['Strategy','a competitor reads out first and the commercial case evaporates']
+   ]},
+
+  {name:'Phase III → NDA',   short:'PH III',p:0.578,y:-2.5, col:LM.C.amber,
+   note:'Confirmatory, pivotal',
+   asks:'Does the effect replicate at scale, and is it safe at scale?',
+   why:[
+    ['Primary endpoint missed','the Phase II effect fails to replicate — small, unblinded or single-arm Phase IIs regress hard', true],
+    ['Significant but not meaningful','a p-value nobody can turn into a clinical claim'],
+    ['Rare serious events','DILI, cardiovascular or malignancy signals only visible at n in the thousands'],
+    ['Secondary endpoints fail','the testing hierarchy breaks and the key claims go with it'],
+    ['Inconsistency','regions or major subgroups disagree with each other'],
+    ['Stopped at interim','a futility analysis ends it early'],
+    ['Operational failure','enrolment, data quality or GCP findings make the result unusable']
+   ]},
+
+  {name:'NDA/BLA → Approval',short:'NDA',  p:0.906, y:-5.0, col:LM.C.accent,
+   note:'Regulatory review',
+   asks:'Will a regulator put their name on it?',
+   why:[
+    ['Manufacturing CRL','facility inspection, process validation or stability — the most common reason at this stage', true],
+    ['Benefit–risk judged unfavourable','the advisory committee votes no'],
+    ['Risk cannot be mitigated','no workable REMS exists for the hazard'],
+    ['One trial is not enough','a confirmatory study is required before approval'],
+    ['Inspection findings','data integrity or GCP violations at clinical sites'],
+    ['Data not generalisable','foreign trial populations do not match the intended one'],
+    ['Labelling dispute','the sponsor and the agency cannot agree on the indication']
+   ]}
 ];
 var TOP = 7.6, FLOOR = -7.4, START = 1000;
 
@@ -68,7 +161,8 @@ function ringLine(r, col, op, y){
 }
 function gateRadius(y){ return LM.lerp(3.0, 0.62, LM.clamp((TOP-y)/(TOP-FLOOR),0,1)); }
 
-var gateMeshes = [];
+var BAND = 2.5;                 // vertical slab of the column owned by each gate
+var gateMeshes = [], bands = [];
 GATES.forEach(function(G,i){
   var r = gateRadius(G.y);
   var disc = new THREE.Mesh(
@@ -77,8 +171,9 @@ GATES.forEach(function(G,i){
   );
   disc.rotation.x = -Math.PI/2; disc.position.y = G.y;
   ctx.add(disc);
-  ctx.add(ringLine(r, G.col, 0.55, G.y));
-  ctx.add(ringLine(r*0.985, G.col, 0.18, G.y-0.012));
+  var ring1 = ringLine(r, G.col, 0.55, G.y);
+  var ring2 = ringLine(r*0.985, G.col, 0.18, G.y-0.012);
+  ctx.add(ring1); ctx.add(ring2);
 
   var lab = LM.label(G.short, {size:40, weight:700, color:'#'+G.col.toString(16).padStart(6,'0'), scale:1.05, depthTest:false});
   lab.position.set(r+0.95, G.y+0.30, 0);
@@ -86,7 +181,19 @@ GATES.forEach(function(G,i){
   var cnt = LM.label('—', {size:34, weight:600, color:'#525c67', scale:1.0, depthTest:false});
   cnt.position.set(r+0.95, G.y-0.28, 0);
   ctx.add(cnt);
-  gateMeshes.push({disc:disc, lab:lab, cnt:cnt, r:r});
+  gateMeshes.push({disc:disc, ring1:ring1, ring2:ring2, lab:lab, cnt:cnt, r:r});
+
+  // invisible slab used only for picking: colorWrite off so it never draws,
+  // but the object stays visible so the raycaster still sees it
+  var pick = new THREE.Mesh(
+    new THREE.CylinderGeometry(3.7, 3.7, BAND, 20, 1, false),
+    new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false, colorWrite:false})
+  );
+  pick.position.y = G.y;
+  pick.renderOrder = -1;
+  pick.userData.gate = i;
+  ctx.add(pick);
+  bands.push(pick);
 });
 
 // entry + exit markers
@@ -190,33 +297,39 @@ var mat = new THREE.ShaderMaterial({
     uAlive:{value:new THREE.Color(LM.C.ink)},
     uHot:{value:new THREE.Color(LM.C.accent)},
     uGateCol:{value:GATES.map(function(g){return new THREE.Color(g.col);})},
-    uSize:{value:0.055}, uFloor:{value:FLOOR}
+    uSize:{value:0.055}, uFloor:{value:FLOOR},
+    uHover:{value:-1}
   },
   vertexShader:[
     LM.glsl.psize,
-    'uniform sampler2D uPos;uniform float uSize,uFloor;attribute vec2 aRef;',
-    'varying float vS;varying float vY;',
+    'uniform sampler2D uPos;uniform float uSize,uFloor,uHover;attribute vec2 aRef;',
+    'varying float vS;varying float vY;varying float vHL;',
     'void main(){vec4 s=texture2D(uPos,aRef);vS=s.w;vY=s.y;',
     ' vec4 mv=modelViewMatrix*vec4(s.xyz,1.0);',
-    ' float sz=uSize*(s.w>0.0?1.0:0.72);',
+    // a rejected particle belongs to the gate that killed it
+    ' float g=s.w<0.0?floor(-s.w)-1.0:-1.0;',
+    ' vHL=(uHover>=0.0&&g>=0.0&&abs(g-uHover)<0.5)?1.0:0.0;',
+    ' float sz=uSize*(s.w>0.0?1.0:0.72)*(1.0+vHL*0.85);',
     ' gl_PointSize=lmSize(sz,mv);gl_Position=projectionMatrix*mv;}'
   ].join('\n'),
   fragmentShader:[
-    'uniform vec3 uAlive,uHot;uniform vec3 uGateCol[5];uniform float uFloor;',
-    'varying float vS;varying float vY;',
+    'uniform vec3 uAlive,uHot;uniform vec3 uGateCol[5];uniform float uFloor,uHover;',
+    'varying float vS;varying float vY;varying float vHL;',
     'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
     ' float a=1.0-smoothstep(0.25,1.0,d);',
     ' vec3 c; float o;',
     ' if(vS>0.0){',
     '   float deep=smoothstep(0.0,-5.2,vY);',      // the closer to approval, the hotter
     '   c=mix(uAlive,uHot,deep); o=0.82;',
+    '   if(uHover>=0.0) o*=0.30;',                 // recede the surviving beam
     ' } else {',
     '   float g=floor(-vS)-1.0; float timer=-vS-(g+1.0);',
     '   int gi=int(g); c=vec3(0.55);',
     '   for(int k=0;k<5;k++){ if(k==gi) c=uGateCol[k]; }',  // ES 1.00: constant-index only
     '   o=0.46*(1.0-smoothstep(0.35,1.0,timer));',
+    '   if(uHover>=0.0) o*=mix(0.16,2.05,vHL);',   // isolate this gate’s loss spray
     ' }',
-    ' gl_FragColor=vec4(c,a*o);}'
+    ' gl_FragColor=vec4(c,a*min(o,1.0));}'
   ].join('\n')
 });
 ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), mat));
@@ -246,12 +359,16 @@ var setStat = LM.ui.stats(document.getElementById('stats'), [
 ]);
 
 var funnel = document.getElementById('funnel');
+var rows = [];
+var hoverGate = -1;            // -1 = nothing hovered
+var tipAnchor = {x:0, y:0};    // where the hover card is drawn
+
 function refresh(){
-  var n = START, rows=[], cum=1;
+  var n = START, cum=1;
+  rows = [];
   GATES.forEach(function(G,i){
     n = n*G.p; cum *= G.p;
     rows.push({G:G, n:n, cum:cum});
-    gateMeshes[i].cnt.material.map.image; // keep ref
   });
   // phase-I-onward odds (gates 1..4)
   var ph1 = GATES[1].p*GATES[2].p*GATES[3].p*GATES[4].p;
@@ -260,16 +377,16 @@ function refresh(){
   setStat('odds', (ph1*100).toFixed(1)+'%');
   setStat('need', LM.fmt(Math.round(1/Math.max(ph1,1e-6))) + '<small> cands</small>');
 
-  funnel.innerHTML = rows.map(function(r){
+  funnel.innerHTML = rows.map(function(r,i){
     var w = Math.max(2, Math.pow(r.cum,0.33)*100);
     var c = '#'+r.G.col.toString(16).padStart(6,'0');
-    return '<div style="margin-bottom:7px">'+
-      '<div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
-        '<span>'+r.G.short+'</span><span style="color:'+c+'">'+LM.fmt(r.n, r.n<10?1:0)+'</span></div>'+
-      '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
-        '<div style="height:100%;width:'+w+'%;background:'+c+';border-radius:2px"></div></div>'+
-      '<div class="note" style="font-size:10px;margin-top:2px;color:var(--faint)">'+r.G.note+'</div></div>';
+    return '<div class="frow" data-gate="'+i+'">'+
+      '<div class="ftop"><span>'+r.G.short+'</span>'+
+        '<span style="color:'+c+'">'+LM.fmt(r.n, r.n<10?1:0)+'</span></div>'+
+      '<div class="fbar"><i style="width:'+w+'%;background:'+c+'"></i></div>'+
+      '<div class="fnote">'+r.G.note+'</div></div>';
   }).join('');
+  bindRows();
 
   // refresh the 3D gate count labels
   rows.forEach(function(r,i){
@@ -282,15 +399,93 @@ function refresh(){
     gm.cnt = fresh; ctx.add(fresh);
   });
 }
+
+/* ---------- the hover card ---------- */
+function bindRows(){
+  Array.prototype.forEach.call(funnel.querySelectorAll('.frow'), function(el){
+    var i = +el.dataset.gate;
+    el.addEventListener('mouseenter', function(){
+      var b = el.getBoundingClientRect();
+      tipAnchor.x = b.right - 4; tipAnchor.y = b.bottom + 4;
+      hoverGate = i;
+    });
+    el.addEventListener('mouseleave', function(){ if (hoverGate === i) hoverGate = -1; });
+  });
+}
+
+// the card is tall, so it sits beside the cursor rather than above it
+function placeTip(n){
+  var w = n.offsetWidth, h = n.offsetHeight;
+  var x = tipAnchor.x + 18;
+  if (x + w > window.innerWidth - 12) x = tipAnchor.x - w - 18;
+  n.style.left = Math.max(12, x) + 'px';
+  n.style.top = LM.clamp(tipAnchor.y - h/2, 12, Math.max(12, window.innerHeight - h - 12)) + 'px';
+}
+
+// the whole explanation, rendered into the tooltip
+function cardFor(i){
+  var G = GATES[i], r = rows[i];
+  var entering = i === 0 ? START : rows[i-1].n;
+  var lost = Math.max(0, entering - r.n);
+  return '<span class="t">'+G.name+'</span>'+
+    '<div class="tw-rate"><em>'+(G.p*100).toFixed(1)+'% pass</em> &middot; '+
+      '<b>'+LM.fmt(lost, lost<10?1:0)+'</b> of '+LM.fmt(entering, entering<10?1:0)+' lost here</div>'+
+    '<div class="tw-ask">'+G.asks+'</div>'+
+    '<ul class="tw">'+
+      G.why.map(function(w){
+        return '<li'+(w[2]?' class="lead"':'')+'><b>'+w[0]+'</b> &mdash; '+w[1]+'</li>';
+      }).join('')+
+    '</ul>';
+}
+
 refresh();
 
+/* ---------- 3D picking ---------- */
+var ray = new THREE.Raycaster();
+var mouse = LM.pointer(ctx.renderer.domElement, null);
+ctx.renderer.domElement.addEventListener('pointermove', function(e){
+  tipAnchor.x = e.clientX; tipAnchor.y = e.clientY;
+});
+
+var lastShown = -99;
 ctx.onFrame(function(dt,t){
   gpu.step(Math.min(dt,0.033), t);
   mat.uniforms.uPos.value = gpu.texture;
-  // gentle breathing on the gate discs
-  for (var i=0;i<gateMeshes.length;i++){
-    gateMeshes[i].disc.material.opacity = 0.045 + 0.028*Math.sin(t*1.1 + i*0.9);
+
+  // hovering the column wins; otherwise a funnel row may still be holding it
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit = ray.intersectObjects(bands);
+  var over3d = hit.length ? hit[0].object.userData.gate : -1;
+  if (over3d >= 0) hoverGate = over3d;
+  else if (hoverGate >= 0 && !funnel.querySelector('.frow:hover')) hoverGate = -1;
+
+  mat.uniforms.uHover.value = hoverGate;
+
+  if (hoverGate >= 0){
+    var n = LM.tip.node();
+    // rebuild the card only when the gate changes, then just reposition
+    if (hoverGate !== lastShown){ n.innerHTML = cardFor(hoverGate); n.style.opacity = '1'; lastShown = hoverGate; }
+    placeTip(n);
+  } else if (lastShown !== -1){
+    LM.tip.hide(); lastShown = -1;
   }
+
+  var dom = ctx.renderer.domElement;
+  if (over3d >= 0) dom.style.cursor = 'pointer';
+  else if (dom.style.cursor === 'pointer') dom.style.cursor = 'grab';
+
+  // highlight the hovered gate; everything else recedes
+  for (var i=0;i<gateMeshes.length;i++){
+    var gm = gateMeshes[i], on = (i === hoverGate);
+    gm.disc.material.opacity = on ? 0.17 : 0.045 + 0.028*Math.sin(t*1.1 + i*0.9);
+    gm.ring1.material.opacity = on ? 0.95 : (hoverGate>=0 ? 0.22 : 0.55);
+    gm.ring2.material.opacity = on ? 0.45 : 0.18;
+    gm.lab.material.opacity = on ? 1 : (hoverGate>=0 ? 0.45 : 1);
+    gm.cnt.material.opacity = on ? 1 : (hoverGate>=0 ? 0.45 : 1);
+  }
+  Array.prototype.forEach.call(funnel.querySelectorAll('.frow'), function(el){
+    el.classList.toggle('on', +el.dataset.gate === hoverGate);
+  });
 });
 })();
 </script>

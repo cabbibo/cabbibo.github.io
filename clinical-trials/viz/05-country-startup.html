@@ -77,7 +77,7 @@ var ACTS = [
   {k:'siv',   n:'Site initiation visit', c:LM.C.green,  own:'CRA / monitoring'}
 ];
 
-var LANE = 0.86, LANE_GAP = 0.20, DAY = 0.056;
+var LANE = 0.86, LANE_GAP = 0.40, DAY = 0.056;
 var NC = COUNTRIES.length;
 var DEPTH = NC*(LANE+LANE_GAP);
 var SPAN = 420*DAY;
@@ -120,7 +120,19 @@ function buildSchedule(){
     blocks.push({k:'imp', a:ctrEnd, b:ctrEnd+imp});
     blocks.push({k:'siv', a:ctrEnd+imp, b:ctrEnd+imp+siv});
     var fpi = ctrEnd+imp+siv;
-    return {name:c[0], sites:c[5], blocks:blocks, fpi:fpi, i:i};
+
+    /* Pack activities that overlap in time into parallel sub-lanes.
+       Greedy first-fit by start date: anything that can share a track does,
+       so nothing is ever drawn on top of anything else. */
+    var ends = [];
+    blocks.slice().sort(function(x,y){ return x.a - y.a; }).forEach(function(bl){
+      var s = 0;
+      while (s < ends.length && ends[s] > bl.a + 1e-6) s++;
+      bl.sub = s;
+      ends[s] = bl.b;
+    });
+
+    return {name:c[0], sites:c[5], blocks:blocks, fpi:fpi, nSub:Math.max(1, ends.length), i:i};
   });
   lanes.sort(function(a,b){return a.fpi-b.fpi;});
 }
@@ -131,8 +143,8 @@ var allBlocks = [];
 lanes.forEach(function(L,li){ L.blocks.forEach(function(b){ allBlocks.push({L:L, b:b, li:li}); }); });
 var NB = allBlocks.length;
 
-var geo = new THREE.BoxGeometry(1, 0.30, LANE);
-geo.translate(0.5, 0.15, 0);
+var geo = new THREE.BoxGeometry(1, 0.26, LANE);
+geo.translate(0.5, 0.15, 0);   // lifted clear of the ground grid
 var mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({vertexColors:true}), NB);
 mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 var cols = new Float32Array(NB*3);
@@ -179,7 +191,7 @@ var sweep = new THREE.Mesh(
   new THREE.MeshBasicMaterial({color:LM.C.accent, transparent:true, opacity:0.55})
 );
 sweep.rotation.x = -Math.PI/2;
-sweep.position.y = 0.02;
+sweep.position.y = 0.006;      // under the blocks, so it never intersects them
 ctx.add(sweep);
 
 /* ---- UI ---- */
@@ -254,8 +266,10 @@ ctx.onFrame(function(dt,t){
     var E = allBlocks[i], b = E.b;
     var done = LM.clamp((cursor-b.a)/Math.max(b.b-b.a,1),0,1);
     var w = Math.max((b.b-b.a)*DAY*done, 0.0001);
-    O.position.set(b.a*DAY, 0, laneZ(E.li));
-    O.scale.set(w, 1, 1);
+    // each activity sits in its own sub-lane, thinner, never stacked
+    var sw = LANE / E.L.nSub;
+    O.position.set(b.a*DAY, 0, laneZ(E.li) + (b.sub - (E.L.nSub-1)/2)*sw);
+    O.scale.set(w, 1, (sw*0.84)/LANE);
     O.rotation.set(0,0,0);
     O.updateMatrix(); mesh.setMatrixAt(i,O.matrix);
     C.setHex(actMap[b.k].c);
