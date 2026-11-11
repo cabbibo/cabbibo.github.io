@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Risk Surface</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Computing risk field<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">17 · Data &amp; Evidence</p>
+  <h1 class="viz">Risk <em>Surface</em></h1>
+  <p class="lede">Risk-based monitoring means you cannot visit everyone. Key risk indicators become a landscape over the site network &mdash; and your travel budget is a contour line drawn across it.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Key risk indicators</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Monitoring plan</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="flag"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('17-risk-monitoring');
+
+var sites = LM.study.sites, N = sites.length;
+var MW = 30, MD = 15;                       // map extent
+function mx(lon){ return lon/360*MW; }
+function mz(lat){ return -lat/180*MD*2; }
+
+/* ---------- KRIs ---------- */
+var KRI = [
+  {k:'enrol', n:'Enrolment anomaly',   c:LM.C.accent, w:0.22, why:'Rate far above or below plan'},
+  {k:'query', n:'Query rate',          c:LM.C.violet, w:0.18, why:'Queries per 100 data points'},
+  {k:'dev',   n:'Deviation rate',      c:LM.C.amber,  w:0.22, why:'Major protocol deviations'},
+  {k:'ae',    n:'AE under-reporting',  c:LM.C.red,    w:0.16, why:'Fewer AEs than peers — a red flag'},
+  {k:'lag',   n:'Data entry lag',      c:LM.C.teal,   w:0.12, why:'Days from visit to EDC'},
+  {k:'sf',    n:'Screen-failure outlier', c:LM.C.slate, w:0.10, why:'Eligibility applied inconsistently'}
+];
+
+(function deriveKRIs(){
+  var rnd = LM.rng(31337);
+  var meanRate = sites.reduce(function(a,s){return a+s.rate;},0)/N;
+  sites.forEach(function(s){
+    var bad = 1 - s.quality;
+    s.kri = {
+      enrol: LM.clamp(Math.abs(s.rate-meanRate)/meanRate*0.8 + rnd()*0.15, 0, 1),
+      query: LM.clamp(s.queries/70 + rnd()*0.12, 0, 1),
+      dev:   LM.clamp(s.deviations/16 + rnd()*0.12, 0, 1),
+      ae:    LM.clamp(bad*0.7 + rnd()*0.35, 0, 1),
+      lag:   LM.clamp(bad*0.8 + rnd()*0.3, 0, 1),
+      sf:    LM.clamp(Math.abs(s.screenFail-0.33)/0.33 + rnd()*0.1, 0, 1)
+    };
+  });
+})();
+
+function scoreOf(s){
+  var tw=0, v=0;
+  KRI.forEach(function(K){ tw+=K.w; v+=K.w*s.kri[K.k]; });
+  return tw>0 ? v/tw : 0;
+}
+
+var ctx = LM.boot({
+  cam:[0,13,17], fov:34, fit:MW*0.54, fitMargin:1.05,
+  orbit:{ target:new THREE.Vector3(0,1.0,0), minDist:9, maxDist:80,
+          autoRotate:true, autoRotateSpeed:0.045, minPolar:0.10, maxPolar:1.44 },
+  fog:[36,118]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.72,key:0.72,fill:0.26,rim:0.16});
+var uPix = LM.pixUniform(ctx);
+
+/* faint coastlines for geographic anchoring */
+var coast = LM.geo.landFlat(MW,{opacity:0.16,color:LM.C.ink});
+coast.position.y = 0.005;
+ctx.add(coast);
+
+/* ---------- risk field texture (IDW over the site network) ---------- */
+var FW = 160, FH = 90;
+var fieldData = new Float32Array(FW*FH*4);
+var fieldTex = new THREE.DataTexture(fieldData, FW, FH, THREE.RGBAFormat, THREE.FloatType);
+fieldTex.minFilter = fieldTex.magFilter = THREE.LinearFilter;
+fieldTex.wrapS = fieldTex.wrapT = THREE.ClampToEdgeWrapping;
+
+function rebuildField(){
+  var pts = sites.map(function(s){
+    return {x:mx(s.lon), z:mz(s.lat), v:scoreOf(s)};
+  });
+  for (var j=0;j<FH;j++){
+    for (var i=0;i<FW;i++){
+      var x = (i/(FW-1)-0.5)*MW;
+      var z = (j/(FH-1)-0.5)*MD*2;
+      var num=0, den=0;
+      for (var k=0;k<pts.length;k++){
+        var dx=x-pts[k].x, dz=z-pts[k].z;
+        var d2=dx*dx+dz*dz+0.35;
+        var w=1/(d2*d2);
+        num+=w*pts[k].v; den+=w;
+      }
+      var v = den>0 ? num/den : 0;
+      var o=(j*FW+i)*4;
+      fieldData[o]=v; fieldData[o+1]=v; fieldData[o+2]=v; fieldData[o+3]=1;
+    }
+  }
+  fieldTex.needsUpdate = true;
+}
+rebuildField();
+
+/* ---------- displaced surface ---------- */
+var uAmp = { value: 4.2 };
+var uThresh = { value: 0.40 };
+var surfGeo = new THREE.PlaneGeometry(MW, MD*2, 220, 130);
+surfGeo.rotateX(-Math.PI/2);
+var surfMat = new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{
+    uField:{value:fieldTex}, uAmp:uAmp, uThresh:uThresh,
+    uLow:{value:new THREE.Color(0xe8ecf1)},
+    uMid:{value:new THREE.Color(LM.C.amber)},
+    uHigh:{value:new THREE.Color(LM.C.red)},
+    uTime:{value:0}
+  },
+  vertexShader:[
+    'uniform sampler2D uField;uniform float uAmp,uTime;',
+    'varying float vV;varying vec3 vP;',
+    'void main(){',
+    ' float v=texture2D(uField,uv).r;',
+    ' vV=v;',
+    ' vec3 p=position;',
+    ' p.y=v*uAmp + sin(uTime*0.7+p.x*0.4)*0.015;',
+    ' vP=p;',
+    ' gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uLow,uMid,uHigh;uniform float uThresh;',
+    'varying float vV;varying vec3 vP;',
+    'void main(){',
+    ' vec3 c=mix(uLow,uMid,smoothstep(0.13,0.37,vV));',
+    ' c=mix(c,uHigh,smoothstep(0.37,0.55,vV));',
+    ' // contour banding makes the gradient readable',
+    ' float band=abs(fract(vV*26.0)-0.5);',
+    ' c*=0.93+0.07*smoothstep(0.0,0.14,band);',
+    ' // the monitoring threshold draws itself as a bright contour',
+    ' float t=abs(vV-uThresh);',
+    ' float line=1.0-smoothstep(0.0,0.008,t);',
+    ' c=mix(c,vec3(0.05,0.09,0.12),line*0.85);',
+    ' gl_FragColor=vec4(c,0.95);}'
+  ].join('\n')
+});
+var surf = new THREE.Mesh(surfGeo, surfMat);
+ctx.add(surf);
+
+// wireframe over the top for structure
+var wire = new THREE.Mesh(
+  new THREE.PlaneGeometry(MW, MD*2, 56, 34).rotateX(-Math.PI/2),
+  new THREE.ShaderMaterial({
+    wireframe:true, transparent:true,
+    uniforms:{uField:{value:fieldTex}, uAmp:uAmp},
+    vertexShader:'uniform sampler2D uField;uniform float uAmp;void main(){vec3 p=position;p.y=texture2D(uField,uv).r*uAmp+0.012;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}',
+    fragmentShader:'void main(){gl_FragColor=vec4(0.05,0.09,0.12,0.07);}'
+  })
+);
+ctx.add(wire);
+
+/* ---------- site markers ---------- */
+var pinGeo = new THREE.ConeGeometry(0.085, 0.42, 5);
+pinGeo.translate(0,0.21,0);
+var pins = new THREE.InstancedMesh(pinGeo, new THREE.MeshLambertMaterial({vertexColors:true}), N);
+pins.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var pCol = new Float32Array(N*3);
+pins.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(pCol,3));
+ctx.add(pins);
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+KRI.forEach(function(K){
+  LM.ui.slider(ctrls,{label:K.n, min:0, max:0.5, step:0.01, value:K.w,
+    fmt:function(v){return (v*100).toFixed(0);},
+    on:function(v){ K.w=v; rebuildField(); refresh(); }});
+});
+LM.ui.slider(ctrls,{label:'Monitoring threshold', min:0.1, max:0.7, step:0.005, value:0.40,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){ uThresh.value=v; refresh(); }});
+LM.ui.slider(ctrls,{label:'Terrain exaggeration', min:1, max:10, step:0.1, value:4.2,
+  fmt:function(v){return v.toFixed(1)+'x';}, on:function(v){ uAmp.value=v; }});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Sites flagged', id:'fl', accent:true},
+  {k:'On-site visits', id:'vis'},
+  {k:'Patients covered', id:'cov'},
+  {k:'Mean risk', id:'mean'},
+  {k:'Peak risk', id:'peak'},
+  {k:'Est. cost', id:'cost'}
+]);
+
+var flagEl=document.getElementById('flag');
+function refresh(){
+  var scored = sites.map(function(s,i){ return {i:i, s:s, v:scoreOf(s)}; })
+                    .sort(function(a,b){return b.v-a.v;});
+  var flagged = scored.filter(function(e){ return e.v >= uThresh.value; });
+  var mean = scored.reduce(function(a,e){return a+e.v;},0)/N;
+  var cov = flagged.reduce(function(a,e){return a+e.s.enrolled;},0);
+  var totalPts = sites.reduce(function(a,s){return a+s.enrolled;},0);
+  var visits = flagged.reduce(function(a,e){ return a + Math.ceil(2 + e.v*6); }, 0);
+
+  setStat('fl', flagged.length+'<small> / '+N+'</small>');
+  setStat('vis', visits);
+  setStat('cov', LM.pct(cov/Math.max(totalPts,1),0));
+  setStat('mean', mean.toFixed(2));
+  setStat('peak', scored[0].v.toFixed(2));
+  setStat('cost', '$'+LM.fmt(Math.round(visits*4.8))+'<small>k</small>');
+
+  flagEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Highest risk</div>'+
+    scored.slice(0,8).map(function(e){
+      var over = e.v>=uThresh.value;
+      var c = over ? '#e2503f' : '#8d97a3';
+      return '<div style="margin-bottom:6px">'+
+        '<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.s.name+'</span>'+
+        '<span style="color:'+c+';flex:none">'+e.v.toFixed(2)+'</span></div>'+
+        '<div style="position:relative;height:4px;background:rgba(13,22,31,.06);border-radius:2px">'+
+        '<div style="height:100%;width:'+(e.v*100).toFixed(0)+'%;background:'+c+';border-radius:2px"></div>'+
+        '<div style="position:absolute;top:-2px;left:'+(uThresh.value*100).toFixed(0)+'%;width:1px;height:8px;background:#0d161f;opacity:.5"></div>'+
+        '</div></div>';
+    }).join('');
+}
+refresh();
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+/* ---------- frame ---------- */
+var O=new THREE.Object3D(), C=new THREE.Color();
+var cSafe=new THREE.Color(LM.C.slate), cHot=new THREE.Color(LM.C.red);
+function sampleField(x,z){
+  var i = Math.round((x/MW+0.5)*(FW-1));
+  var j = Math.round((z/(MD*2)+0.5)*(FH-1));
+  i=LM.clamp(i,0,FW-1); j=LM.clamp(j,0,FH-1);
+  return fieldData[(j*FW+i)*4];
+}
+
+ctx.onFrame(function(dt,t){
+  surfMat.uniforms.uTime.value = t;
+  for (var i=0;i<N;i++){
+    var s=sites[i], v=scoreOf(s);
+    var x=mx(s.lon), z=mz(s.lat);
+    var y=sampleField(x,z)*uAmp.value;
+    var over = v>=uThresh.value;
+    var sc = over ? 1.25+0.14*Math.sin(t*3+i) : 0.7;
+    O.position.set(x, y, z);
+    O.scale.set(sc, sc*(0.7+v*1.6), sc);
+    O.rotation.set(0,0,0);
+    O.updateMatrix(); pins.setMatrixAt(i,O.matrix);
+    C.copy(over?cHot:cSafe).lerp(new THREE.Color(0xffffff), over?0:0.35);
+    pCol[i*3]=C.r; pCol[i*3+1]=C.g; pCol[i*3+2]=C.b;
+  }
+  pins.instanceMatrix.needsUpdate=true;
+  pins.geometry.attributes.color.needsUpdate=true;
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObject(pins);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var s=sites[hit[0].instanceId], v=scoreOf(s);
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+s.name+'</span>'+
+      '<span class="m">'+s.country+' &middot; '+s.id+(v>=uThresh.value?' &middot; <b>FLAGGED</b>':'')+'</span>'+
+      '<div style="margin-top:5px">Composite risk <b>'+v.toFixed(2)+'</b><br>'+
+      KRI.map(function(K){return K.n.split(' ')[0]+' '+(s.kri[K.k]*100).toFixed(0);}).join(' &middot; ')+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

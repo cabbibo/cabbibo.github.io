@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Randomisation &amp; Blind</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Generating allocation<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">11 · Conduct &amp; Safety</p>
+  <h1 class="viz">Randomisation <em>&amp; Blind</em></h1>
+  <p class="lede">One stream of patients enters. Stratified permuted-block randomisation splits it into arms that must stay balanced &mdash; inside every stratum, not just overall. Nobody downstream knows which is which.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Allocation</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Balance</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="arms"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('11-randomization');
+
+var ARMS = [
+  {k:'A', n:'Investigational 200 mg', c:LM.C.accent, y: 3.0},
+  {k:'B', n:'Investigational 100 mg', c:LM.C.violet, y: 0.0},
+  {k:'C', n:'Placebo',                c:LM.C.slate,  y:-3.0}
+];
+var STRATA = [
+  {n:'ECOG 0 / no prior', z: 2.6},
+  {n:'ECOG 0 / prior Tx', z: 0.87},
+  {n:'ECOG 1 / no prior', z:-0.87},
+  {n:'ECOG 1 / prior Tx', z:-2.6}
+];
+var X0 = -12, XR = -1.0, X1 = 12;
+var BLOCK = 6;
+
+var ctx = LM.boot({
+  cam:[0,2,25], fov:36, fit:12.0, fitMargin:1.06,
+  orbit:{ minDist:8, maxDist:60, autoRotate:true, autoRotateSpeed:0.065,
+          minPolar:0.4, maxPolar:2.4, pan:false },
+  fog:[28,86]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.78,key:0.64,fill:0.24,rim:0.14});
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- furniture ---------- */
+// the randomisation gate
+var gate = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.10, 8.6),
+  new THREE.MeshBasicMaterial({color:LM.C.ink, transparent:true, opacity:0.22})
+);
+gate.position.set(XR, 0, 0);
+ctx.add(gate);
+(function(){
+  var l = LM.label('RANDOMISATION', {size:28, weight:700, color:'#0d161f', scale:0.78, depthTest:false});
+  l.position.set(XR, 4.9, 0); ctx.add(l);
+  var e = LM.label('ELIGIBLE PATIENTS', {size:26, weight:700, color:'#8d97a3', scale:0.74, depthTest:false});
+  e.position.set(X0+1.6, 1.3, 0); ctx.add(e);
+})();
+
+// arm rails + labels
+ARMS.forEach(function(A){
+  var pts=[];
+  for (var i=0;i<=60;i++){
+    var t=i/60, x=LM.lerp(XR,X1,t);
+    pts.push(x, A.y, -3.2, x, A.y, 3.2);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([XR,A.y,0, X1,A.y,0],3));
+  ctx.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:A.c,transparent:true,opacity:0.22})));
+  var l=LM.label(A.n.replace(/&amp;/g,'&'),{size:30,weight:700,color:'#'+A.c.toString(16).padStart(6,'0'),scale:0.80,depthTest:false});
+  l.position.set(X1+0.3+l.scale.x/2, A.y, 0); ctx.add(l);
+  A._count = LM.label('0',{size:30,weight:600,color:'#525c67',scale:0.78,depthTest:false});
+  A._count.position.set(X1+0.3+l.scale.x/2, A.y-0.62, 0); ctx.add(A._count);
+});
+
+// stratum planes
+STRATA.forEach(function(S){
+  var l=LM.label(S.n,{size:26,weight:600,color:'#8d97a3',scale:0.68,depthTest:false});
+  l.position.set(X0-0.4-l.scale.x/2, 0.1, S.z); ctx.add(l);
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([X0,0,S.z, XR,0,S.z],3));
+  ctx.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:LM.C.line,transparent:true,opacity:0.5})));
+});
+
+/* ---------- allocation model (CPU, authoritative) ---------- */
+var alloc = [0.40, 0.20, 0.40];
+var blocked = true, useStrata = true;
+var counts, strataCounts, nRand;
+function resetCounts(){
+  counts=[0,0,0];
+  strataCounts = STRATA.map(function(){return [0,0,0];});
+  nRand=0;
+}
+resetCounts();
+
+/* Build an allocation sequence per stratum so the GPU can look it up.
+   Permuted blocks keep each stratum balanced at every block boundary. */
+var SEQLEN = 512;
+var seq = [];   // seq[stratum][i] = arm index
+function buildSeq(){
+  seq = STRATA.map(function(_,si){
+    var rnd = LM.rng(1000+si*77);
+    var out = [], blockUnits = [];
+    var ratio = alloc.map(function(a){ return Math.max(1, Math.round(a*BLOCK/Math.max.apply(null,[0.0001].concat(alloc)))); });
+    // normalise the block composition to BLOCK slots
+    var comp = [];
+    var tot = alloc[0]+alloc[1]+alloc[2];
+    var want = alloc.map(function(a){ return a/tot*BLOCK; });
+    var base = want.map(Math.floor);
+    var rem = BLOCK - base.reduce(function(a,b){return a+b;},0);
+    var order = [0,1,2].sort(function(a,b){ return (want[b]-base[b])-(want[a]-base[a]); });
+    for (var r=0;r<rem;r++) base[order[r%3]]++;
+    for (var a=0;a<3;a++) for (var k=0;k<base[a];k++) comp.push(a);
+
+    while (out.length < SEQLEN){
+      if (blocked){
+        var b = comp.slice();
+        for (var i=b.length-1;i>0;i--){ var j=Math.floor(rnd()*(i+1)); var t=b[i];b[i]=b[j];b[j]=t; }
+        out = out.concat(b);
+      } else {
+        var r2 = rnd(), acc=0, pick=2;
+        for (var a=0;a<3;a++){ acc+=alloc[a]/tot; if(r2<=acc){pick=a;break;} }
+        out.push(pick);
+      }
+    }
+    return out.slice(0,SEQLEN);
+  });
+  // bake into a texture the shader can read
+  for (var si=0; si<STRATA.length; si++)
+    for (var i=0;i<SEQLEN;i++){
+      var o = (si*SEQLEN+i)*4;
+      seqData[o] = seq[si][i]; seqData[o+1]=0; seqData[o+2]=0; seqData[o+3]=1;
+    }
+  seqTex.needsUpdate = true;
+}
+var seqData = new Float32Array(SEQLEN*8*4);
+var seqTex = new THREE.DataTexture(seqData, SEQLEN, 8, THREE.RGBAFormat, THREE.FloatType);
+seqTex.minFilter = seqTex.magFilter = THREE.NearestFilter;
+buildSeq();
+
+/* ---------- GPU patients ---------- */
+var PW=96, PH=96, PN=PW*PH;
+var uBlind = { value: 1.0 };
+var armY = ARMS.map(function(A){return A.y;});
+var strZ = STRATA.map(function(S){return S.z;});
+
+var frag=[
+ 'uniform sampler2D uPrev,uSeq;uniform float uDt,uTime,uSpeed,uX0,uXR,uX1,uSeqLen;',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' float p=st.x;',             // progress along x, 0..1
+ ' float stratum=st.y;',
+ ' float ticket=st.z;',        // position in that stratum sequence
+ ' p+=uDt*uSpeed*(0.085+hash11(idx*0.53)*0.05);',
+ ' if(p>1.08){',
+ '   p=-0.08;',
+ '   stratum=floor(hash11(idx*7.7+uTime*1.31)*4.0);',
+ '   ticket=floor(hash11(idx*2.9+uTime*2.17)*uSeqLen);',
+ ' }',
+ ' gl_FragColor=vec4(p,stratum,ticket,1.0);',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{
+  uSpeed:{value:1.0}, uX0:{value:X0}, uXR:{value:XR}, uX1:{value:X1},
+  uSeq:{value:seqTex}, uSeqLen:{value:SEQLEN}
+},function(d,w,h){
+  var rnd=LM.rng(313);
+  for (var i=0;i<w*h;i++){
+    d[i*4]=rnd()*1.16-0.08;
+    d[i*4+1]=Math.floor(rnd()*4);
+    d[i*4+2]=Math.floor(rnd()*SEQLEN);
+    d[i*4+3]=1;
+  }
+});
+
+var pMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uState:{value:gpu.texture}, uSeq:{value:seqTex}, uPix:uPix,
+    uSize:{value:0.060}, uSeqLen:{value:SEQLEN},
+    uX0:{value:X0}, uXR:{value:XR}, uX1:{value:X1},
+    uArmY:{value:armY}, uStrZ:{value:strZ},
+    uArmCol:{value:ARMS.map(function(A){return new THREE.Color(A.c);})},
+    uInk:{value:new THREE.Color(LM.C.ink)},
+    uBlind:uBlind
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uState,uSeq;uniform float uSize,uSeqLen,uX0,uXR,uX1;',
+    'uniform float uArmY[3];uniform float uStrZ[4];',
+    'attribute vec2 aRef;varying float vArm;varying float vPost;varying float vA;',
+    'void main(){',
+    ' vec4 s=texture2D(uState,aRef);',
+    ' float p=s.x, strat=s.y, ticket=s.z;',
+    ' float arm=texture2D(uSeq,vec2((ticket+0.5)/uSeqLen,(strat+0.5)/8.0)).r;',
+    ' int ai=int(arm+0.5); int si=int(strat+0.5);',
+    ' float ay=0.0; for(int k=0;k<3;k++){ if(k==ai) ay=uArmY[k]; }',
+    ' float sz=0.0; for(int k=0;k<4;k++){ if(k==si) sz=uStrZ[k]; }',
+    ' // x runs the full width; the split happens at the gate',
+    ' float x=mix(uX0,uX1,clamp(p,0.0,1.0));',
+    ' float tGate=smoothstep(0.0,0.26,(x-uXR)/(uX1-uXR));',
+    ' float y=mix(0.0,ay,tGate);',
+    ' float z=mix(sz,sz*0.34,tGate);',
+    ' vArm=arm;',
+    ' vPost=step(uXR,x);',
+    ' vA=smoothstep(-0.08,0.0,p)*(1.0-smoothstep(0.98,1.08,p));',
+    ' vec4 mv=modelViewMatrix*vec4(x,y,z,1.0);',
+    ' gl_PointSize=lmSize(uSize,mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uArmCol[3];uniform vec3 uInk;uniform float uBlind;',
+    'varying float vArm;varying float vPost;varying float vA;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' int ai=int(vArm+0.5); vec3 c=vec3(0.5);',
+    ' for(int k=0;k<3;k++){ if(k==ai) c=uArmCol[k]; }',
+    ' // under the blind, allocated patients are indistinguishable',
+    ' vec3 shown=mix(c,uInk,uBlind*vPost);',
+    ' shown=mix(uInk,shown,max(vPost,1.0-uBlind));',
+    ' gl_FragColor=vec4(shown,(1.0-smoothstep(0.2,1.0,d))*vA*0.85);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), pMat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.seg(ctrls,{label:'Allocation ratio', index:0, options:[
+  {label:'2:1:2', value:[0.4,0.2,0.4]},
+  {label:'1:1:1', value:[1/3,1/3,1/3]},
+  {label:'2:1',   value:[0.667,0.0001,0.333]},
+  {label:'3:1',   value:[0.75,0.0001,0.25]}
+], on:function(v){ alloc=v.slice(); buildSeq(); resetCounts(); refresh(); }});
+
+LM.ui.check(ctrls,{label:'Permuted blocks (size 6)', value:true, on:function(v){
+  blocked=v; buildSeq(); resetCounts(); refresh();
+}});
+LM.ui.check(ctrls,{label:'Stratify by ECOG &amp; prior therapy', value:true, on:function(v){
+  useStrata=v; refresh();
+}});
+LM.ui.check(ctrls,{label:'Maintain the blind', value:true, on:function(v){
+  uBlind.value = v?1:0;
+}});
+LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:4, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uSpeed.value=v;}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Randomised', id:'n', accent:true},
+  {k:'Max imbalance', id:'imb'},
+  {k:'Worst stratum', id:'ws'},
+  {k:'Block size', id:'bs'},
+  {k:'Strata', id:'st'},
+  {k:'Blind', id:'bl'}
+]);
+
+var armsEl=document.getElementById('arms');
+
+/* Run the real allocation sequence forward so the panel reports true counts. */
+var cursor = [0,0,0,0];
+function allocateStep(nPatients){
+  for (var i=0;i<nPatients;i++){
+    var si = useStrata ? Math.floor(Math.random()*STRATA.length) : 0;
+    var a = seq[si][cursor[si] % SEQLEN];
+    cursor[si]++;
+    counts[a]++; strataCounts[si][a]++; nRand++;
+  }
+}
+
+function refresh(){
+  var tot = counts[0]+counts[1]+counts[2];
+  var totAl = alloc[0]+alloc[1]+alloc[2];
+  var maxImb = 0;
+  if (tot>0) for (var a=0;a<3;a++){
+    var expct = tot*alloc[a]/totAl;
+    maxImb = Math.max(maxImb, Math.abs(counts[a]-expct));
+  }
+  var worst = 0, worstIdx = -1;
+  strataCounts.forEach(function(sc,si){
+    var st = sc[0]+sc[1]+sc[2];
+    if (!st) return;
+    for (var a=0;a<3;a++){
+      var e = st*alloc[a]/totAl;
+      if (Math.abs(sc[a]-e) > worst){ worst = Math.abs(sc[a]-e); worstIdx = si; }
+    }
+  });
+
+  setStat('n', LM.fmt(tot));
+  setStat('imb', '±'+maxImb.toFixed(1));
+  setStat('ws', worstIdx>=0 ? '±'+worst.toFixed(1) : '—');
+  setStat('bs', blocked?BLOCK:'none');
+  setStat('st', useStrata?STRATA.length:1);
+  setStat('bl', uBlind.value>0.5?'ON':'OFF');
+
+  armsEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Arm allocation</div>'+
+    ARMS.map(function(A,a){
+      var c='#'+A.c.toString(16).padStart(6,'0');
+      var w = tot>0 ? counts[a]/tot*100 : 0;
+      var target = alloc[a]/totAl*100;
+      return '<div style="margin-bottom:8px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span>'+A.n.replace(/&amp;/g,'&')+'</span>'+
+        '<span style="color:'+c+'">'+LM.fmt(counts[a])+' &middot; '+w.toFixed(1)+'%</span></div>'+
+        '<div style="position:relative;height:5px;background:rgba(13,22,31,.06);border-radius:2px;overflow:visible">'+
+        '<div style="height:100%;width:'+w.toFixed(1)+'%;background:'+c+';border-radius:2px"></div>'+
+        '<div style="position:absolute;top:-2px;left:'+target.toFixed(1)+'%;width:1px;height:9px;background:#0d161f;opacity:.45"></div>'+
+        '</div></div>';
+    }).join('')+
+    '<p class="note" style="margin-top:4px">Tick marks are the target ratio.</p>';
+
+  ARMS.forEach(function(A,a){
+    var fresh=LM.label(LM.fmt(counts[a]),{size:30,weight:600,color:'#525c67',scale:0.78,depthTest:false});
+    fresh.position.copy(A._count.position);
+    ctx.scene.remove(A._count);
+    A._count.material.map.dispose(); A._count.material.dispose();
+    A._count=fresh; ctx.add(fresh);
+  });
+}
+refresh();
+
+var acc=0;
+ctx.onFrame(function(dt,t){
+  gpu.step(Math.min(dt,0.033), t);
+  pMat.uniforms.uState.value = gpu.texture;
+  gate.material.opacity = 0.18 + 0.08*Math.sin(t*1.6);
+
+  acc += dt*gpu.uniforms.uSpeed.value*22;
+  if (acc >= 1){ var n=Math.floor(acc); acc-=n; allocateStep(n); }
+  if (ctx.frame % 8 === 0) refresh();
+});
+})();
+</script>
+</body>
+</html>

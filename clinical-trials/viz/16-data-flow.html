@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Pipeline</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Opening pipeline<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">16 · Data &amp; Evidence</p>
+  <h1 class="viz">Data <em>Pipeline</em></h1>
+  <p class="lede">Source document to database lock. Every point is a data item moving through capture, validation, query and reconciliation &mdash; and the queries are what stand between you and a lock date.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Pipeline controls</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Throughput</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="stages"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('16-data-flow');
+
+var STAGES = [
+  {n:'Source document',  c:LM.C.faint,  x:-13.5, note:'Chart, device, ePRO'},
+  {n:'EDC capture',      c:LM.C.slate,  x: -8.1, note:'Site enters the CRF'},
+  {n:'Edit checks',      c:LM.C.teal,   x: -2.7, note:'Automated validation'},
+  {n:'Query resolution', c:LM.C.amber,  x:  2.7, note:'Monitor raises, site answers'},
+  {n:'SDV / reconcile',  c:LM.C.violet, x:  8.1, note:'Source data verification'},
+  {n:'Database lock',    c:LM.C.accent, x: 13.5, note:'Clean, frozen, analysable'}
+];
+var NS = STAGES.length;
+
+var ctx = LM.boot({
+  cam:[0,2.5,26], fov:36, fit:13.4, fitMargin:1.06,
+  orbit:{ minDist:9, maxDist:64, autoRotate:true, autoRotateSpeed:0.06,
+          minPolar:0.45, maxPolar:2.3, pan:false },
+  fog:[32,96]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.80,key:0.60,fill:0.22,rim:0.14});
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- stage gates ---------- */
+var gates=[];
+STAGES.forEach(function(S,i){
+  var ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.25, 0.035, 8, 64),
+    new THREE.MeshBasicMaterial({color:S.c, transparent:true, opacity:0.55})
+  );
+  ring.rotation.y = Math.PI/2;
+  ring.position.set(S.x, 0, 0);
+  ctx.add(ring); gates.push(ring);
+
+  var disc = new THREE.Mesh(
+    new THREE.CircleGeometry(2.25, 48),
+    new THREE.MeshBasicMaterial({color:S.c, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false})
+  );
+  disc.rotation.y = Math.PI/2;
+  disc.position.set(S.x, 0, 0);
+  ctx.add(disc);
+
+  var l=LM.label(S.n,{size:30,weight:700,color:'#'+S.c.toString(16).padStart(6,'0'),scale:0.78,depthTest:false});
+  l.position.set(S.x, 2.95, 0); ctx.add(l);
+  var l2=LM.label(S.note,{size:24,weight:500,color:'#8d97a3',scale:0.62,depthTest:false});
+  l2.position.set(S.x, 2.48, 0); ctx.add(l2);
+  S._cnt = LM.label('',{size:26,weight:600,color:'#525c67',scale:0.68,depthTest:false});
+  S._cnt.position.set(S.x, -2.75, 0); ctx.add(S._cnt);
+});
+
+// the conduit
+(function(){
+  var pts=[], R=2.25, RINGS=18;
+  for (var k=0;k<RINGS;k++){
+    var a=k/RINGS*Math.PI*2;
+    for (var i=0;i<NS-1;i++){
+      pts.push(STAGES[i].x, Math.cos(a)*R, Math.sin(a)*R,
+               STAGES[i+1].x, Math.cos(a)*R, Math.sin(a)*R);
+    }
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.045})));
+})();
+
+/* ---------- GPGPU: data items ----------
+   x = progress 0..1 across the whole pipeline
+   y = query state: 0 clean, 1 queried (parked, orbiting outward)
+   z = parked timer
+   w = seed                                                                  */
+var PW=140, PH=140;
+var uQueryRate = { value: 0.22 };
+var uResolve   = { value: 0.55 };
+var uSpeed     = { value: 1.0 };
+
+var frag=[
+ 'uniform sampler2D uPrev;uniform float uDt,uTime,uSpeed,uQRate,uResolve;',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' float p=st.x, q=st.y, timer=st.z, seed=st.w;',
+ ' if(q<0.5){',
+ '   float prev=p;',
+ '   p+=uDt*uSpeed*(0.040+hash11(idx*0.37+seed)*0.030);',
+ '   // the edit-check gate sits at 40% of the run; queries are raised there',
+ '   if(prev<0.40&&p>=0.40){',
+ '     if(hash11(idx*5.7+floor(uTime*3.0)+seed)<uQRate){ q=1.0; timer=0.0; }',
+ '   }',
+ '   if(p>1.04){ p=-0.04; seed=hash11(idx*1.13+uTime*0.87); }',
+ ' } else {',
+ '   // parked in the query loop until resolved',
+ '   timer+=uDt*uResolve*0.42;',
+ '   if(timer>=1.0){ q=0.0; timer=0.0; p=0.48; }',
+ ' }',
+ ' gl_FragColor=vec4(p,q,timer,seed);',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{
+  uSpeed:uSpeed, uQRate:uQueryRate, uResolve:uResolve
+},function(d,w,h){
+  var rnd=LM.rng(1771);
+  for (var i=0;i<w*h;i++){
+    d[i*4]=rnd()*1.08-0.04; d[i*4+1]=0; d[i*4+2]=0; d[i*4+3]=rnd();
+  }
+});
+
+var stageX = STAGES.map(function(S){return S.x;});
+var stageCol = STAGES.map(function(S){return new THREE.Color(S.c);});
+
+var pMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uState:{value:gpu.texture}, uPix:uPix, uSize:{value:0.052},
+    uX0:{value:STAGES[0].x}, uX1:{value:STAGES[NS-1].x},
+    uCols:{value:stageCol},
+    uQuery:{value:new THREE.Color(LM.C.amber)},
+    uTime:{value:0}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    LM.glsl.hash,
+    'uniform sampler2D uState;uniform float uSize,uX0,uX1,uTime;',
+    'attribute vec2 aRef;attribute float aIdx;',
+    'varying float vStage;varying float vQ;varying float vA;',
+    'void main(){',
+    ' vec4 s=texture2D(uState,aRef);',
+    ' float p=s.x,q=s.y,timer=s.z,seed=s.w;',
+    ' float ang=seed*6.283+uTime*0.30;',
+    ' float rad=0.25+seed*1.75;',
+    ' float x,y,z;',
+    ' if(q<0.5){',
+    '   x=mix(uX0,uX1,clamp(p,0.0,1.0));',
+    '   // the stream narrows as data gets cleaner',
+    '   float tighten=mix(1.0,0.42,smoothstep(0.4,1.0,p));',
+    '   y=cos(ang)*rad*tighten; z=sin(ang)*rad*tighten;',
+    ' } else {',
+    '   // bulge out of the pipe into the query loop, then come back',
+    '   float bulge=sin(timer*3.14159);',
+    '   x=mix(uX0,uX1,0.44)+bulge*1.9;',
+    '   float r2=rad+bulge*2.3;',
+    '   y=cos(ang+timer*2.2)*r2; z=sin(ang+timer*2.2)*r2;',
+    ' }',
+    ' vStage=clamp(p,0.0,1.0)*5.0;',
+    ' vQ=q;',
+    ' vA=smoothstep(-0.04,0.01,p)*(1.0-smoothstep(0.99,1.04,p));',
+    ' vec4 mv=modelViewMatrix*vec4(x,y,z,1.0);',
+    ' gl_PointSize=lmSize(uSize*(q>0.5?1.4:1.0),mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCols[6];uniform vec3 uQuery;',
+    'varying float vStage;varying float vQ;varying float vA;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' int si=int(floor(vStage)); float f=fract(vStage);',
+    ' vec3 a=vec3(0.5),b=vec3(0.5);',
+    ' for(int k=0;k<6;k++){ if(k==si) a=uCols[k]; if(k==si+1) b=uCols[k]; }',
+    ' vec3 c=mix(a,b,f);',
+    ' if(vQ>0.5) c=uQuery;',
+    ' gl_FragColor=vec4(c,(1.0-smoothstep(0.2,1.0,d))*vA*0.80);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), pMat));
+
+/* ---------- CPU mirror for the numbers ---------- */
+var MIR = 4000;
+var mP=new Float32Array(MIR), mQ=new Float32Array(MIR), mT=new Float32Array(MIR), mV=new Float32Array(MIR);
+(function(){ var r=LM.rng(99); for(var i=0;i<MIR;i++){ mP[i]=r(); mQ[i]=0; mT[i]=0; mV[i]=0.040+r()*0.030; } })();
+var queriedNow=0, locked=0, raised=0, resolved=0, elapsed=0;
+
+function stepMirror(dt){
+  var qr=uQueryRate.value, rs=uResolve.value, sp=uSpeed.value;
+  var qn=0;
+  for (var i=0;i<MIR;i++){
+    if (mQ[i]<0.5){
+      var prev=mP[i];
+      mP[i]+=dt*sp*mV[i];
+      if (prev<0.40 && mP[i]>=0.40 && Math.random()<qr){ mQ[i]=1; mT[i]=0; raised++; }
+      if (mP[i]>1.04){ mP[i]=-0.04; locked++; }
+    } else {
+      mT[i]+=dt*rs*0.42;
+      if (mT[i]>=1){ mQ[i]=0; mT[i]=0; mP[i]=0.48; resolved++; }
+      qn++;
+    }
+  }
+  queriedNow=qn; elapsed+=dt;
+}
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.slider(ctrls,{label:'Query rate at edit checks', min:0, max:0.8, step:0.01, value:0.22,
+  fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){uQueryRate.value=v;}});
+LM.ui.slider(ctrls,{label:'Query resolution speed', min:0.1, max:2.5, step:0.05, value:0.55,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uResolve.value=v;}});
+LM.ui.slider(ctrls,{label:'Capture throughput', min:0.1, max:3, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
+LM.ui.seg(ctrls,{label:'Scenario', index:1, options:[
+  {label:'Paper-heavy', value:[0.46,0.28]},
+  {label:'Typical EDC', value:[0.22,0.55]},
+  {label:'Risk-based', value:[0.11,1.30]}
+], on:function(v){
+  var sl=ctrls.querySelectorAll('input[type=range]');
+  sl[0].value=v[0]; sl[0].dispatchEvent(new Event('input'));
+  sl[1].value=v[1]; sl[1].dispatchEvent(new Event('input'));
+}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Open queries', id:'oq', accent:true},
+  {k:'Query burden', id:'qb'},
+  {k:'Raised', id:'rz'},
+  {k:'Resolved', id:'rv'},
+  {k:'Locked items', id:'lk'},
+  {k:'Est. lock lag', id:'lag'}
+]);
+
+var stagesEl=document.getElementById('stages');
+function refresh(){
+  var burden = queriedNow/MIR;
+  // expected time stuck in the query loop, scaled to a plausible lock delay
+  var lag = uQueryRate.value/Math.max(uResolve.value,0.01)*34;
+  setStat('oq', LM.fmt(queriedNow));
+  setStat('qb', LM.pct(burden,1));
+  setStat('rz', LM.fmt(raised));
+  setStat('rv', LM.fmt(resolved));
+  setStat('lk', LM.fmt(locked));
+  setStat('lag', Math.round(lag)+'<small> d</small>');
+
+  // how many items sit in each stage band
+  var bins=[0,0,0,0,0,0];
+  for (var i=0;i<MIR;i++){
+    if (mQ[i]>0.5){ bins[3]++; continue; }
+    var b=Math.min(5,Math.max(0,Math.floor(LM.clamp(mP[i],0,0.999)*6)));
+    bins[b]++;
+  }
+  stagesEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Items by stage</div>'+
+    STAGES.map(function(S,i){
+      var c='#'+S.c.toString(16).padStart(6,'0');
+      return '<div style="margin-bottom:6px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span>'+S.n+'</span><span style="color:'+c+'">'+LM.fmt(bins[i])+'</span></div>'+
+        '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+        '<div style="height:100%;width:'+(bins[i]/MIR*100*2.4).toFixed(1)+'%;max-width:100%;background:'+c+';border-radius:2px"></div></div></div>';
+    }).join('');
+}
+
+ctx.onFrame(function(dt,t){
+  var d = Math.min(dt,0.033);
+  gpu.step(d, t);
+  pMat.uniforms.uState.value = gpu.texture;
+  pMat.uniforms.uTime.value = t;
+  stepMirror(d);
+  gates.forEach(function(g,i){ g.material.opacity = 0.45 + 0.18*Math.sin(t*1.5 + i*0.8); });
+  if (ctx.frame % 6 === 0) refresh();
+});
+})();
+</script>
+</body>
+</html>

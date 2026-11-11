@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dose Escalation</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Dosing cohort 1<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">12 · Conduct &amp; Safety</p>
+  <h1 class="viz">Dose <em>Escalation</em></h1>
+  <p class="lede">Three patients at a time, climbing until toxicity stops the ascent. The 3+3 is statistically crude and still runs most first-in-human oncology trials &mdash; watch how often it lands on the wrong dose.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Design &amp; toxicity</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Escalation log</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="log"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('12-dose-escalation');
+
+var DOSES = [10, 20, 40, 80, 140, 220, 320, 440];
+var NL = DOSES.length;
+var STEP_X = 2.0, STEP_Y = 1.15;
+
+var ctx = LM.boot({
+  cam:[0,5,20], fov:36, fit:10.0, fitMargin:1.08,
+  orbit:{ target:new THREE.Vector3(1.2,2.4,0), minDist:8, maxDist:52,
+          autoRotate:true, autoRotateSpeed:0.06, minPolar:0.25, maxPolar:1.75 },
+  fog:[28,86]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.74,key:0.70,fill:0.26,rim:0.16});
+
+function levelPos(l){ return new THREE.Vector3(-((NL-1)*STEP_X)/2 + l*STEP_X, l*STEP_Y, 0); }
+
+/* ---------- platforms + labels ---------- */
+var platforms = [];
+DOSES.forEach(function(d,l){
+  var p = levelPos(l);
+  var m = new THREE.Mesh(
+    new THREE.BoxGeometry(1.55, 0.09, 1.55),
+    new THREE.MeshLambertMaterial({color:0xffffff, transparent:true, opacity:0.95})
+  );
+  m.position.copy(p); ctx.add(m); platforms.push(m);
+
+  var e = new THREE.Mesh(
+    new THREE.BoxGeometry(1.60, 0.012, 1.60),
+    new THREE.MeshBasicMaterial({color:LM.C.line})
+  );
+  e.position.set(p.x, p.y+0.052, p.z); ctx.add(e);
+
+  var l1 = LM.label(d+' mg', {size:32, weight:700, color:'#0d161f', scale:0.82, depthTest:false});
+  l1.position.set(p.x, p.y+0.62, 0); ctx.add(l1);
+  var l2 = LM.label('L'+(l+1), {size:24, weight:600, color:'#8d97a3', scale:0.66, depthTest:false});
+  l2.position.set(p.x, p.y-0.30, 0); ctx.add(l2);
+});
+
+// connecting ramp
+(function(){
+  var pts=[];
+  for (var l=0;l<NL-1;l++){
+    var a=levelPos(l), b=levelPos(l+1);
+    pts.push(a.x+0.8,a.y,0, b.x-0.8,b.y,0);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineDashedMaterial({color:LM.C.faint,transparent:true,opacity:0.35})));
+})();
+
+/* ---------- patients ---------- */
+var MAXP = 120;
+var pGeo = new THREE.SphereGeometry(0.135, 14, 10);
+var pMesh = new THREE.InstancedMesh(pGeo, new THREE.MeshLambertMaterial({vertexColors:true}), MAXP);
+pMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var pCol = new Float32Array(MAXP*3);
+pMesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(pCol,3));
+ctx.add(pMesh);
+
+// MTD marker
+var mtdRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.05, 0.035, 8, 40),
+  new THREE.MeshBasicMaterial({color:LM.C.green, transparent:true, opacity:0.9})
+);
+mtdRing.rotation.x = -Math.PI/2;
+mtdRing.visible = false;
+ctx.add(mtdRing);
+
+/* ---------- the 3+3 simulation ---------- */
+var ed50 = 210, slope = 0.55, seed = 7;
+var design = '3+3';
+var sim, patients, logRows;
+
+function trueP(dose){
+  return 1/(1+Math.exp(-(Math.log(dose)-Math.log(ed50))/slope));
+}
+
+function runSim(){
+  var rnd = LM.rng(seed);
+  patients = [];      // {level, dlt, idx}
+  logRows = [];
+  var level = 0, mtd = null, stopped = false, declared = null;
+  var levelData = DOSES.map(function(){ return {n:0, dlt:0, visited:false}; });
+
+  function dose3(lv, n){
+    var dlts = 0;
+    for (var i=0;i<n;i++){
+      var d = rnd() < trueP(DOSES[lv]);
+      patients.push({level:lv, dlt:d});
+      levelData[lv].n++; if (d) levelData[lv].dlt++;
+      if (d) dlts++;
+    }
+    levelData[lv].visited = true;
+    return dlts;
+  }
+
+  var guard = 0;
+  while (!stopped && guard++ < 60){
+    if (level >= NL){ declared = NL-1; stopped = true; break; }
+
+    if (design === 'accel' && level < NL && levelData[level].n === 0){
+      // accelerated titration: 1 patient per level until the first DLT
+      var d1 = dose3(level, 1);
+      logRows.push({lv:level, n:1, dlt:d1, act:d1?'Expand to 3+3':'Escalate (single patient)'});
+      if (d1 === 0){ level++; continue; }
+      // fall through into 3+3 at this level
+    }
+
+    var first = dose3(level, 3);
+    if (first === 0){
+      logRows.push({lv:level, n:3, dlt:0, act:'0/3 DLT — escalate'});
+      level++;
+    } else if (first === 1){
+      var second = dose3(level, 3);
+      var tot = first + second;
+      if (tot === 1){
+        logRows.push({lv:level, n:6, dlt:1, act:'1/6 DLT — escalate'});
+        level++;
+      } else {
+        logRows.push({lv:level, n:6, dlt:tot, act:tot+'/6 DLT — stop'});
+        declared = level-1; stopped = true;
+      }
+    } else {
+      logRows.push({lv:level, n:3, dlt:first, act:first+'/3 DLT — stop'});
+      declared = level-1; stopped = true;
+    }
+  }
+  if (declared === null) declared = Math.max(0, level-1);
+  if (declared < 0) declared = -1;
+
+  sim = {
+    mtd: declared,
+    levelData: levelData,
+    nPatients: patients.length,
+    nDlt: patients.filter(function(p){return p.dlt;}).length
+  };
+  reveal = 0;
+}
+
+var reveal = 0;   // how many patients have been "dosed" on screen
+runSim();
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.seg(ctrls,{label:'Design', index:0, options:[
+  {label:'3 + 3', value:'3+3'},
+  {label:'Accel. titration', value:'accel'}
+], on:function(v){ design=v; runSim(); refresh(); }});
+
+LM.ui.slider(ctrls,{label:'True MTD (toxicity ED50)', min:40, max:440, step:5, value:210,
+  fmt:function(v){return Math.round(v)+' mg';}, on:function(v){ ed50=v; runSim(); refresh(); }});
+LM.ui.slider(ctrls,{label:'Dose-toxicity steepness', min:0.15, max:1.4, step:0.01, value:0.55,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){ slope=v; runSim(); refresh(); }});
+LM.ui.slider(ctrls,{label:'Dosing speed', min:0.2, max:8, step:0.1, value:1.6,
+  fmt:function(v){return v.toFixed(1)+'x';}, on:function(v){ speed=v; }});
+var speed=1.6;
+LM.ui.button(ctrls,{label:'Re-run with new randomness', solid:true, on:function(){
+  seed = Math.floor(Math.random()*100000); runSim(); refresh();
+}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Declared MTD', id:'mtd', accent:true},
+  {k:'True MTD', id:'tmtd'},
+  {k:'Patients used', id:'np'},
+  {k:'DLTs', id:'ndlt'},
+  {k:'Levels tested', id:'nl'},
+  {k:'Est. duration', id:'dur'}
+]);
+
+var logEl=document.getElementById('log');
+function refresh(){
+  // the "true" MTD is the highest dose with P(DLT) <= 0.33
+  var trueMtd = -1;
+  for (var l=0;l<NL;l++) if (trueP(DOSES[l]) <= 0.33) trueMtd = l;
+
+  setStat('mtd', sim.mtd>=0 ? DOSES[sim.mtd]+'<small> mg</small>' : 'none');
+  setStat('tmtd', trueMtd>=0 ? DOSES[trueMtd]+'<small> mg</small>' : '&lt;'+DOSES[0]);
+  setStat('np', sim.nPatients);
+  setStat('ndlt', sim.nDlt);
+  setStat('nl', sim.levelData.filter(function(d){return d.visited;}).length);
+  setStat('dur', Math.round(sim.nPatients*1.4)+'<small> wk</small>');
+
+  logEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Cohort decisions</div>'+
+    logRows.map(function(r){
+      var stop = r.act.indexOf('stop')>=0;
+      var c = stop ? '#e2503f' : '#3bb974';
+      return '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px;font-size:11px">'+
+        '<span style="font-family:var(--mono);font-size:10px;color:var(--faint);width:34px;flex:none">'+DOSES[r.lv]+'mg</span>'+
+        '<span style="flex:1;color:var(--muted)">'+r.act+'</span>'+
+        '<span style="width:7px;height:7px;border-radius:50%;background:'+c+';flex:none"></span></div>';
+    }).join('')+
+    (sim.mtd>=0 && trueMtd>=0 && sim.mtd!==trueMtd
+      ? '<p class="note" style="margin-top:8px;color:#e2503f"><b>Landed on the wrong level.</b> The 3+3 declared '+DOSES[sim.mtd]+' mg where the true MTD is '+DOSES[trueMtd]+' mg.</p>'
+      : '<p class="note" style="margin-top:8px">Re-run to see how unstable this answer is.</p>');
+}
+refresh();
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+/* ---------- frame ---------- */
+var O=new THREE.Object3D(), C=new THREE.Color();
+var cOk=new THREE.Color(LM.C.slate), cDlt=new THREE.Color(LM.C.red);
+var acc=0;
+
+ctx.onFrame(function(dt,t){
+  acc += dt*speed;
+  if (acc > 0.5){ acc=0; if (reveal < patients.length) reveal++; }
+
+  // lay patients out on their platform
+  var perLevel = {};
+  for (var i=0;i<MAXP;i++){
+    if (i >= reveal){ O.position.set(0,-999,0); O.scale.set(0.001,0.001,0.001); O.updateMatrix(); pMesh.setMatrixAt(i,O.matrix); continue; }
+    var p = patients[i];
+    var k = perLevel[p.level] = (perLevel[p.level]||0);
+    perLevel[p.level]++;
+    var base = levelPos(p.level);
+    var col = k % 3, row = Math.floor(k/3);
+    var x = base.x + (col-1)*0.42;
+    var z = base.z + (row-0.5)*0.42;
+    var bob = 0.16 + 0.03*Math.sin(t*2.4 + i*0.9);
+    var pop = LM.clamp((reveal-i)*2.5, 0, 1);
+    O.position.set(x, base.y + bob*pop, z);
+    O.scale.setScalar(pop);
+    O.updateMatrix(); pMesh.setMatrixAt(i,O.matrix);
+    C.copy(p.dlt?cDlt:cOk);
+    pCol[i*3]=C.r; pCol[i*3+1]=C.g; pCol[i*3+2]=C.b;
+  }
+  pMesh.instanceMatrix.needsUpdate=true;
+  pMesh.geometry.attributes.color.needsUpdate=true;
+
+  // platforms glow by how far the simulation has climbed
+  var reached = reveal>0 ? patients[Math.min(reveal,patients.length)-1].level : 0;
+  platforms.forEach(function(m,l){
+    var on = l<=reached;
+    m.material.color.setHex(on?0xffffff:0xf1f0ee);
+    m.material.opacity = on?0.98:0.55;
+  });
+
+  if (reveal >= patients.length && sim.mtd>=0){
+    var p = levelPos(sim.mtd);
+    mtdRing.visible = true;
+    mtdRing.position.set(p.x, p.y+0.07, p.z);
+    var s = 1 + 0.05*Math.sin(t*2.6);
+    mtdRing.scale.set(s,s,s);
+  } else mtdRing.visible = false;
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObject(pMesh);
+  if (hit.length && hit[0].instanceId!==undefined && hit[0].instanceId<reveal){
+    var p=patients[hit[0].instanceId];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">Patient '+(hit[0].instanceId+1)+'</span>'+
+      '<span class="m">Dose level '+(p.level+1)+' &middot; '+DOSES[p.level]+' mg</span>'+
+      '<div style="margin-top:5px">'+(p.dlt?'<b>Dose-limiting toxicity</b>':'No DLT')+
+      '<br>True P(DLT) at this dose: '+(trueP(DOSES[p.level])*100).toFixed(0)+'%</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

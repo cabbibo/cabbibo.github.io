@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regulatory Runway</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Laying out runway<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">05 · Design &amp; Startup</p>
+  <h1 class="viz">Regulatory <em>Runway</em></h1>
+  <p class="lede">Nothing enrols until a country is open. Each lane is a country, each block a startup activity, and the marker is first-patient-in. The lanes that finish last set your timeline.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Startup levers</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Timeline</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <p class="note">Durations are typical ranges for a Phase&nbsp;III oncology protocol. Hover a block for the activity and its owner.</p>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('05-country-startup');
+
+/* country, regulatory review days, ethics days, contract days, SIV days, sites */
+var COUNTRIES = [
+  ['Australia',        18,  38,  42, 16, 4],
+  ['United States',    30,  34,  55, 18, 12],
+  ['Canada',           38,  42,  48, 16, 3],
+  ['United Kingdom',   44,  40,  62, 20, 3],
+  ['Netherlands',      50,  52,  58, 18, 1],
+  ['Denmark',          46,  48,  54, 16, 1],
+  ['Sweden',           48,  50,  56, 17, 1],
+  ['Spain',            58,  46,  72, 20, 2],
+  ['Belgium',          52,  50,  66, 18, 1],
+  ['Germany',          62,  58,  88, 22, 3],
+  ['Poland',           68,  62,  74, 20, 2],
+  ['Czechia',          64,  58,  70, 19, 1],
+  ['Hungary',          66,  60,  72, 19, 1],
+  ['France',           78,  70,  96, 24, 2],
+  ['Italy',            84,  92, 104, 26, 2],
+  ['South Korea',      72,  64,  80, 22, 1],
+  ['Japan',            96,  74, 102, 28, 2],
+  ['Taiwan',           78,  68,  84, 22, 1],
+  ['Israel',           70,  66,  76, 20, 1],
+  ['Turkey',          104,  88,  94, 24, 1],
+  ['India',           132,  96,  98, 26, 5],
+  ['Brazil',          168, 112, 120, 30, 3],
+  ['Mexico',          124,  92, 102, 26, 1],
+  ['Argentina',       136, 100, 110, 28, 1],
+  ['China',           186, 118, 132, 32, 4],
+  ['South Africa',    118,  96,  92, 24, 2]
+];
+
+var ACTS = [
+  {k:'prep',  n:'Dossier preparation', c:LM.C.slate,  own:'Regulatory affairs'},
+  {k:'reg',   n:'Health authority review', c:LM.C.accent, own:'Competent authority'},
+  {k:'eth',   n:'Ethics / IRB approval', c:LM.C.violet, own:'IEC / IRB'},
+  {k:'ctr',   n:'Contract &amp; budget', c:LM.C.amber,  own:'Site + sponsor legal'},
+  {k:'imp',   n:'IMP release &amp; import', c:LM.C.teal, own:'Supply chain'},
+  {k:'siv',   n:'Site initiation visit', c:LM.C.green,  own:'CRA / monitoring'}
+];
+
+var LANE = 0.86, LANE_GAP = 0.20, DAY = 0.056;
+var NC = COUNTRIES.length;
+var DEPTH = NC*(LANE+LANE_GAP);
+var SPAN = 420*DAY;
+
+var ctx = LM.boot({
+  cam:[0,13,15], fov:34, fit:Math.max(DEPTH,SPAN)*0.52, fitMargin:1.04,
+  orbit:{ target:new THREE.Vector3(SPAN*0.42,0,0), minDist:9, maxDist:90,
+          autoRotate:true, autoRotateSpeed:0.045, minPolar:0.18, maxPolar:1.42 },
+  fog:[38,120]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.74,key:0.72,fill:0.26,rim:0.16});
+
+/* ---- controls state ---- */
+var parallelEthics = true, accel = 1.0, maxDays = 420;
+
+/* ---- schedule model ---- */
+var lanes = [];
+function buildSchedule(){
+  lanes = COUNTRIES.map(function(c,i){
+    var prep = 22 + (c[1]*0.10);
+    var reg  = c[1]*accel;
+    var eth  = c[2]*accel;
+    var ctr  = c[3]*accel;
+    var imp  = 18 + c[1]*0.06;
+    var siv  = c[4];
+    var t = 0, blocks = [];
+    blocks.push({k:'prep', a:t, b:t+prep}); t += prep;
+    var regStart = t;
+    var regEnd = regStart + reg;
+    var ethStart = parallelEthics ? regStart : regEnd;
+    var ethEnd = ethStart + eth;
+    blocks.push({k:'reg', a:regStart, b:regEnd});
+    blocks.push({k:'eth', a:ethStart, b:ethEnd});
+    var approved = Math.max(regEnd, ethEnd);
+    // contracts run alongside regulatory, but cannot finish before approval
+    var ctrStart = regStart + 10;
+    var ctrEnd = Math.max(ctrStart + ctr, approved);
+    blocks.push({k:'ctr', a:ctrStart, b:ctrEnd});
+    blocks.push({k:'imp', a:ctrEnd, b:ctrEnd+imp});
+    blocks.push({k:'siv', a:ctrEnd+imp, b:ctrEnd+imp+siv});
+    var fpi = ctrEnd+imp+siv;
+    return {name:c[0], sites:c[5], blocks:blocks, fpi:fpi, i:i};
+  });
+  lanes.sort(function(a,b){return a.fpi-b.fpi;});
+}
+buildSchedule();
+
+/* ---- geometry ---- */
+var allBlocks = [];
+lanes.forEach(function(L,li){ L.blocks.forEach(function(b){ allBlocks.push({L:L, b:b, li:li}); }); });
+var NB = allBlocks.length;
+
+var geo = new THREE.BoxGeometry(1, 0.30, LANE);
+geo.translate(0.5, 0.15, 0);
+var mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({vertexColors:true}), NB);
+mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var cols = new Float32Array(NB*3);
+mesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(cols,3));
+ctx.add(mesh);
+
+// FPI markers
+var fpiGeo = new THREE.ConeGeometry(0.17, 0.40, 4);
+fpiGeo.translate(0, 0.20, 0);
+var fpiMesh = new THREE.InstancedMesh(fpiGeo, new THREE.MeshLambertMaterial({color:LM.C.ink}), NC);
+fpiMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+ctx.add(fpiMesh);
+
+var labels = [];
+function rebuildLabels(){
+  labels.forEach(function(l){ ctx.scene.remove(l); l.material.map.dispose(); l.material.dispose(); });
+  labels = [];
+  lanes.forEach(function(L,li){
+    var l = LM.label(L.name, {size:30, weight:600, color:'#525c67', scale:0.78, depthTest:false});
+    l.position.set(-2.1, 0.1, laneZ(li));
+    ctx.add(l); labels.push(l);
+  });
+}
+function laneZ(li){ return -DEPTH/2 + li*(LANE+LANE_GAP) + LANE/2; }
+
+/* ---- time axis ---- */
+(function(){
+  var pts=[];
+  for (var d=0; d<=maxDays; d+=30){
+    pts.push(d*DAY, 0, -DEPTH/2-0.4, d*DAY, 0, DEPTH/2+0.4);
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.07})));
+  for (var d=0; d<=maxDays; d+=90){
+    var l=LM.label('Day '+d,{size:28,weight:600,color:'#8d97a3',scale:0.72,depthTest:false});
+    l.position.set(d*DAY, 0.06, -DEPTH/2-1.1); ctx.add(l);
+  }
+})();
+
+/* ---- a sweeping "today" plane ---- */
+var sweep = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.035, DEPTH+1.4),
+  new THREE.MeshBasicMaterial({color:LM.C.accent, transparent:true, opacity:0.55})
+);
+sweep.rotation.x = -Math.PI/2;
+sweep.position.y = 0.02;
+ctx.add(sweep);
+
+/* ---- UI ---- */
+var ctrls = document.getElementById('ctrls');
+var cursor = 0, playing = true;
+var cursorSlider = LM.ui.slider(ctrls,{label:'Day', min:0, max:maxDays, step:1, value:0,
+  fmt:function(v){return 'D'+Math.round(v);}, on:function(v){ cursor=v; }});
+LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
+  {label:'Play',value:'p'},{label:'Pause',value:'s'},{label:'Restart',value:'r'}
+], on:function(v){
+  if(v==='p') playing=true; if(v==='s') playing=false;
+  if(v==='r'){ cursor=0; cursorSlider.set(0); playing=true; }
+}});
+LM.ui.check(ctrls,{label:'Ethics in parallel with regulatory', value:true, on:function(v){
+  parallelEthics=v; rebuild();
+}});
+LM.ui.slider(ctrls,{label:'Process acceleration', min:0.4, max:1.4, step:0.02, value:1,
+  fmt:function(v){return (1/v).toFixed(2)+'x faster';},
+  on:function(v){ accel=v; rebuild(); }});
+
+var setStat = LM.ui.stats(document.getElementById('stats'),[
+  {k:'Median FPI', id:'med', accent:true},
+  {k:'Fastest', id:'fast'},
+  {k:'Slowest', id:'slow'},
+  {k:'Open today', id:'open'},
+  {k:'Sites live', id:'sl'},
+  {k:'Spread', id:'spread'}
+]);
+
+LM.ui.legend(document.getElementById('legend'), ACTS.map(function(A){
+  return {color:'#'+A.c.toString(16).padStart(6,'0'), label:A.n.replace(/&amp;/g,'&'), sub:A.own};
+}));
+
+function rebuild(){
+  buildSchedule();
+  allBlocks = [];
+  lanes.forEach(function(L,li){ L.blocks.forEach(function(b){ allBlocks.push({L:L,b:b,li:li}); }); });
+  rebuildLabels();
+  updateStats();
+}
+function updateStats(){
+  var f = lanes.map(function(L){return L.fpi;}).sort(function(a,b){return a-b;});
+  var med = f[Math.floor(f.length/2)];
+  setStat('med','D'+Math.round(med));
+  setStat('fast','D'+Math.round(f[0]));
+  setStat('slow','D'+Math.round(f[f.length-1]));
+  setStat('spread', Math.round(f[f.length-1]-f[0])+'<small>d</small>');
+}
+rebuildLabels();
+updateStats();
+
+/* ---- hover ---- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+var O=new THREE.Object3D(), C=new THREE.Color();
+var actMap={}; ACTS.forEach(function(A){actMap[A.k]=A;});
+
+ctx.onFrame(function(dt,t){
+  if (playing){
+    cursor += dt*62;
+    if (cursor>maxDays){ cursor=maxDays; playing=false; }
+    cursorSlider.el.value=cursor;
+    cursorSlider.el.previousSibling.lastChild.textContent='D'+Math.round(cursor);
+  }
+  sweep.position.x = cursor*DAY;
+
+  var openCount=0, siteCount=0;
+  for (var i=0;i<NB;i++){
+    var E = allBlocks[i], b = E.b;
+    var done = LM.clamp((cursor-b.a)/Math.max(b.b-b.a,1),0,1);
+    var w = Math.max((b.b-b.a)*DAY*done, 0.0001);
+    O.position.set(b.a*DAY, 0, laneZ(E.li));
+    O.scale.set(w, 1, 1);
+    O.rotation.set(0,0,0);
+    O.updateMatrix(); mesh.setMatrixAt(i,O.matrix);
+    C.setHex(actMap[b.k].c);
+    if (done>=1) C.lerp(new THREE.Color(0xffffff),0.18);
+    cols[i*3]=C.r; cols[i*3+1]=C.g; cols[i*3+2]=C.b;
+  }
+  mesh.instanceMatrix.needsUpdate=true;
+  mesh.geometry.attributes.color.needsUpdate=true;
+
+  for (var li=0; li<NC; li++){
+    var L=lanes[li];
+    var live = cursor>=L.fpi;
+    if (live){ openCount++; siteCount+=L.sites; }
+    O.position.set(L.fpi*DAY, 0.30, laneZ(li));
+    var s = live ? 1 + 0.12*Math.sin(t*2.6+li) : 0.55;
+    O.scale.set(s,s,s);
+    O.rotation.set(0, t*0.6 + li, 0);
+    O.updateMatrix(); fpiMesh.setMatrixAt(li,O.matrix);
+  }
+  fpiMesh.instanceMatrix.needsUpdate=true;
+  fpiMesh.material.color.setHex(openCount>0?LM.C.accent:LM.C.line);
+
+  setStat('open', openCount+'<small> / '+NC+'</small>');
+  setStat('sl', siteCount);
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObject(mesh);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var E=allBlocks[hit[0].instanceId], A=actMap[E.b.k];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+A.n.replace(/&amp;/g,'&')+'</span>'+
+      '<span class="m">'+E.L.name+' &middot; '+A.own+'</span>'+
+      '<div style="margin-top:5px">Day <b>'+Math.round(E.b.a)+'</b> &rarr; <b>'+Math.round(E.b.b)+'</b>'+
+      ' ('+Math.round(E.b.b-E.b.a)+'d)<br>Country FPI day '+Math.round(E.L.fpi)+' &middot; '+E.L.sites+' sites</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patient Journeys</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Tracing journeys<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">09 · Global Operations</p>
+  <h1 class="viz">Patient <em>Journeys</em></h1>
+  <p class="lede">Eleven thousand people are approached so that two thousand four hundred can be randomised. Every particle is one person moving through consent, randomisation, treatment and exit.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Flow model</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Disposition</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="breakdown"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('09-patient-journey');
+
+/* ---------- the alluvial model ----------
+   5 stages; each stage has nodes with a share of the incoming cohort.      */
+var COHORT = 11400;
+
+var M = {
+  consentRate : 0.42,   // of identified, consent to screening
+  screenPass  : 0.50,   // of screened, pass eligibility
+  allocA      : 0.40, allocB:0.20, allocC:0.40,
+  completed   : 0.52, progressed:0.24, aeStop:0.11, withdrew:0.07, ltfu:0.06
+};
+
+function stages(){
+  var s0 = [{k:'id', n:'Identified', v:1, c:LM.C.faint}];
+  var s1 = [
+    {k:'scr', n:'Consented &amp; screened', v:M.consentRate, c:LM.C.slate},
+    {k:'nocon', n:'Declined / not approached', v:1-M.consentRate, c:LM.C.line, dead:true}
+  ];
+  var sc = M.consentRate;
+  var s2 = [
+    {k:'rand', n:'Randomised', v:sc*M.screenPass, c:LM.C.ink},
+    {k:'sf',   n:'Screen failure', v:sc*(1-M.screenPass), c:LM.C.amber, dead:true}
+  ];
+  var r = sc*M.screenPass;
+  var s3 = [
+    {k:'armA', n:'Arm A &middot; 200 mg', v:r*M.allocA, c:LM.C.accent},
+    {k:'armB', n:'Arm B &middot; 100 mg', v:r*M.allocB, c:LM.C.violet},
+    {k:'armC', n:'Placebo',               v:r*M.allocC, c:LM.C.slate}
+  ];
+  var s4 = [
+    {k:'comp', n:'Completed treatment', v:r*M.completed,   c:LM.C.green},
+    {k:'prog', n:'Progressive disease', v:r*M.progressed,  c:LM.C.amber},
+    {k:'ae',   n:'Discontinued — AE', v:r*M.aeStop,   c:LM.C.red},
+    {k:'wd',   n:'Withdrew consent',    v:r*M.withdrew,    c:LM.C.violet},
+    {k:'ltfu', n:'Lost to follow-up',   v:r*M.ltfu,        c:LM.C.faint}
+  ];
+  return [s0,s1,s2,s3,s4];
+}
+
+var STAGE_X = [-11, -5.5, 0, 5.5, 11];
+var STAGE_LABEL = ['Identified','Screened','Randomised','Treatment arm','Outcome'];
+var HEIGHT = 9.0;
+
+var ctx = LM.boot({
+  cam:[0,2,26], fov:36, fit:12.6, fitMargin:1.06,
+  orbit:{ minDist:9, maxDist:60, autoRotate:true, autoRotateSpeed:0.06,
+          minPolar:0.55, maxPolar:2.3, pan:false },
+  fog:[30,90]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.80,key:0.60,fill:0.22,rim:0.14});
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- node geometry ---------- */
+var nodeMesh = null, nodeRecs = [], labelSprites = [];
+function layout(){
+  var S = stages(), recs = [];
+  S.forEach(function(nodes, si){
+    var total = nodes.reduce(function(a,n){return a+n.v;},0) || 1;
+    var gap = 0.34, usable = HEIGHT - gap*(nodes.length-1);
+    var y = HEIGHT/2;
+    nodes.forEach(function(n){
+      var h = n.v/total*usable;
+      n.y0 = y; n.y1 = y-h; n.yc = y-h/2; n.h = h; n.si = si;
+      y -= h+gap;
+      recs.push(n);
+    });
+  });
+  return {S:S, recs:recs};
+}
+var L = layout();
+
+function rebuildNodes(){
+  if (nodeMesh){ ctx.scene.remove(nodeMesh); nodeMesh.geometry.dispose(); nodeMesh.material.dispose(); }
+  labelSprites.forEach(function(s){ ctx.scene.remove(s); s.material.map.dispose(); s.material.dispose(); });
+  labelSprites = [];
+
+  L = layout();
+  var recs = L.recs;
+  var g = new THREE.BoxGeometry(0.44, 1, 0.70);
+  nodeMesh = new THREE.InstancedMesh(g, new THREE.MeshLambertMaterial({vertexColors:true, transparent:true, opacity:0.95}), recs.length);
+  var cols = new Float32Array(recs.length*3);
+  nodeMesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(cols,3));
+  var O=new THREE.Object3D(), C=new THREE.Color();
+  recs.forEach(function(n,i){
+    O.position.set(STAGE_X[n.si], n.yc, 0);
+    O.scale.set(1, Math.max(n.h,0.02), 1);
+    O.updateMatrix(); nodeMesh.setMatrixAt(i,O.matrix);
+    C.setHex(n.c); cols[i*3]=C.r; cols[i*3+1]=C.g; cols[i*3+2]=C.b;
+
+    var txt = n.n.replace(/&amp;/g,'&').replace(/&middot;/g,'·');
+    var lab = LM.label(txt+'  '+LM.fmt(Math.round(n.v*COHORT)), {
+      size:28, weight:600,
+      color:'#'+(n.dead?0x8d97a3:n.c).toString(16).padStart(6,'0'),
+      scale:0.72, depthTest:false
+    });
+    var side = n.si===4 ? 1 : (n.si===0 ? -1 : 1);
+    lab.position.set(STAGE_X[n.si] + side*(lab.scale.x/2 + 0.45), n.yc, 0.55);
+    ctx.add(lab); labelSprites.push(lab);
+  });
+  nodeMesh.geometry.attributes.color.needsUpdate = true;
+  ctx.add(nodeMesh);
+  nodeRecs = recs;
+}
+rebuildNodes();
+
+// stage headers
+STAGE_LABEL.forEach(function(t,i){
+  var l = LM.label(t.toUpperCase(), {size:26, weight:700, color:'#8d97a3', scale:0.74, depthTest:false});
+  l.position.set(STAGE_X[i], HEIGHT/2+0.85, 0);
+  ctx.add(l);
+});
+
+/* ---------- GPU journeys ----------
+   Each particle is one person. Its vertical position at each of the 5 stages
+   is baked into two RGBA textures; the shader interpolates between them.    */
+var PW=160, PH=160, PN=PW*PH;
+var pathA = new Float32Array(PN*4);   // y0,y1,y2,y3
+var pathB = new Float32Array(PN*4);   // y4, colourIdx, deadStage, speedJitter
+
+var PALETTE = [LM.C.faint, LM.C.slate, LM.C.line, LM.C.ink, LM.C.amber,
+               LM.C.accent, LM.C.violet, LM.C.slate, LM.C.green, LM.C.amber,
+               LM.C.red, LM.C.violet, LM.C.faint];
+function palIdx(c){ for (var i=0;i<PALETTE.length;i++) if (PALETTE[i]===c) return i; return 0; }
+
+var texA = new THREE.DataTexture(pathA, PW, PH, THREE.RGBAFormat, THREE.FloatType);
+var texB = new THREE.DataTexture(pathB, PW, PH, THREE.RGBAFormat, THREE.FloatType);
+texA.minFilter=texA.magFilter=THREE.NearestFilter;
+texB.minFilter=texB.magFilter=THREE.NearestFilter;
+
+function pickWeighted(nodes, r){
+  var total = nodes.reduce(function(a,n){return a+n.v;},0);
+  var acc=0;
+  for (var i=0;i<nodes.length;i++){ acc += nodes[i].v/total; if (r<=acc) return nodes[i]; }
+  return nodes[nodes.length-1];
+}
+function bakePaths(){
+  var S = L.S, rnd = LM.rng(8891);
+  for (var i=0;i<PN;i++){
+    var n0 = S[0][0];
+    var n1 = pickWeighted(S[1], rnd());
+    var deadAt = 5, node = n1;
+    var y = [n0.yc, n1.yc, 0,0,0];
+    var colNode = n1;
+    if (n1.dead){ deadAt = 1; y[2]=y[3]=y[4]=n1.yc; }
+    else {
+      var n2 = pickWeighted(S[2], rnd());
+      y[2]=n2.yc; colNode=n2;
+      if (n2.dead){ deadAt = 2; y[3]=y[4]=n2.yc; }
+      else {
+        var n3 = pickWeighted(S[3], rnd());
+        var n4 = pickWeighted(S[4], rnd());
+        y[3]=n3.yc; y[4]=n4.yc; colNode=n3;
+      }
+    }
+    pathA[i*4]=y[0]; pathA[i*4+1]=y[1]; pathA[i*4+2]=y[2]; pathA[i*4+3]=y[3];
+    pathB[i*4]=y[4];
+    pathB[i*4+1]=palIdx(colNode.c);
+    pathB[i*4+2]=deadAt;
+    pathB[i*4+3]=0.65+rnd()*0.7;
+  }
+  texA.needsUpdate = true; texB.needsUpdate = true;
+}
+bakePaths();
+
+var frag=[
+ 'uniform sampler2D uPrev;uniform float uDt,uSpeed;',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' float p=st.x+uDt*uSpeed*st.y*0.085;',
+ ' if(p>1.06){ p=-0.06-hash11(idx*0.37)*0.10; }',
+ ' gl_FragColor=vec4(p,st.y,st.z,1.0);',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{uSpeed:{value:1.0}},function(d,w,h){
+  var rnd=LM.rng(553);
+  for (var i=0;i<w*h;i++){
+    d[i*4]=rnd();                 // progress 0..1
+    d[i*4+1]=0.65+rnd()*0.7;      // speed jitter
+    d[i*4+2]=rnd();               // z jitter seed
+    d[i*4+3]=1;
+  }
+});
+
+var palArr = PALETTE.map(function(c){return new THREE.Color(c);});
+var pMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uProg:{value:gpu.texture}, uA:{value:texA}, uB:{value:texB},
+    uPix:uPix, uSize:{value:0.052},
+    uPal:{value:palArr},
+    uX:{value:STAGE_X.slice()},
+    uSpread:{value:0.62}, uFade:{value:1.0}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uProg,uA,uB;uniform float uSize,uSpread;uniform float uX[5];',
+    'attribute vec2 aRef;attribute float aIdx;',
+    'varying float vPal;varying float vA;',
+    'void main(){',
+    ' vec4 pr=texture2D(uProg,aRef);',
+    ' vec4 A=texture2D(uA,aRef); vec4 B=texture2D(uB,aRef);',
+    ' float p=clamp(pr.x,0.0,1.0);',
+    ' float seg=p*4.0; int si=int(floor(seg)); float f=fract(seg);',
+    ' if(si>3){si=3;f=1.0;}',
+    ' float ya,yb,xa,xb;',
+    ' if(si==0){ya=A.x;yb=A.y;xa=uX[0];xb=uX[1];}',
+    ' else if(si==1){ya=A.y;yb=A.z;xa=uX[1];xb=uX[2];}',
+    ' else if(si==2){ya=A.z;yb=A.w;xa=uX[2];xb=uX[3];}',
+    ' else {ya=A.w;yb=B.x;xa=uX[3];xb=uX[4];}',
+    ' float sm=f*f*(3.0-2.0*f);',
+    ' float y=mix(ya,yb,sm);',
+    ' float x=mix(xa,xb,f);',
+    ' float z=(pr.z-0.5)*uSpread;',
+    ' // people who exit the study stop moving and fade',
+    ' float dead=B.z;',
+    ' float stageNow=p*4.0;',
+    ' float stopped=step(dead+0.001,stageNow);',
+    ' vPal=B.y;',
+    ' vA=(1.0-stopped*0.72)*(1.0-smoothstep(0.93,1.06,pr.x))*smoothstep(-0.06,0.03,pr.x);',
+    ' vec4 mv=modelViewMatrix*vec4(x,y,z,1.0);',
+    ' gl_PointSize=lmSize(uSize,mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uPal[13];varying float vPal;varying float vA;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' int pi=int(vPal+0.5); vec3 c=vec3(0.5);',
+    ' for(int k=0;k<13;k++){ if(k==pi) c=uPal[k]; }',   // ES 1.00: constant-index only
+    ' gl_FragColor=vec4(c,(1.0-smoothstep(0.2,1.0,d))*vA*0.85);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), pMat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+function reflow(){ rebuildNodes(); bakePaths(); refresh(); }
+
+LM.ui.slider(ctrls,{label:'Consent rate', min:0.1, max:1, step:0.01, value:M.consentRate,
+  fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){M.consentRate=v;reflow();}});
+LM.ui.slider(ctrls,{label:'Screening pass rate', min:0.1, max:1, step:0.01, value:M.screenPass,
+  fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){M.screenPass=v;reflow();}});
+LM.ui.slider(ctrls,{label:'Completed treatment', min:0.1, max:0.9, step:0.01, value:M.completed,
+  fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){
+    var rest=1-v, k=(M.progressed+M.aeStop+M.withdrew+M.ltfu)||1;
+    M.progressed*=rest/k; M.aeStop*=rest/k; M.withdrew*=rest/k; M.ltfu*=rest/k;
+    M.completed=v; reflow();
+  }});
+LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:4, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uSpeed.value=v;}});
+LM.ui.slider(ctrls,{label:'Ribbon depth', min:0, max:2.4, step:0.05, value:0.62,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){pMat.uniforms.uSpread.value=v;}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Identified', id:'id'},
+  {k:'Screened', id:'sc'},
+  {k:'Randomised', id:'rd', accent:true},
+  {k:'Screen failure', id:'sf'},
+  {k:'Completed', id:'cp'},
+  {k:'Attrition', id:'at'}
+]);
+
+var bd=document.getElementById('breakdown');
+function refresh(){
+  var sc=M.consentRate, r=sc*M.screenPass;
+  setStat('id', LM.fmt(COHORT));
+  setStat('sc', LM.fmt(Math.round(COHORT*sc)));
+  setStat('rd', LM.fmt(Math.round(COHORT*r)));
+  setStat('sf', LM.pct(1-M.screenPass,0));
+  setStat('cp', LM.fmt(Math.round(COHORT*r*M.completed)));
+  setStat('at', LM.pct(1-M.completed,0));
+
+  var outs = L.S[4];
+  var tot = outs.reduce(function(a,n){return a+n.v;},0)||1;
+  bd.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Outcome of the randomised</div>'+
+    outs.map(function(n){
+      var c='#'+n.c.toString(16).padStart(6,'0');
+      return '<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span>'+n.n.replace(/&amp;/g,'&').replace(/&middot;/g,'·')+'</span>'+
+        '<span style="color:'+c+'">'+LM.fmt(Math.round(n.v*COHORT))+'</span></div>'+
+        '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+        '<div style="height:100%;width:'+(n.v/tot*100).toFixed(1)+'%;background:'+c+';border-radius:2px"></div></div></div>';
+    }).join('');
+}
+refresh();
+
+ctx.onFrame(function(dt,t){
+  gpu.step(Math.min(dt,0.033), t);
+  pMat.uniforms.uProg.value = gpu.texture;
+});
+})();
+</script>
+</body>
+</html>

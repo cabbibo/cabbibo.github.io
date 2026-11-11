@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Phase Cascade</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Seeding candidates<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">01 · Design &amp; Startup</p>
+  <h1 class="viz">The Phase <em>Cascade</em></h1>
+  <p class="lede">A thousand candidate molecules enter at the top. Each gate is a phase transition, and each one throws most of them away. Only the beam that reaches the floor is approved.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Phase transition rates</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Survivors</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="funnel"></div>
+  <hr class="sep">
+  <p class="note">Defaults are industry transition rates for 2011&ndash;2020 (BIO / Informa / QLS, 12,728 transitions). Overall Phase&nbsp;I &rarr; approval is <b>7.9%</b>.</p>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('01-trial-phases');
+
+var GATES = [
+  {name:'Preclinical → IND', short:'IND',  p:0.100, y: 5.0, col:LM.C.slate,  note:'Tox, CMC, IND-enabling'},
+  {name:'Phase I → II',      short:'PH I', p:0.520, y: 2.5, col:LM.C.teal,   note:'Safety, PK, dose finding'},
+  {name:'Phase II → III',    short:'PH II',p:0.289, y: 0.0, col:LM.C.violet, note:'Proof of concept — the killing field'},
+  {name:'Phase III → NDA',   short:'PH III',p:0.578,y:-2.5, col:LM.C.amber,  note:'Confirmatory, pivotal'},
+  {name:'NDA/BLA → Approval',short:'NDA',  p:0.906, y:-5.0, col:LM.C.accent, note:'Regulatory review'}
+];
+var TOP = 7.6, FLOOR = -7.4, START = 1000;
+
+var ctx = LM.boot({
+  cam:[0,0.4,23], fov:36, fit:9.4, fitMargin:1.08,
+  orbit:{ minDist:9, maxDist:48, autoRotate:true, autoRotateSpeed:0.08, pan:false,
+          minPolar:0.55, maxPolar:2.45 },
+  fog:[24,62]
+});
+if(!ctx) return;
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- gate furniture ---------- */
+function ringLine(r, col, op, y){
+  var pts=[], seg=160;
+  for (var i=0;i<=seg;i++){ var a=i/seg*Math.PI*2; pts.push(Math.cos(a)*r, 0, Math.sin(a)*r); }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  var l = new THREE.Line(g, new THREE.LineBasicMaterial({color:col, transparent:true, opacity:op}));
+  l.position.y = y;
+  return l;
+}
+function gateRadius(y){ return LM.lerp(3.0, 0.62, LM.clamp((TOP-y)/(TOP-FLOOR),0,1)); }
+
+var gateMeshes = [];
+GATES.forEach(function(G,i){
+  var r = gateRadius(G.y);
+  var disc = new THREE.Mesh(
+    new THREE.RingGeometry(r*0.04, r, 64),
+    new THREE.MeshBasicMaterial({color:G.col, transparent:true, opacity:0.055, side:THREE.DoubleSide, depthWrite:false})
+  );
+  disc.rotation.x = -Math.PI/2; disc.position.y = G.y;
+  ctx.add(disc);
+  ctx.add(ringLine(r, G.col, 0.55, G.y));
+  ctx.add(ringLine(r*0.985, G.col, 0.18, G.y-0.012));
+
+  var lab = LM.label(G.short, {size:40, weight:700, color:'#'+G.col.toString(16).padStart(6,'0'), scale:1.05, depthTest:false});
+  lab.position.set(r+0.95, G.y+0.30, 0);
+  ctx.add(lab);
+  var cnt = LM.label('—', {size:34, weight:600, color:'#525c67', scale:1.0, depthTest:false});
+  cnt.position.set(r+0.95, G.y-0.28, 0);
+  ctx.add(cnt);
+  gateMeshes.push({disc:disc, lab:lab, cnt:cnt, r:r});
+});
+
+// entry + exit markers
+(function(){
+  var e = LM.label('1,000 CANDIDATES', {size:32, weight:700, color:'#0d161f', scale:1.0, depthTest:false});
+  e.position.set(0, TOP+0.75, 0); ctx.add(e);
+  var x = LM.label('APPROVED', {size:32, weight:700, color:'#d82591', scale:1.0, depthTest:false});
+  x.position.set(0, FLOOR-0.75, 0); ctx.add(x);
+  ctx.add(ringLine(gateRadius(TOP), LM.C.ink, 0.22, TOP));
+  ctx.add(ringLine(gateRadius(FLOOR), LM.C.accent, 0.45, FLOOR));
+})();
+
+/* vertical guide rails give the funnel a readable silhouette */
+(function(){
+  var pts=[], R=14;
+  for (var k=0;k<R;k++){
+    var a = k/R*Math.PI*2;
+    for (var s=0;s<28;s++){
+      var y0 = LM.lerp(TOP,FLOOR,s/28), y1 = LM.lerp(TOP,FLOOR,(s+1)/28);
+      var r0 = gateRadius(y0), r1 = gateRadius(y1);
+      pts.push(Math.cos(a)*r0,y0,Math.sin(a)*r0, Math.cos(a)*r1,y1,Math.sin(a)*r1);
+    }
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({color:LM.C.ink, transparent:true, opacity:0.055})));
+})();
+
+/* ---------- GPGPU cascade ---------- */
+var PW=128, PH=128;
+var uSurv = { value: GATES.map(function(g){return g.p;}) };
+var uGateY = { value: GATES.map(function(g){return g.y;}) };
+var uSpeed = { value: 1.0 };
+
+var frag = [
+  'uniform sampler2D uPrev;uniform float uDt,uTime,uSpeed;',
+  'uniform float uSurv[5];uniform float uGateY[5];',
+  'uniform float uTop,uFloor;',
+  'varying vec2 vUv;',
+  LM.glsl.hash,
+  'float gateR(float y){return mix(3.0,0.62,clamp((uTop-y)/(uTop-uFloor),0.0,1.0));}',
+  'void main(){',
+  ' vec4 st=texture2D(uPrev,vUv);',
+  ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+  ' vec3 p=st.xyz; float s=st.w;',
+  ' float v=uSpeed*(2.05+hash11(idx*0.117)*0.75);',
+  ' if(s>0.0){',
+  '   float ny=p.y-v*uDt;',
+  '   for(int g=0;g<5;g++){',
+  '     float gy=uGateY[g];',
+  '     if(p.y>gy&&ny<=gy&&s>0.0){',
+  '       float r=hash11(idx*7.31+float(g)*113.7+floor(uTime*0.37)*17.0);',
+  '       if(r>uSurv[g]) s=-(float(g)+1.0);',   // negative: parked/rejected at gate g
+  '     }',
+  '   }',
+  '   p.y=ny;',
+  '   if(s>0.0){',
+  '     // funnel: pull survivors toward the radius of their current depth',
+  '     float tr=gateR(p.y)*(0.30+hash11(idx*2.9)*0.62);',
+  '     vec2 xz=p.xz; float cr=length(xz)+1e-5;',
+  '     xz=xz/cr*mix(cr,tr,1.0-exp(-2.4*uDt));',
+  '     float a=uTime*0.22+hash11(idx*5.1)*6.283;',
+  '     xz+=vec2(cos(a),sin(a))*0.0035;',
+  '     p.xz=xz;',
+  '   }',
+  ' } else {',
+  '   // rejected: thrown outward in the colour of the gate that killed it',
+  '   float g=floor(-s)-1.0; float timer=-s-(g+1.0);',
+  '   vec3 h=hash33(vec3(idx*0.021,idx*0.0071,3.1))*2.0-1.0;',
+  '   p.y-=v*uDt*0.34;',
+  '   p.xz+=normalize(p.xz+h.xz*0.45+1e-4)*uDt*2.9*(1.0-timer*0.55);',
+  '   timer+=uDt*0.46;',
+  '   s=-((g+1.0)+min(timer,0.999));',
+  '   if(timer>=0.999) s=0.0;',               // 0 => recycle below
+  ' }',
+  ' if(p.y<uFloor-0.6||s==0.0){',
+  '   vec3 h=hash33(vec3(idx*0.0131,uTime*0.71,idx*0.049));',
+  '   float a=h.x*6.283, rr=sqrt(h.y)*gateR(uTop)*0.94;',
+  '   p=vec3(cos(a)*rr,uTop+h.z*1.5,sin(a)*rr);',
+  '   s=1.0;',
+  ' }',
+  ' gl_FragColor=vec4(p,s);',
+  '}'
+].join('\n');
+
+var gpu = new LM.GPGPU(ctx.renderer, PW, PH, frag, {
+  uSurv:uSurv, uGateY:uGateY, uSpeed:uSpeed,
+  uTop:{value:TOP}, uFloor:{value:FLOOR}
+}, function(d,w,h){
+  var rnd=LM.rng(31);
+  for (var i=0;i<w*h;i++){
+    var a=rnd()*Math.PI*2, r=Math.sqrt(rnd())*2.8;
+    d[i*4]=Math.cos(a)*r; d[i*4+1]=LM.lerp(TOP,FLOOR,rnd()); d[i*4+2]=Math.sin(a)*r; d[i*4+3]=1;
+  }
+});
+
+var mat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uPos:{value:gpu.texture}, uPix:uPix,
+    uAlive:{value:new THREE.Color(LM.C.ink)},
+    uHot:{value:new THREE.Color(LM.C.accent)},
+    uGateCol:{value:GATES.map(function(g){return new THREE.Color(g.col);})},
+    uSize:{value:0.055}, uFloor:{value:FLOOR}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uPos;uniform float uSize,uFloor;attribute vec2 aRef;',
+    'varying float vS;varying float vY;',
+    'void main(){vec4 s=texture2D(uPos,aRef);vS=s.w;vY=s.y;',
+    ' vec4 mv=modelViewMatrix*vec4(s.xyz,1.0);',
+    ' float sz=uSize*(s.w>0.0?1.0:0.72);',
+    ' gl_PointSize=lmSize(sz,mv);gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uAlive,uHot;uniform vec3 uGateCol[5];uniform float uFloor;',
+    'varying float vS;varying float vY;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' float a=1.0-smoothstep(0.25,1.0,d);',
+    ' vec3 c; float o;',
+    ' if(vS>0.0){',
+    '   float deep=smoothstep(0.0,-5.2,vY);',      // the closer to approval, the hotter
+    '   c=mix(uAlive,uHot,deep); o=0.82;',
+    ' } else {',
+    '   float g=floor(-vS)-1.0; float timer=-vS-(g+1.0);',
+    '   int gi=int(g); c=vec3(0.55);',
+    '   for(int k=0;k<5;k++){ if(k==gi) c=uGateCol[k]; }',  // ES 1.00: constant-index only
+    '   o=0.46*(1.0-smoothstep(0.35,1.0,timer));',
+    ' }',
+    ' gl_FragColor=vec4(c,a*o);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), mat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+GATES.forEach(function(G,i){
+  LM.ui.slider(ctrls,{
+    label:G.name, min:0.01, max:1, step:0.001, value:G.p,
+    fmt:function(v){return (v*100).toFixed(1)+'%';},
+    on:function(v){ G.p=v; uSurv.value[i]=v; refresh(); }
+  });
+});
+LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:3, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
+LM.ui.button(ctrls,{label:'Reset to industry rates', on:function(){
+  var def=[0.100,0.520,0.289,0.578,0.906];
+  var sl=ctrls.querySelectorAll('input[type=range]');
+  for (var i=0;i<5;i++){ sl[i].value=def[i]; sl[i].dispatchEvent(new Event('input')); }
+}});
+
+var setStat = LM.ui.stats(document.getElementById('stats'), [
+  {k:'Enter Phase I', id:'in'},
+  {k:'Reach approval', id:'out', accent:true},
+  {k:'Cumulative odds', id:'odds'},
+  {k:'Needed for 1', id:'need'}
+]);
+
+var funnel = document.getElementById('funnel');
+function refresh(){
+  var n = START, rows=[], cum=1;
+  GATES.forEach(function(G,i){
+    n = n*G.p; cum *= G.p;
+    rows.push({G:G, n:n, cum:cum});
+    gateMeshes[i].cnt.material.map.image; // keep ref
+  });
+  // phase-I-onward odds (gates 1..4)
+  var ph1 = GATES[1].p*GATES[2].p*GATES[3].p*GATES[4].p;
+  setStat('in', LM.fmt(START*GATES[0].p));
+  setStat('out', LM.fmt(rows[4].n, rows[4].n<10?1:0));
+  setStat('odds', (ph1*100).toFixed(1)+'%');
+  setStat('need', LM.fmt(Math.round(1/Math.max(ph1,1e-6))) + '<small> cands</small>');
+
+  funnel.innerHTML = rows.map(function(r){
+    var w = Math.max(2, Math.pow(r.cum,0.33)*100);
+    var c = '#'+r.G.col.toString(16).padStart(6,'0');
+    return '<div style="margin-bottom:7px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span>'+r.G.short+'</span><span style="color:'+c+'">'+LM.fmt(r.n, r.n<10?1:0)+'</span></div>'+
+      '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+        '<div style="height:100%;width:'+w+'%;background:'+c+';border-radius:2px"></div></div>'+
+      '<div class="note" style="font-size:10px;margin-top:2px;color:var(--faint)">'+r.G.note+'</div></div>';
+  }).join('');
+
+  // refresh the 3D gate count labels
+  rows.forEach(function(r,i){
+    var gm = gateMeshes[i];
+    var txt = LM.fmt(r.n, r.n<10?1:0);
+    var fresh = LM.label(txt, {size:34, weight:600, color:'#525c67', scale:1.0, depthTest:false});
+    fresh.position.copy(gm.cnt.position);
+    ctx.scene.remove(gm.cnt);
+    gm.cnt.material.map.dispose(); gm.cnt.material.dispose();
+    gm.cnt = fresh; ctx.add(fresh);
+  });
+}
+refresh();
+
+ctx.onFrame(function(dt,t){
+  gpu.step(Math.min(dt,0.033), t);
+  mat.uniforms.uPos.value = gpu.texture;
+  // gentle breathing on the gate discs
+  for (var i=0;i<gateMeshes.length;i++){
+    gateMeshes[i].disc.material.opacity = 0.045 + 0.028*Math.sin(t*1.1 + i*0.9);
+  }
+});
+})();
+</script>
+</body>
+</html>

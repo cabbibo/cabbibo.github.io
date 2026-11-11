@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cold Chain</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Routing shipments<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">10 · Global Operations</p>
+  <h1 class="viz">Cold <em>Chain</em></h1>
+  <p class="lede">Investigational product moving from five regional depots to eighty-four sites. Every shipment carries a temperature logger &mdash; and every excursion is a quarantine, a resupply, and a missed dose.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Supply controls</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>In transit</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <div id="depots"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('10-supply-chain');
+
+var R = 5.0, sites = LM.study.sites, N = sites.length;
+
+var DEPOTS = [
+  {n:'Memphis',   r:'NA',    lat:35.15, lon:-90.05, c:LM.C.accent},
+  {n:'Amsterdam', r:'EU',    lat:52.31, lon:4.76,   c:LM.C.slate},
+  {n:'São Paulo', r:'LATAM', lat:-23.43, lon:-46.47, c:LM.C.amber},
+  {n:'Dubai',     r:'EMEA',  lat:25.25, lon:55.36,  c:LM.C.violet},
+  {n:'Singapore', r:'APAC',  lat:1.36,  lon:103.99, c:LM.C.teal}
+];
+var depotOf = {}; DEPOTS.forEach(function(d,i){ depotOf[d.r]=i; });
+
+var ctx = LM.boot({
+  cam:[0,3.6,15], fov:38, fit:R*1.52, fitMargin:1.08,
+  orbit:{ minDist:7, maxDist:42, autoRotate:true, autoRotateSpeed:0.095, pan:false },
+  fog:[22,62]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.58,key:0.78,fill:0.30,rim:0.18});
+var uPix = LM.pixUniform(ctx);
+var globe = LM.globe(ctx, R, {pix:uPix, rimStrength:0.18, dotAlpha:0.62});
+
+/* ---------- arcs: depot -> site ---------- */
+var SAMPLES = 64, ARCH = 128;
+var arcData = new Float32Array(SAMPLES*ARCH*4);
+var arcLines = [];
+var arcMeta = [];
+
+for (var i=0;i<N;i++){
+  var s = sites[i];
+  var d = DEPOTS[depotOf[s.region]];
+  var a = LM.geo.toVec3(d.lat, d.lon, R*1.005);
+  var b = LM.geo.toVec3(s.lat, s.lon, R*1.005);
+  var curve = LM.geo.arc(a, b, 0.30);
+  var pts = curve.getPoints(SAMPLES-1);
+  for (var k=0;k<SAMPLES;k++){
+    var o = (i*SAMPLES + k)*4;
+    arcData[o] = pts[k].x; arcData[o+1] = pts[k].y; arcData[o+2] = pts[k].z; arcData[o+3] = 1;
+  }
+  arcMeta.push({site:s, depot:depotOf[s.region], len:a.distanceTo(b)});
+  // faint route line
+  for (var k=0;k<SAMPLES-1;k++){
+    arcLines.push(pts[k].x,pts[k].y,pts[k].z, pts[k+1].x,pts[k+1].y,pts[k+1].z);
+  }
+}
+var arcTex = new THREE.DataTexture(arcData, SAMPLES, ARCH, THREE.RGBAFormat, THREE.FloatType);
+arcTex.minFilter = arcTex.magFilter = THREE.LinearFilter;
+arcTex.wrapS = THREE.ClampToEdgeWrapping;
+arcTex.needsUpdate = true;
+
+(function(){
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(arcLines,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.slate,transparent:true,opacity:0.15})));
+})();
+
+/* ---------- depot + site markers ---------- */
+var depotMeshes = [];
+DEPOTS.forEach(function(d){
+  var p = LM.geo.toVec3(d.lat, d.lon, R*1.01);
+  var m = new THREE.Mesh(new THREE.OctahedronGeometry(0.14),
+          new THREE.MeshLambertMaterial({color:d.c}));
+  m.position.copy(p); ctx.add(m); depotMeshes.push(m);
+  var l = LM.label(d.n, {size:30, weight:700, color:'#'+d.c.toString(16).padStart(6,'0'), scale:0.80, depthTest:true});
+  l.position.copy(p.clone().multiplyScalar(1.09)); ctx.add(l);
+  d._mesh = m;
+});
+
+var siteGeo = new THREE.SphereGeometry(0.040,8,6);
+var siteMesh = new THREE.InstancedMesh(siteGeo, new THREE.MeshBasicMaterial({vertexColors:true}), N);
+var sCol = new Float32Array(N*3);
+siteMesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(sCol,3));
+var O=new THREE.Object3D(), C=new THREE.Color();
+for (var i=0;i<N;i++){
+  O.position.copy(LM.geo.toVec3(sites[i].lat, sites[i].lon, R*1.01));
+  O.scale.set(1,1,1); O.updateMatrix(); siteMesh.setMatrixAt(i,O.matrix);
+  C.setHex(DEPOTS[depotOf[sites[i].region]].c);
+  sCol[i*3]=C.r; sCol[i*3+1]=C.g; sCol[i*3+2]=C.b;
+}
+siteMesh.instanceMatrix.needsUpdate=true;
+siteMesh.geometry.attributes.color.needsUpdate=true;
+ctx.add(siteMesh);
+
+/* ---------- GPGPU shipments ----------
+   state: x = progress 0..1, y = temperature (C), z = arc index, w = status
+          w =  1  nominal
+          w = -t  excursion (t counts 0..1 then respawns)                     */
+var PW=40, PH=40;
+var uExcursion = { value: 0.022 };  // per-check probability once out of range
+var uSpeed = { value: 1.0 };
+
+var frag=[
+ 'uniform sampler2D uPrev;uniform float uDt,uTime,uSpeed,uN,uExc,uAmb;',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' float p=st.x, temp=st.y, arc=st.z, status=st.w;',
+ ' if(status>0.0){',
+ '   float v=uSpeed*(0.045+hash11(idx*0.71)*0.045);',
+ '   p+=v*uDt;',
+ '   // temperature random-walks around 5C, pulled by ambient on long legs',
+ '   float n=hash11(idx*3.7+floor(uTime*8.0))*2.0-1.0;',
+ '   temp+=n*uDt*7.0+(uAmb-temp)*uDt*0.17;',
+ '   if(temp<2.0||temp>8.0){',
+ '     if(hash11(idx*9.13+floor(uTime*4.0))<uExc) status=-0.001;',
+ '   }',
+ '   if(p>=1.0){',
+ '     p=0.0; temp=5.0;',
+ '     arc=floor(hash11(idx*1.37+uTime*0.91)*uN);',
+ '   }',
+ ' } else {',
+ '   status-=uDt*0.55;',
+ '   if(status<-1.0){',
+ '     status=1.0; p=0.0; temp=5.0;',
+ '     arc=floor(hash11(idx*2.11+uTime*1.37)*uN);',
+ '   }',
+ ' }',
+ ' gl_FragColor=vec4(p,temp,arc,status);',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{
+  uN:{value:N}, uExc:uExcursion, uSpeed:uSpeed, uAmb:{value:9.0}
+},function(d,w,h){
+  var rnd=LM.rng(661);
+  for (var i=0;i<w*h;i++){
+    d[i*4]=rnd(); d[i*4+1]=4.5+rnd(); d[i*4+2]=Math.floor(rnd()*N); d[i*4+3]=1;
+  }
+});
+
+var pMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uState:{value:gpu.texture}, uArcs:{value:arcTex}, uPix:uPix,
+    uSize:{value:0.085}, uArcH:{value:ARCH},
+    uCold:{value:new THREE.Color(LM.C.teal)},
+    uOk:{value:new THREE.Color(LM.C.green)},
+    uWarm:{value:new THREE.Color(LM.C.amber)},
+    uBad:{value:new THREE.Color(LM.C.red)}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uState,uArcs;uniform float uSize,uArcH;',
+    'attribute vec2 aRef;varying float vT;varying float vS;',
+    'void main(){',
+    ' vec4 s=texture2D(uState,aRef);',
+    ' vec3 pos=texture2D(uArcs,vec2(clamp(s.x,0.0,1.0),(s.z+0.5)/uArcH)).xyz;',
+    ' vT=s.y; vS=s.w;',
+    ' vec4 mv=modelViewMatrix*vec4(pos,1.0);',
+    ' gl_PointSize=lmSize(uSize*(s.w>0.0?1.0:1.45),mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCold,uOk,uWarm,uBad;varying float vT;varying float vS;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' float a=1.0-smoothstep(0.18,1.0,d);',
+    ' vec3 c;float o;',
+    ' if(vS>0.0){',
+    '   c = vT<2.0 ? uCold : (vT>8.0 ? uWarm : uOk);',
+    '   o = 0.88;',
+    ' } else {',
+    '   float tm=-vS;',
+    '   c = uBad;',
+    '   o = 0.95*(1.0-smoothstep(0.3,1.0,tm));',
+    '   a *= 1.0+ (1.0-tm)*0.6;',
+    ' }',
+    ' gl_FragColor=vec4(c,a*o);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), pMat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.slider(ctrls,{label:'Shipment speed', min:0.1, max:4, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
+LM.ui.slider(ctrls,{label:'Excursion sensitivity', min:0, max:0.2, step:0.002, value:0.022,
+  fmt:function(v){return (v*100).toFixed(1)+'%';}, on:function(v){uExcursion.value=v;}});
+LM.ui.slider(ctrls,{label:'Ambient temperature', min:-10, max:40, step:1, value:9,
+  fmt:function(v){return v+'°C';}, on:function(v){gpu.uniforms.uAmb.value=v; ambient=v; }});
+var ambient=9;
+LM.ui.seg(ctrls,{label:'Packaging', index:1, options:[
+  {label:'Passive', value:0},{label:'Phase-change', value:1},{label:'Active', value:2}
+], on:function(v){
+  var mult=[2.6,1.0,0.3][v];
+  var sl=ctrls.querySelectorAll('input[type=range]')[1];
+  sl.value = LM.clamp(0.022*mult,0,0.2); sl.dispatchEvent(new Event('input'));
+}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Shipments', id:'ship', accent:true},
+  {k:'Excursions', id:'exc'},
+  {k:'Compliant', id:'ok'},
+  {k:'Depots', id:'dep'},
+  {k:'Mean temp', id:'temp'},
+  {k:'Lanes', id:'lane'}
+]);
+
+LM.ui.legend(document.getElementById('legend'),[
+  {color:'#3bb974', label:'In range 2&ndash;8°C', sub:'Nominal cold chain', round:true},
+  {color:'#00a9b1', label:'Below range', sub:'Freeze risk', round:true},
+  {color:'#ed9e2f', label:'Above range', sub:'Approaching excursion', round:true},
+  {color:'#e2503f', label:'Excursion — quarantined', sub:'Resupply required', round:true}
+]);
+
+document.getElementById('depots').innerHTML =
+  '<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Depot network</div>'+
+  DEPOTS.map(function(d){
+    var n = sites.filter(function(s){return s.region===d.r;}).length;
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px">'+
+      '<span style="width:9px;height:9px;transform:rotate(45deg);background:#'+d.c.toString(16).padStart(6,'0')+';flex:none"></span>'+
+      '<span style="font-weight:600;flex:1">'+d.n+'</span>'+
+      '<span style="font-family:var(--mono);font-size:10.5px;color:var(--muted)">'+n+' sites</span></div>';
+  }).join('');
+
+/* ---------- CPU mirror of the same model, for honest statistics ----------
+   Float render targets cannot be read back reliably across drivers, so the
+   numbers come from an identical simulation stepped on the CPU.            */
+var MIR = PW*PH;
+var mTemp = new Float32Array(MIR), mProg = new Float32Array(MIR),
+    mStat = new Float32Array(MIR), mVel = new Float32Array(MIR);
+(function(){
+  var rnd = LM.rng(661);
+  for (var i=0;i<MIR;i++){
+    mProg[i]=rnd(); mTemp[i]=4.5+rnd(); mStat[i]=1;
+    mVel[i]=0.045+rnd()*0.045;
+  }
+})();
+var excRate = 0, meanTemp = 5, excCount = 0, delivered = 0;
+
+function stepMirror(dt){
+  var amb = gpu.uniforms.uAmb.value, exc = uExcursion.value, sp = uSpeed.value;
+  var nExc = 0, tsum = 0, n = 0;
+  for (var i=0;i<MIR;i++){
+    if (mStat[i] > 0){
+      mProg[i] += mVel[i]*sp*dt;
+      mTemp[i] += (Math.random()*2-1)*dt*7.0 + (amb-mTemp[i])*dt*0.17;
+      if (mTemp[i] < 2 || mTemp[i] > 8){
+        if (Math.random() < exc*4*dt){ mStat[i] = -0.001; excCount++; }
+      }
+      if (mProg[i] >= 1){ mProg[i]=0; mTemp[i]=5; delivered++; }
+      tsum += mTemp[i]; n++;
+    } else {
+      mStat[i] -= dt*0.55;
+      if (mStat[i] < -1){ mStat[i]=1; mProg[i]=0; mTemp[i]=5; }
+      nExc++;
+    }
+  }
+  excRate += (nExc/MIR - excRate)*0.15;
+  if (n) meanTemp += (tsum/n - meanTemp)*0.15;
+}
+
+ctx.onFrame(function(dt,t){
+  gpu.step(Math.min(dt,0.033), t);
+  pMat.uniforms.uState.value = gpu.texture;
+
+  depotMeshes.forEach(function(m,i){
+    m.rotation.y = t*0.8 + i;
+    m.rotation.x = t*0.5;
+    var s = 1 + 0.10*Math.sin(t*2.2+i*1.3);
+    m.scale.set(s,s,s);
+  });
+
+  stepMirror(Math.min(dt,0.033));
+
+  setStat('ship', LM.fmt(Math.round(MIR*(1-excRate))));
+  setStat('exc', LM.pct(excRate,1));
+  setStat('ok', LM.pct(1-excRate,1));
+  setStat('dep', DEPOTS.length);
+  setStat('temp', meanTemp.toFixed(1)+'<small>°C</small>');
+  setStat('lane', N);
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evidence Graph</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Resolving entities<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">19 · Data &amp; Evidence</p>
+  <h1 class="viz">Evidence <em>Graph</em></h1>
+  <p class="lede">Literature, proteins, compounds, indications and trials resolved into one graph and laid out by an n-body simulation running entirely on the GPU. The clusters are research programmes nobody drew on purpose.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Layout forces</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Corpus</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <div id="hubs"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('19-evidence-graph');
+
+var NW = 24, NH = 24, NN = NW*NH;    // 576 nodes
+
+var TYPES = [
+  {k:'paper',   n:'Publication',    c:LM.C.slate,  share:0.42},
+  {k:'protein', n:'Protein / gene', c:LM.C.teal,   share:0.20},
+  {k:'drug',    n:'Compound',       c:LM.C.accent, share:0.14},
+  {k:'disease', n:'Indication',     c:LM.C.violet, share:0.10},
+  {k:'trial',   n:'Clinical trial', c:LM.C.amber,  share:0.14}
+];
+
+var NAMES = {
+  protein:['PD-L1','CTLA-4','EGFR','KRAS','TP53','BRAF','ALK','HER2','VEGFA','MET','PIK3CA','BRCA1','BRCA2','MYC','PTEN','STK11','KEAP1','TIGIT','LAG-3','TIM-3','CD47','IL-6','TNF','JAK2','STAT3'],
+  drug:['pembrolizumab','nivolumab','atezolizumab','osimertinib','sotorasib','trastuzumab','olaparib','lenvatinib','cabozantinib','sacituzumab','adagrasib','durvalumab','tiragolumab','relatlimab'],
+  disease:['NSCLC','melanoma','colorectal carcinoma','RCC','HCC','TNBC','ovarian carcinoma','gastric cancer','bladder carcinoma','pancreatic adenocarcinoma'],
+  trial:['NCT0'+'4123','NCT0'+'5581','NCT0'+'3917','NCT0'+'4772','NCT0'+'5104','NCT0'+'3842','NCT0'+'4615','NCT0'+'5390']
+};
+
+/* ---------- build the graph ---------- */
+var nodes = [], edges = [];
+(function build(){
+  var rnd = LM.rng(606060);
+  var acc = [], c = 0;
+  TYPES.forEach(function(T){ c += T.share; acc.push(c); });
+  for (var i=0;i<NN;i++){
+    var r = rnd()*acc[acc.length-1], ti = 0;
+    for (var k=0;k<acc.length;k++) if (r<=acc[k]){ ti=k; break; }
+    var T = TYPES[ti];
+    var pool = NAMES[T.k];
+    nodes.push({
+      i:i, type:ti,
+      name: pool ? pool[Math.floor(rnd()*pool.length)] : ('PMID '+(31000000+Math.floor(rnd()*900000))),
+      deg:0
+    });
+  }
+  // preferential attachment -> scale-free hubs, which is what real corpora look like
+  var targets = [0];
+  for (var i=1;i<NN;i++){
+    var m = 1 + Math.floor(rnd()*3);
+    for (var e=0;e<m;e++){
+      var j = targets[Math.floor(rnd()*targets.length)];
+      if (j===i) continue;
+      edges.push([i,j]);
+      nodes[i].deg++; nodes[j].deg++;
+      targets.push(i); targets.push(j);
+    }
+  }
+  // a few cross-links between entity types (entity resolution finds these)
+  for (var e=0;e<260;e++){
+    var a=Math.floor(rnd()*NN), b=Math.floor(rnd()*NN);
+    if (a===b) continue;
+    edges.push([a,b]); nodes[a].deg++; nodes[b].deg++;
+  }
+})();
+
+/* neighbour lookup: up to 8 per node, packed into two RGBA textures */
+var nbrA = new Float32Array(NN*4), nbrB = new Float32Array(NN*4);
+(function(){
+  var lists = nodes.map(function(){ return []; });
+  edges.forEach(function(e){
+    if (lists[e[0]].length<8) lists[e[0]].push(e[1]);
+    if (lists[e[1]].length<8) lists[e[1]].push(e[0]);
+  });
+  lists.forEach(function(L,i){
+    for (var k=0;k<4;k++) nbrA[i*4+k] = (k<L.length) ? L[k]+1 : 0;
+    for (var k=0;k<4;k++) nbrB[i*4+k] = (k+4<L.length) ? L[k+4]+1 : 0;
+  });
+})();
+var texA = new THREE.DataTexture(nbrA, NW, NH, THREE.RGBAFormat, THREE.FloatType);
+var texB = new THREE.DataTexture(nbrB, NW, NH, THREE.RGBAFormat, THREE.FloatType);
+texA.minFilter=texA.magFilter=THREE.NearestFilter; texA.needsUpdate=true;
+texB.minFilter=texB.magFilter=THREE.NearestFilter; texB.needsUpdate=true;
+
+var typeData = new Float32Array(NN*4);
+nodes.forEach(function(n,i){
+  typeData[i*4]=n.type; typeData[i*4+1]=n.deg; typeData[i*4+2]=0; typeData[i*4+3]=1;
+});
+var typeTex = new THREE.DataTexture(typeData, NW, NH, THREE.RGBAFormat, THREE.FloatType);
+typeTex.minFilter=typeTex.magFilter=THREE.NearestFilter; typeTex.needsUpdate=true;
+
+/* ---------- scene ---------- */
+var ctx = LM.boot({
+  cam:[0,0,26], fov:40, fit:9.0, fitMargin:1.06,
+  orbit:{ minDist:5, maxDist:70, autoRotate:true, autoRotateSpeed:0.10, pan:false },
+  fog:[26,80]
+});
+if(!ctx) return;
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- GPGPU: velocity then position ---------- */
+var uRepel={value:1.8}, uLink={value:0.85}, uCentre={value:0.70}, uDamp={value:0.88};
+
+function init(d,w,h){
+  var rnd=LM.rng(4242);
+  for (var i=0;i<w*h;i++){
+    var th=rnd()*Math.PI*2, ph=Math.acos(rnd()*2-1), r=Math.pow(rnd(),0.33)*5;
+    d[i*4]=r*Math.sin(ph)*Math.cos(th);
+    d[i*4+1]=r*Math.cos(ph);
+    d[i*4+2]=r*Math.sin(ph)*Math.sin(th);
+    d[i*4+3]=1;
+  }
+}
+function zero(d,w,h){ for (var i=0;i<w*h*4;i++) d[i]=0; }
+
+var velFrag=[
+ 'uniform sampler2D uPrev,uPos,uNbrA,uNbrB,uType;',
+ 'uniform float uDt,uRepel,uLink,uCentre,uDamp,uN;',
+ 'varying vec2 vUv;',
+ 'vec3 fetch(float id){',
+ '  float x=mod(id,'+NW+'.0),y=floor(id/'+NW+'.0);',
+ '  return texture2D(uPos,vec2((x+0.5)/'+NW+'.0,(y+0.5)/'+NH+'.0)).xyz;}',
+ 'void main(){',
+ ' vec3 v=texture2D(uPrev,vUv).xyz;',
+ ' vec3 p=texture2D(uPos,vUv).xyz;',
+ ' float idx=floor(vUv.x*'+NW+'.0)+floor(vUv.y*'+NH+'.0)*'+NW+'.0;',
+ ' vec3 f=vec3(0.0);',
+ ' // all-pairs repulsion',
+ ' for(int j=0;j<'+NN+';j++){',
+ '   vec3 q=fetch(float(j));',
+ '   vec3 d=p-q;',
+ '   float d2=dot(d,d)+0.22;',
+ '   f+=d*(uRepel*0.55/(d2*sqrt(d2)));',
+ ' }',
+ ' // spring attraction along edges',
+ ' vec4 A=texture2D(uNbrA,vUv), B=texture2D(uNbrB,vUv);',
+ ' for(int k=0;k<4;k++){',
+ '   float id=(k==0?A.x:k==1?A.y:k==2?A.z:A.w);',
+ '   if(id>0.5){ vec3 q=fetch(id-1.0); f+=(q-p)*uLink*0.055; }',
+ ' }',
+ ' for(int k=0;k<4;k++){',
+ '   float id=(k==0?B.x:k==1?B.y:k==2?B.z:B.w);',
+ '   if(id>0.5){ vec3 q=fetch(id-1.0); f+=(q-p)*uLink*0.055; }',
+ ' }',
+ ' // gravity toward the centre keeps the graph on screen',
+ ' f-=p*uCentre*0.035;',
+ ' v=(v+f*uDt*2.2)*pow(uDamp,uDt*60.0);',
+ ' gl_FragColor=vec4(v,1.0);',
+ '}'].join('\n');
+
+var posFrag=[
+ 'uniform sampler2D uPrev,uVel;uniform float uDt;',
+ 'varying vec2 vUv;',
+ 'void main(){',
+ ' vec3 p=texture2D(uPrev,vUv).xyz;',
+ ' vec3 v=texture2D(uVel,vUv).xyz;',
+ ' p+=v*uDt*2.2;',
+ ' gl_FragColor=vec4(p,1.0);',
+ '}'].join('\n');
+
+var posGPU = new LM.GPGPU(ctx.renderer, NW, NH, posFrag, { uVel:{value:null} }, init);
+var velGPU = new LM.GPGPU(ctx.renderer, NW, NH, velFrag, {
+  uPos:{value:posGPU.texture}, uNbrA:{value:texA}, uNbrB:{value:texB}, uType:{value:typeTex},
+  uRepel:uRepel, uLink:uLink, uCentre:uCentre, uDamp:uDamp, uN:{value:NN}
+}, zero);
+
+/* ---------- edges ---------- */
+var eRef = new Float32Array(edges.length*2*2);
+edges.forEach(function(e,i){
+  eRef[i*4]   = ((e[0]%NW)+0.5)/NW;  eRef[i*4+1] = (Math.floor(e[0]/NW)+0.5)/NH;
+  eRef[i*4+2] = ((e[1]%NW)+0.5)/NW;  eRef[i*4+3] = (Math.floor(e[1]/NW)+0.5)/NH;
+});
+var eGeo = new THREE.BufferGeometry();
+eGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(edges.length*2*3),3));
+eGeo.setAttribute('aRef', new THREE.BufferAttribute(eRef,2));
+eGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e4);
+var eMat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{ uPos:{value:posGPU.texture}, uOpacity:{value:0.12} },
+  vertexShader:[
+    'uniform sampler2D uPos;attribute vec2 aRef;',
+    'void main(){vec3 p=texture2D(uPos,aRef).xyz;',
+    ' gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}'
+  ].join('\n'),
+  fragmentShader:'uniform float uOpacity;void main(){gl_FragColor=vec4(0.05,0.09,0.12,uOpacity);}'
+});
+ctx.add(new THREE.LineSegments(eGeo, eMat));
+
+/* ---------- nodes ---------- */
+var uFilter = { value: -1 };
+var nMat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{
+    uPos:{value:posGPU.texture}, uType:{value:typeTex}, uPix:uPix,
+    uSize:{value:0.085}, uFilter:uFilter,
+    uCols:{value:TYPES.map(function(T){return new THREE.Color(T.c);})},
+    uDim:{value:new THREE.Color(LM.C.line)}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uPos,uType;uniform float uSize,uFilter;',
+    'attribute vec2 aRef;varying float vT;varying float vOn;',
+    'void main(){',
+    ' vec3 p=texture2D(uPos,aRef).xyz;',
+    ' vec4 T=texture2D(uType,aRef);',
+    ' vT=T.x;',
+    ' vOn=(uFilter<0.0||abs(T.x-uFilter)<0.5)?1.0:0.0;',
+    ' vec4 mv=modelViewMatrix*vec4(p,1.0);',
+    ' float deg=clamp(T.y,1.0,40.0);',
+    ' gl_PointSize=lmSize(uSize*(0.55+sqrt(deg)*0.30)*(vOn>0.5?1.0:0.55),mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCols[5];uniform vec3 uDim;varying float vT;varying float vOn;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' int ti=int(vT+0.5); vec3 c=vec3(0.5);',
+    ' for(int k=0;k<5;k++){ if(k==ti) c=uCols[k]; }',
+    ' c=mix(uDim,c,vOn);',
+    ' gl_FragColor=vec4(c,(1.0-smoothstep(0.25,1.0,d))*(vOn>0.5?0.92:0.30));}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(NW,NH), nMat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.slider(ctrls,{label:'Repulsion', min:0, max:4, step:0.02, value:1.8,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){uRepel.value=v;}});
+LM.ui.slider(ctrls,{label:'Link strength', min:0, max:3, step:0.02, value:0.85,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){uLink.value=v;}});
+LM.ui.slider(ctrls,{label:'Gravity', min:0, max:4, step:0.02, value:0.70,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){uCentre.value=v;}});
+LM.ui.slider(ctrls,{label:'Damping', min:0.70, max:0.99, step:0.005, value:0.88,
+  fmt:function(v){return v.toFixed(3);}, on:function(v){uDamp.value=v;}});
+LM.ui.slider(ctrls,{label:'Edge visibility', min:0, max:0.5, step:0.005, value:0.12,
+  fmt:function(v){return v.toFixed(3);}, on:function(v){eMat.uniforms.uOpacity.value=v;}});
+LM.ui.seg(ctrls,{label:'Highlight entity type', index:0, options:
+  [{label:'All', value:-1}].concat(TYPES.map(function(T,i){
+    return {label:T.n.split(' ')[0].split('/')[0], value:i};
+  })),
+  on:function(v){ uFilter.value=v; }});
+LM.ui.button(ctrls,{label:'Re-seed layout', on:function(){ posGPU.reset(); velGPU.reset(); }});
+
+var typeCounts = TYPES.map(function(){return 0;});
+nodes.forEach(function(n){ typeCounts[n.type]++; });
+var meanDeg = (edges.length*2/NN);
+
+LM.ui.stats(document.getElementById('stats'),[
+  {k:'Nodes', id:'n', v:LM.fmt(NN)},
+  {k:'Edges', id:'e', v:LM.fmt(edges.length), accent:true},
+  {k:'Mean degree', id:'d', v:meanDeg.toFixed(1)},
+  {k:'Density', id:'den', v:(edges.length/(NN*(NN-1)/2)*100).toFixed(2)+'%'},
+  {k:'Entity types', id:'t', v:TYPES.length},
+  {k:'Max degree', id:'md', v:Math.max.apply(null,nodes.map(function(n){return n.deg;}))}
+]);
+
+LM.ui.legend(document.getElementById('legend'), TYPES.map(function(T,i){
+  return {color:'#'+T.c.toString(16).padStart(6,'0'), label:T.n, sub:LM.fmt(typeCounts[i])+' nodes', round:true};
+}));
+
+var hubs = nodes.slice().sort(function(a,b){return b.deg-a.deg;}).slice(0,8);
+document.getElementById('hubs').innerHTML =
+  '<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Highest-degree entities</div>'+
+  hubs.map(function(n){
+    var T=TYPES[n.type], c='#'+T.c.toString(16).padStart(6,'0');
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:'+c+';flex:none"></span>'+
+      '<span style="font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.name+'</span>'+
+      '<span style="font-family:var(--mono);font-size:10.5px;color:var(--muted)">'+n.deg+'</span></div>';
+  }).join('');
+
+/* ---------- frame ---------- */
+ctx.onFrame(function(dt,t){
+  var d = Math.min(dt, 0.025);
+  velGPU.uniforms.uPos.value = posGPU.texture;
+  velGPU.step(d, t);
+  posGPU.uniforms.uVel.value = velGPU.texture;
+  posGPU.step(d, t);
+  nMat.uniforms.uPos.value = posGPU.texture;
+  eMat.uniforms.uPos.value = posGPU.texture;
+});
+})();
+</script>
+</body>
+</html>

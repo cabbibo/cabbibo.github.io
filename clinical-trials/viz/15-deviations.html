@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deviation Lattice</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Building lattice<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">15 · Conduct &amp; Safety</p>
+  <h1 class="viz">Deviation <em>Lattice</em></h1>
+  <p class="lede">Eighty-four sites by thirty months. Quality has a texture: most of the surface is flat and boring, and the few spikes are where your monitoring budget should go.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Metric &amp; sorting</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Quality</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="worst"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('15-deviations');
+
+var sites = LM.study.sites, N = sites.length, MONTHS = LM.study.months;
+
+/* ---------- generate monthly quality signals per site ---------- */
+var METRICS = [
+  {k:'dev',   n:'Protocol deviations', unit:'dev',  c:LM.C.accent, hi:'Major deviations per month'},
+  {k:'query', n:'Open data queries',   unit:'qry',  c:LM.C.violet, hi:'Queries raised per month'},
+  {k:'miss',  n:'Missing data points', unit:'pts',  c:LM.C.amber,  hi:'Required fields left blank'},
+  {k:'late',  n:'Late data entry',     unit:'days', c:LM.C.teal,   hi:'Mean days source-to-EDC'}
+];
+var data = {};
+(function(){
+  var rnd = LM.rng(55512);
+  METRICS.forEach(function(M){ data[M.k] = new Float32Array(N*MONTHS); });
+  sites.forEach(function(s, i){
+    // a site's baseline badness, plus drift and occasional incidents
+    var bad = (1 - s.quality);
+    var drift = (rnd()-0.5)*0.035;
+    var incidentMonth = rnd()<0.28 ? Math.floor(rnd()*MONTHS) : -1;
+    for (var m=0;m<MONTHS;m++){
+      var open = (m*30.4 >= s.activation);
+      var load = open ? LM.clamp((m*30.4 - s.activation)/180, 0.1, 1) : 0;
+      var ramp = 1 + drift*m;
+      var spike = (incidentMonth>=0 && m>=incidentMonth && m<incidentMonth+3) ? 3.4 : 1;
+      var noise = function(){ return 0.55 + rnd()*0.9; };
+      data.dev[i*MONTHS+m]   = open ? Math.max(0, bad*5.2*load*ramp*spike*noise()) : 0;
+      data.query[i*MONTHS+m] = open ? Math.max(0, bad*22*load*ramp*spike*noise()) : 0;
+      data.miss[i*MONTHS+m]  = open ? Math.max(0, bad*16*load*ramp*noise()) : 0;
+      data.late[i*MONTHS+m]  = open ? Math.max(0, 2 + bad*18*ramp*(spike>1?1.8:1)*noise()) : 0;
+    }
+  });
+})();
+
+var CX = 0.26, CZ = 0.60;
+var W = N*CX, D = MONTHS*CZ;
+
+var ctx = LM.boot({
+  cam:[0,10,19], fov:34, fit:Math.max(W,D)*0.52, fitMargin:1.05,
+  orbit:{ target:new THREE.Vector3(0,1.0,0), minDist:8, maxDist:90,
+          autoRotate:true, autoRotateSpeed:0.045, minPolar:0.10, maxPolar:1.45 },
+  fog:[36,120]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.74,key:0.70,fill:0.25,rim:0.15});
+
+/* ---------- lattice ---------- */
+var NC = N*MONTHS;
+var geo = new THREE.BoxGeometry(CX*0.80, 1, CZ*0.80);
+geo.translate(0,0.5,0);
+var mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({vertexColors:true}), NC);
+mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var cols = new Float32Array(NC*3);
+mesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(cols,3));
+ctx.add(mesh);
+
+// base grid
+(function(){
+  var pts=[];
+  for (var i=0;i<=N;i+=6){ var x=-W/2+i*CX; pts.push(x,0,-D/2, x,0,D/2); }
+  for (var m=0;m<=MONTHS;m+=3){ var z=-D/2+m*CZ; pts.push(-W/2,0,z, W/2,0,z); }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.07})));
+
+  for (var m=0;m<=MONTHS-1;m+=6){
+    var l=LM.label('M'+m,{size:26,weight:600,color:'#8d97a3',scale:0.62,depthTest:false});
+    l.position.set(-W/2-1.0, 0.05, -D/2+m*CZ+CZ/2); ctx.add(l);
+  }
+})();
+
+/* ---------- state ---------- */
+var metric = 'dev', sortMode = 'total', threshold = 0.65, scale = 1.0;
+var order = [], stats = {};
+
+function recompute(){
+  var arr = data[metric];
+  var totals = [];
+  for (var i=0;i<N;i++){
+    var t=0, peak=0;
+    for (var m=0;m<MONTHS;m++){ var v=arr[i*MONTHS+m]; t+=v; if(v>peak) peak=v; }
+    totals.push({i:i, total:t, peak:peak, site:sites[i]});
+  }
+  if (sortMode==='total') totals.sort(function(a,b){return b.total-a.total;});
+  else if (sortMode==='region') totals.sort(function(a,b){
+    var r = a.site.region.localeCompare(b.site.region);
+    return r!==0 ? r : b.total-a.total;
+  });
+  else totals.sort(function(a,b){return a.site.activation-b.site.activation;});
+
+  order = totals;
+  var maxV = 0, grand = 0;
+  for (var k=0;k<NC;k++){ if (arr[k]>maxV) maxV=arr[k]; grand+=arr[k]; }
+  var over = totals.filter(function(t){ return t.peak >= maxV*threshold; }).length;
+  stats = {maxV:maxV, grand:grand, over:over, totals:totals};
+}
+recompute();
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.seg(ctrls,{label:'Metric', index:0, options:METRICS.map(function(M,i){
+  return {label:M.n.split(' ')[0], value:M.k};
+}), on:function(v){ metric=v; recompute(); refresh(); }});
+
+LM.ui.seg(ctrls,{label:'Sort sites by', index:0, options:[
+  {label:'Worst first', value:'total'},
+  {label:'Region', value:'region'},
+  {label:'Activation', value:'activation'}
+], on:function(v){ sortMode=v; recompute(); refresh(); }});
+
+LM.ui.slider(ctrls,{label:'Alert threshold', min:0.1, max:1, step:0.01, value:0.65,
+  fmt:function(v){return (v*100).toFixed(0)+'% of peak';}, on:function(v){ threshold=v; recompute(); refresh(); }});
+LM.ui.slider(ctrls,{label:'Height scale', min:0.2, max:4, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){ scale=v; }});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Total', id:'tot', accent:true},
+  {k:'Per site-month', id:'per'},
+  {k:'Sites alerting', id:'alert'},
+  {k:'Peak', id:'peak'},
+  {k:'Worst site', id:'ws'},
+  {k:'Metric', id:'m'}
+]);
+
+var worstEl=document.getElementById('worst');
+function refresh(){
+  var M = METRICS.filter(function(x){return x.k===metric;})[0];
+  var openCells = 0;
+  for (var k=0;k<NC;k++) if (data[metric][k]>0) openCells++;
+  setStat('tot', LM.fmt(Math.round(stats.grand)));
+  setStat('per', (stats.grand/Math.max(openCells,1)).toFixed(1));
+  setStat('alert', stats.over+'<small> / '+N+'</small>');
+  setStat('peak', stats.maxV.toFixed(1));
+  setStat('ws', stats.totals[0].site.id);
+  setStat('m', M.unit);
+
+  worstEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">'+
+    M.hi+'</div>'+
+    stats.totals.slice(0,8).map(function(t){
+      var c='#'+LM.REGIONS[t.site.region].color.toString(16).padStart(6,'0');
+      var w=t.total/stats.totals[0].total*100;
+      return '<div style="margin-bottom:6px">'+
+        '<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.site.name+'</span>'+
+        '<span style="color:'+c+';flex:none">'+Math.round(t.total)+'</span></div>'+
+        '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+        '<div style="height:100%;width:'+w.toFixed(1)+'%;background:'+c+';border-radius:2px"></div></div></div>';
+    }).join('');
+}
+refresh();
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+/* ---------- frame ---------- */
+var O=new THREE.Object3D(), C=new THREE.Color();
+var cool=new THREE.Color(0xdfe5ec), warm=new THREE.Color(LM.C.amber), hot=new THREE.Color(LM.C.red);
+var grow=0;
+
+ctx.onFrame(function(dt,t){
+  grow = Math.min(1, grow+dt*0.6);
+  var M = METRICS.filter(function(x){return x.k===metric;})[0];
+  var base = new THREE.Color(M.c);
+  var arr = data[metric], maxV = Math.max(stats.maxV, 1e-6);
+
+  for (var col=0; col<N; col++){
+    var si = order[col].i;
+    for (var m=0;m<MONTHS;m++){
+      var idx = col*MONTHS + m;
+      var v = arr[si*MONTHS+m];
+      var norm = v/maxV;
+      var wave = LM.smooth(0,1, grow*1.5 - col/N*0.4);
+      // sqrt lifts the crowded low end so the relief carries the signal
+      var h = Math.max(0.002, Math.sqrt(norm)*4.6*scale*wave);
+      O.position.set(-W/2 + col*CX + CX/2, 0, -D/2 + m*CZ + CZ/2);
+      O.scale.set(1, h, 1);
+      O.updateMatrix(); mesh.setMatrixAt(idx, O.matrix);
+
+      if (v<=0) C.setHex(0xeceef1);
+      else if (norm < threshold*0.55) C.copy(base).lerp(cool, 1-norm/Math.max(threshold*0.55,0.001)*0.85);
+      else if (norm < threshold) C.copy(base);
+      else C.copy(norm>threshold*1.35?hot:warm);
+      cols[idx*3]=C.r; cols[idx*3+1]=C.g; cols[idx*3+2]=C.b;
+    }
+  }
+  mesh.instanceMatrix.needsUpdate=true;
+  mesh.geometry.attributes.color.needsUpdate=true;
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObject(mesh);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var idx=hit[0].instanceId;
+    var col=Math.floor(idx/MONTHS), m=idx%MONTHS;
+    var rec=order[col], s=rec.site;
+    var v=arr[rec.i*MONTHS+m];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+s.name+'</span>'+
+      '<span class="m">'+s.country+' &middot; '+s.id+' &middot; month '+m+'</span>'+
+      '<div style="margin-top:5px">'+M.n.replace(/&amp;/g,'&')+': <b>'+v.toFixed(1)+'</b> '+M.unit+
+      '<br>Site total '+Math.round(rec.total)+' &middot; quality index '+(s.quality*100).toFixed(0)+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

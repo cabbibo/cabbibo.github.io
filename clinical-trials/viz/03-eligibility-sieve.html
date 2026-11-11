@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Eligibility Sieve</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Screening population<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">03 · Design &amp; Startup</p>
+  <h1 class="viz">The Eligibility <em>Sieve</em></h1>
+  <p class="lede">Every inclusion and exclusion criterion is a plate with holes in it. Loosen one and the yield changes immediately &mdash; this is the single highest-leverage conversation in protocol design.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Criteria pass rates</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Yield</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="bars"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('03-eligibility-sieve');
+
+var CRIT = [
+  {n:'Age 18–75',                   p:0.82, c:LM.C.slate,  k:'INC', why:'Paediatric and very elderly excluded'},
+  {n:'ECOG performance 0–1',        p:0.71, c:LM.C.teal,   k:'INC', why:'Ambulatory, self-caring patients only'},
+  {n:'Measurable disease (RECIST 1.1)',  p:0.86, c:LM.C.green,  k:'INC', why:'Needs a lesion you can measure'},
+  {n:'Adequate organ function',          p:0.78, c:LM.C.amber,  k:'INC', why:'Renal, hepatic, haematologic thresholds'},
+  {n:'No prior anti-PD-1 / PD-L1',       p:0.55, c:LM.C.accent, k:'EXC', why:'The single biggest exclusion in oncology'},
+  {n:'No untreated CNS metastases',      p:0.83, c:LM.C.violet, k:'EXC', why:'Brain mets must be treated and stable'},
+  {n:'Washout ≥ 28 days',           p:0.74, c:LM.C.red,    k:'EXC', why:'Time since last therapy'},
+  {n:'Able to consent &amp; attend',     p:0.69, c:LM.C.muted,  k:'INC', why:'Travel, language, caregiver, comorbidity'}
+];
+var NC = CRIT.length;
+var TOP = 7.0, SPACING = 1.65;
+var PLANE_Y = CRIT.map(function(_,i){ return TOP - 1.2 - i*SPACING; });
+var BASIN_Y = PLANE_Y[NC-1] - 2.1;
+var RING_R = 5.4, PLATE_R = 2.55;
+
+var ctx = LM.boot({
+  cam:[0,0,26], fov:36, fit:9.0, fitMargin:1.1,
+  orbit:{ target:new THREE.Vector3(0,-0.6,0), minDist:9, maxDist:60,
+          autoRotate:true, autoRotateSpeed:0.075, pan:false, minPolar:0.5, maxPolar:2.5 },
+  fog:[28,78]
+});
+if(!ctx) return;
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- plates ---------- */
+function ringLine(r,col,op,y,seg){
+  seg=seg||140; var pts=[];
+  for(var i=0;i<=seg;i++){var a=i/seg*Math.PI*2;pts.push(Math.cos(a)*r,0,Math.sin(a)*r);}
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  var l=new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,opacity:op}));
+  l.position.y=y; return l;
+}
+var plates=[];
+CRIT.forEach(function(C,i){
+  var y=PLANE_Y[i];
+  var disc=new THREE.Mesh(
+    new THREE.CircleGeometry(PLATE_R,72),
+    new THREE.MeshBasicMaterial({color:C.c,transparent:true,opacity:0.07,side:THREE.DoubleSide,depthWrite:false})
+  );
+  disc.rotation.x=-Math.PI/2; disc.position.y=y;
+  ctx.add(disc);
+  ctx.add(ringLine(PLATE_R,C.c,0.5,y));
+  ctx.add(ringLine(RING_R,C.c,0.11,y,180));
+  plates.push(disc);
+
+  var lab=LM.label(C.n.replace(/&amp;/g,'&'),{size:30,weight:600,color:'#'+C.c.toString(16).padStart(6,'0'),scale:0.84,depthTest:false});
+  lab.position.set(RING_R+1.1,y+0.22,0); ctx.add(lab);
+  C._pctLabel=LM.label('—',{size:28,weight:600,color:'#8d97a3',scale:0.80,depthTest:false});
+  C._pctLabel.position.set(RING_R+1.1,y-0.30,0); ctx.add(C._pctLabel);
+});
+ctx.add(ringLine(2.9,LM.C.ink,0.18,TOP));
+ctx.add(ringLine(2.2,LM.C.accent,0.5,BASIN_Y));
+(function(){
+  var a=LM.label('SCREENED POPULATION',{size:30,weight:700,color:'#0d161f',scale:0.9,depthTest:false});
+  a.position.set(0,TOP+0.85,0); ctx.add(a);
+  var b=LM.label('ELIGIBLE',{size:34,weight:700,color:'#d82591',scale:1.0,depthTest:false});
+  b.position.set(0,BASIN_Y-0.95,0); ctx.add(b);
+})();
+
+/* ---------- GPGPU sieve ----------
+   w encodes state:
+     w in (0,1]      -> falling
+     w <= -1         -> parked;  slot = floor(-w)-1  (0..NC-1 = rejected at that
+                        criterion, NC = eligible pool);  timer = -w-(slot+1)
+*/
+var PW=128, PH=128;
+var uPass = { value: CRIT.map(function(c){return c.p;}) };
+var uY    = { value: PLANE_Y.slice() };
+var uSpeed= { value: 1.0 };
+
+var frag=[
+ 'uniform sampler2D uPrev;uniform float uDt,uTime,uSpeed,uTop,uBasin,uRingR,uPlateR;',
+ 'uniform float uPass[8];uniform float uY[8];',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' vec3 p=st.xyz; float s=st.w;',
+ ' if(s>0.0){',
+ '   float v=uSpeed*(1.75+hash11(idx*0.311)*0.6);',
+ '   float ny=p.y-v*uDt;',
+ '   for(int j=0;j<8;j++){',
+ '     float gy=uY[j];',
+ '     if(p.y>gy&&ny<=gy){',
+ '       float r=hash11(idx*13.7+float(j)*311.0);',
+ '       if(r>uPass[j]&&s>0.0) s=-(float(j)+1.0);',
+ '     }',
+ '   }',
+ '   if(s>0.0){',
+ '     p.y=ny;',
+ '     vec2 xz=p.xz;float cr=length(xz)+1e-5;',
+ '     float tr=uPlateR*0.86*sqrt(hash11(idx*0.77));',
+ '     xz=xz/cr*mix(cr,tr,1.0-exp(-3.2*uDt));',
+ '     p.xz=xz;',
+ '     if(p.y<uBasin){ s=-(8.0+1.0); }',
+ '   }',
+ ' } else {',
+ '   float slot=floor(-s)-1.0;',
+ '   float timer=-s-(slot+1.0);',
+ '   float ang=hash11(idx*0.913)*6.283;',
+ '   vec3 tgt;',
+ '   if(slot<7.5){',
+ '     float ry=0.0; int si=int(slot);',
+ '     for(int k=0;k<8;k++){ if(k==si) ry=uY[k]; }',   // ES 1.00: constant-index only
+ '     float rr=uRingR*(0.93+hash11(idx*3.3)*0.14);',
+ '     tgt=vec3(cos(ang)*rr,ry+ (hash11(idx*1.7)-0.5)*0.22,sin(ang)*rr);',
+ '   } else {',
+ '     float rr=sqrt(hash11(idx*5.9))*1.95;',
+ '     tgt=vec3(cos(ang)*rr,uBasin-0.35-hash11(idx*2.2)*0.5,sin(ang)*rr);',
+ '   }',
+ '   p+=(tgt-p)*(1.0-exp(-3.6*uDt));',
+ '   timer+=uDt*0.105;',
+ '   s=-((slot+1.0)+min(timer,0.999));',
+ '   if(timer>=0.999){',
+ '     vec3 h=hash33(vec3(idx*0.0171,uTime*0.53,idx*0.037));',
+ '     float a=h.x*6.283,rr2=sqrt(h.y)*2.75;',
+ '     p=vec3(cos(a)*rr2,uTop+h.z*1.2,sin(a)*rr2);',
+ '     s=1.0;',
+ '   }',
+ ' }',
+ ' gl_FragColor=vec4(p,s);',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{
+  uPass:uPass, uY:uY, uSpeed:uSpeed,
+  uTop:{value:TOP}, uBasin:{value:BASIN_Y}, uRingR:{value:RING_R}, uPlateR:{value:PLATE_R}
+},function(d,w,h){
+  var rnd=LM.rng(97);
+  for(var i=0;i<w*h;i++){
+    var a=rnd()*Math.PI*2,r=Math.sqrt(rnd())*2.6;
+    d[i*4]=Math.cos(a)*r; d[i*4+1]=LM.lerp(TOP,BASIN_Y,rnd()); d[i*4+2]=Math.sin(a)*r; d[i*4+3]=1;
+  }
+});
+
+var critCols=new Float32Array(9*3);
+CRIT.forEach(function(C,i){var c=new THREE.Color(C.c);critCols[i*3]=c.r;critCols[i*3+1]=c.g;critCols[i*3+2]=c.b;});
+(function(){var c=new THREE.Color(LM.C.accent);critCols[24]=c.r;critCols[25]=c.g;critCols[26]=c.b;})();
+
+var mat=new THREE.ShaderMaterial({
+  transparent:true,depthWrite:false,
+  uniforms:{
+    uPos:{value:gpu.texture}, uPix:uPix, uSize:{value:0.055},
+    uCols:{value:critCols}, uInk:{value:new THREE.Color(LM.C.ink)}
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uPos;uniform float uSize;attribute vec2 aRef;',
+    'varying float vS;',
+    'void main(){vec4 s=texture2D(uPos,aRef);vS=s.w;',
+    ' vec4 mv=modelViewMatrix*vec4(s.xyz,1.0);',
+    ' gl_PointSize=lmSize(uSize*(s.w>0.0?1.0:0.88),mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCols[9];uniform vec3 uInk;varying float vS;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' float a=1.0-smoothstep(0.25,1.0,d);',
+    ' vec3 c;float o;',
+    ' if(vS>0.0){c=uInk;o=0.78;}',
+    ' else{',
+    '   float slot=floor(-vS)-1.0;',
+    '   float timer=-vS-(slot+1.0);',
+    '   int si=int(slot);',
+    '   c=vec3(0.5);',
+    '   for(int k=0;k<9;k++){ if(k==si) c=uCols[k]; }',   // ES 1.00: constant-index only
+    '   o=(si==8?0.95:0.52)*(1.0-smoothstep(0.78,1.0,timer));',
+    ' }',
+    ' gl_FragColor=vec4(c,a*o);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH),mat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+CRIT.forEach(function(C,i){
+  LM.ui.slider(ctrls,{
+    label:C.n.replace(/&amp;/g,'&'), min:0.05, max:1, step:0.005, value:C.p,
+    fmt:function(v){return (v*100).toFixed(0)+'%';},
+    on:function(v){ C.p=v; uPass.value[i]=v; refresh(); }
+  });
+});
+LM.ui.slider(ctrls,{label:'Flow speed',min:0.1,max:3,step:0.05,value:1,
+  fmt:function(v){return v.toFixed(2)+'x';},on:function(v){uSpeed.value=v;}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Eligible', id:'elig', accent:true},
+  {k:'Screen failure', id:'sf'},
+  {k:'Pre-screen for 1', id:'per1'},
+  {k:'To randomise 2,400', id:'need'}
+]);
+
+var bars=document.getElementById('bars');
+function refresh(){
+  var cum=1, rows=[];
+  CRIT.forEach(function(C){
+    var before=cum; cum*=C.p;
+    rows.push({C:C, lost:before-cum, cum:cum});
+    C._pct=C.p;
+  });
+  setStat('elig', LM.pct(cum,2));
+  setStat('sf', LM.pct(1-cum,1));
+  setStat('per1', LM.fmt(Math.round(1/Math.max(cum,1e-9))));
+  setStat('need', LM.fmt(Math.round(2400/Math.max(cum,1e-9))));
+
+  var maxLost=Math.max.apply(null,rows.map(function(r){return r.lost;}));
+  bars.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Where the population is lost</div>'+
+  rows.map(function(r){
+    var c='#'+r.C.c.toString(16).padStart(6,'0');
+    var w=maxLost>0?(r.lost/maxLost*100):0;
+    return '<div style="margin-bottom:7px">'+
+      '<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.C.n+'</span>'+
+        '<span style="color:'+c+';flex:none">−'+(r.lost*100).toFixed(1)+'pp</span></div>'+
+      '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+        '<div style="height:100%;width:'+w+'%;background:'+c+';border-radius:2px"></div></div></div>';
+  }).join('');
+
+  // refresh 3D pass-rate labels
+  CRIT.forEach(function(C,i){
+    var fresh=LM.label((C.p*100).toFixed(0)+'% pass',{size:28,weight:600,color:'#8d97a3',scale:0.80,depthTest:false});
+    fresh.position.copy(C._pctLabel.position);
+    ctx.scene.remove(C._pctLabel);
+    C._pctLabel.material.map.dispose(); C._pctLabel.material.dispose();
+    C._pctLabel=fresh; ctx.add(fresh);
+  });
+}
+refresh();
+
+ctx.onFrame(function(dt,t){
+  gpu.step(Math.min(dt,0.033),t);
+  mat.uniforms.uPos.value=gpu.texture;
+  for(var i=0;i<plates.length;i++){
+    plates[i].material.opacity=0.055+0.030*Math.sin(t*1.0+i*0.75);
+  }
+});
+})();
+</script>
+</body>
+</html>

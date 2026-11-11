@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enrollment Accretion</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Building globe<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">06 · Global Operations</p>
+  <h1 class="viz">Enrollment <em>Accretion</em></h1>
+  <p class="lede">Thirty months of a global Phase III accreting onto the planet. Each column is a site; its height is patients randomised. Particles are enrolments in flight.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Study timeline</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Live readout</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <p class="note">Drag to rotate · scroll to zoom · hover a column for site detail</p>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('06-enrollment-globe');
+
+var R = 5.0;
+var study = LM.study, sites = study.sites, N = sites.length, MONTHS = study.months;
+
+/* ---- precompute enrolment per site per month (shared truth) ---- */
+var tbl = new Float32Array(N * MONTHS);
+for (var i=0;i<N;i++){
+  var s = sites[i];
+  for (var m=0;m<MONTHS;m++){
+    var day = m*30.4;
+    var v = 0;
+    if (day >= s.activation){
+      var mo = (day - s.activation)/30.4;
+      v = Math.min(s.target * (1 - Math.exp(-s.rate*mo/Math.max(s.target*0.22,1))), s.target);
+    }
+    tbl[i*MONTHS+m] = v;
+  }
+}
+function enrolledAt(i, mf){
+  var m0 = Math.floor(mf), m1 = Math.min(m0+1, MONTHS-1), f = mf-m0;
+  return LM.lerp(tbl[i*MONTHS+m0], tbl[i*MONTHS+m1], f);
+}
+
+var ctx = LM.boot({
+  cam:[0, 4.2, 14.5], fov:38, fit:R*1.28, fitMargin:1.1,
+  orbit:{ target:new THREE.Vector3(0,0,0), minDist:7.2, maxDist:40, autoRotate:true, autoRotateSpeed:0.11, pan:false },
+  fog:[22,60]
+});
+if(!ctx) return;
+LM.studio(ctx.scene, {hemi:0.58, key:0.80, fill:0.30, rim:0.18});
+var uPix = LM.pixUniform(ctx);
+
+/* ---- planet body ---- */
+var body = new THREE.Mesh(
+  new THREE.SphereGeometry(R*0.995, 96, 64),
+  new THREE.MeshLambertMaterial({ color:0xfcfcfb })
+);
+ctx.add(body);
+
+/* soft atmospheric rim */
+var rim = new THREE.Mesh(
+  new THREE.SphereGeometry(R*1.05, 64, 48),
+  new THREE.ShaderMaterial({
+    transparent:true, blending:THREE.NormalBlending, side:THREE.BackSide, depthWrite:false,
+    uniforms:{ uCol:{value:new THREE.Color(LM.C.accent)} },
+    vertexShader:'varying vec3 vN;varying vec3 vP;void main(){vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vP=mv.xyz;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 uCol;varying vec3 vN;varying vec3 vP;void main(){float f=pow(1.0-abs(dot(normalize(vN),normalize(-vP))),4.5);gl_FragColor=vec4(uCol,f*0.26);}'
+  })
+);
+ctx.add(rim);
+
+ctx.add(LM.geo.graticule(R*1.001, {opacity:0.09}));
+var landLines = LM.geo.landGlobe(R*1.003, {opacity:0.38, color:LM.C.ink});
+ctx.add(landLines);
+
+/* ---- land dot matrix (instanced, the Big-Hero-6 texture) ---- */
+var mask = LM.geo.landMask(700, 350);
+(function(){
+  var pts = [], step = 1.35;
+  for (var lat=-84; lat<=84; lat+=step){
+    var circ = Math.cos(lat*Math.PI/180);
+    var lonStep = step / Math.max(circ, 0.14);
+    for (var lon=-180; lon<180; lon+=lonStep){
+      if (!mask.sampler(lat, lon)) continue;
+      var p = LM.geo.toVec3(lat, lon, R*1.004);
+      pts.push(p.x,p.y,p.z);
+    }
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  var m = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false,
+    uniforms:{ uCol:{value:new THREE.Color(0x253341)}, uSize:{value:0.036}, uPix:uPix },
+    vertexShader:[
+      LM.glsl.psize,
+      'uniform float uSize;varying float vF;',
+      'void main(){vec4 mv=modelViewMatrix*vec4(position,1.);',
+      ' vec3 n=normalize(normalMatrix*normalize(position));',
+      ' vF=smoothstep(-0.08,0.42,dot(n,normalize(-mv.xyz)));',
+      ' gl_PointSize=lmSize(uSize,mv);gl_Position=projectionMatrix*mv;}'
+    ].join('\n'),
+    fragmentShader:[
+      'uniform vec3 uCol;varying float vF;',
+      'void main(){float d=length(gl_PointCoord-0.5)*2.0;',
+      ' if(d>1.0)discard;',
+      ' gl_FragColor=vec4(uCol,(1.0-smoothstep(0.55,1.0,d))*vF*0.88);}'
+    ].join('\n')
+  });
+  ctx.add(new THREE.Points(g,m));
+  document.getElementById('boot').firstChild.textContent = 'Placing sites';
+})();
+
+/* ---- site columns (instanced) ---- */
+var colGeo = new THREE.CylinderGeometry(0.030, 0.030, 1, 7, 1, true);
+colGeo.translate(0, 0.5, 0);                       // grow upward from base
+var colMat = new THREE.MeshBasicMaterial({ transparent:true, opacity:0.92, vertexColors:true });
+var cols = new THREE.InstancedMesh(colGeo, colMat, N);
+cols.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var instCol = new Float32Array(N*3);
+cols.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(instCol, 3));
+ctx.add(cols);
+
+/* base pads: a flat ring sitting on the surface for every site */
+var padGeo = new THREE.CircleGeometry(0.062, 14);
+var pads = new THREE.InstancedMesh(padGeo, new THREE.MeshBasicMaterial({transparent:true, opacity:0.5, vertexColors:true, side:THREE.DoubleSide}), N);
+var padCol = new Float32Array(N*3);
+pads.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(padCol,3));
+ctx.add(pads);
+
+var basePos = [], upQ = [];
+var tmpO = new THREE.Object3D(), up = new THREE.Vector3(0,1,0), c3 = new THREE.Color();
+for (var i=0;i<N;i++){
+  var s = sites[i];
+  var p = LM.geo.toVec3(s.lat, s.lon, R);
+  basePos.push(p);
+  var q = new THREE.Quaternion().setFromUnitVectors(up, p.clone().normalize());
+  upQ.push(q);
+  // pads are oriented flat against the sphere
+  tmpO.position.copy(p.clone().multiplyScalar(1.004));
+  tmpO.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1), p.clone().normalize()));
+  tmpO.scale.set(1,1,1);
+  tmpO.updateMatrix();
+  pads.setMatrixAt(i, tmpO.matrix);
+  c3.setHex(LM.REGIONS[s.region].color);
+  padCol[i*3]=c3.r; padCol[i*3+1]=c3.g; padCol[i*3+2]=c3.b;
+  instCol[i*3]=c3.r; instCol[i*3+1]=c3.g; instCol[i*3+2]=c3.b;
+}
+pads.instanceMatrix.needsUpdate = true;
+pads.geometry.attributes.color.needsUpdate = true;
+cols.geometry.attributes.color.needsUpdate = true;
+
+/* ---- GPGPU: enrolments in flight ---- */
+var PW = 48, PH = 48, PN = PW*PH;
+// site lookup texture: xyz + activation month
+var stW = 128;
+var sdata = new Float32Array(stW*4);
+for (var i=0;i<N;i++){
+  var p = basePos[i];
+  sdata[i*4]=p.x; sdata[i*4+1]=p.y; sdata[i*4+2]=p.z; sdata[i*4+3]=sites[i].activation/30.4;
+}
+var siteTex = new THREE.DataTexture(sdata, stW, 1, THREE.RGBAFormat, THREE.FloatType);
+siteTex.minFilter = siteTex.magFilter = THREE.NearestFilter;
+siteTex.needsUpdate = true;
+
+var uMonth = { value: 0 };
+var uRegionMask = { value: new THREE.Vector4(1,1,1,1) };
+
+var computeFrag = [
+  'uniform sampler2D uPrev;uniform sampler2D uSites;',
+  'uniform float uDt,uTime,uMonth,uN,uStW,uR,uSpeed;',
+  'varying vec2 vUv;',
+  LM.glsl.hash,
+  'void main(){',
+  ' vec4 st=texture2D(uPrev,vUv);',
+  ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+  ' float site=mod(idx,uN);',
+  ' vec4 S=texture2D(uSites,vec2((site+0.5)/uStW,0.5));',
+  ' vec3 tgt=S.xyz;',
+  ' float act=S.w;',
+  ' float live=step(act,uMonth);',            // site open yet?
+  ' float life=st.w;',
+  ' if(life<=0.0||length(st.xyz)<0.001){',
+  '   // respawn on a high shell, offset around the target so streams read as distinct',
+  '   vec3 h=hash33(vec3(idx*0.013,uTime*0.37,idx*0.071))*2.0-1.0;',
+  '   vec3 dir=normalize(tgt+h*1.5);',
+  '   st.xyz=dir*(uR*(1.18+hash11(idx*0.37+uTime)*0.45));',
+  '   life=1.0;',
+  ' }',
+  ' vec3 d=tgt-st.xyz;float dist=length(d);',
+  ' // curved approach: blend radial descent with a tangential swirl',
+  ' vec3 n=normalize(st.xyz);',
+  ' vec3 tang=normalize(cross(n,normalize(tgt)+vec3(0.001)));',
+  ' vec3 vel=normalize(d)*1.0+tang*0.55*smoothstep(0.0,2.4,dist);',
+  ' float sp=uSpeed*(0.55+hash11(idx*1.7)*0.9)*live;',
+  ' st.xyz+=normalize(vel)*sp*uDt*max(dist*0.9,0.35);',
+  ' life-=uDt*0.055*live;',
+  ' if(dist<0.085) life=0.0;',
+  ' if(live<0.5) life=max(life,0.02);',
+  ' gl_FragColor=vec4(st.xyz,life);',
+  '}'
+].join('\n');
+
+var gpu = new LM.GPGPU(ctx.renderer, PW, PH, computeFrag, {
+  uSites:{value:siteTex}, uN:{value:N}, uStW:{value:stW},
+  uR:{value:R}, uMonth:uMonth, uSpeed:{value:1.0}
+}, function(data,w,h){
+  var rnd = LM.rng(7);
+  for (var k=0;k<w*h;k++){
+    var th = rnd()*Math.PI*2, ph = Math.acos(rnd()*2-1), rr = R*(1.5+rnd());
+    data[k*4]   = rr*Math.sin(ph)*Math.cos(th);
+    data[k*4+1] = rr*Math.cos(ph);
+    data[k*4+2] = rr*Math.sin(ph)*Math.sin(th);
+    data[k*4+3] = rnd();
+  }
+});
+
+var pGeo = LM.indexGeometry(PW,PH);
+var pMat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, blending:THREE.NormalBlending,
+  uniforms:{
+    uPos:{value:gpu.texture},
+    uCol:{value:new THREE.Color(LM.C.accent)},
+    uSize:{value:0.052}, uPix:uPix
+  },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uPos;uniform float uSize;attribute vec2 aRef;varying float vA;',
+    'void main(){vec4 s=texture2D(uPos,aRef);',
+    ' vec4 mv=modelViewMatrix*vec4(s.xyz,1.0);',
+    ' float fade=smoothstep(0.0,0.25,s.w)*smoothstep(1.0,0.72,s.w);',
+    ' vA=fade;',
+    ' gl_PointSize=lmSize(uSize*(0.55+fade*0.75),mv);',
+    ' gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCol;varying float vA;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' float a=(1.0-smoothstep(0.1,1.0,d))*vA;',
+    ' gl_FragColor=vec4(uCol,a*0.95);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(pGeo,pMat));
+
+/* ---- activation pulse rings ---- */
+var RINGS = 26;
+var ringGeo = new THREE.RingGeometry(0.07, 0.085, 28);
+var ringMat = new THREE.MeshBasicMaterial({color:LM.C.accent, transparent:true, opacity:0.0, side:THREE.DoubleSide});
+var rings = new THREE.InstancedMesh(ringGeo, ringMat, RINGS);
+rings.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+ctx.add(rings);
+var ringState = [];
+for (var i=0;i<RINGS;i++) ringState.push({site:-1, t:9});
+
+/* ---- UI ---- */
+var ctrls = document.getElementById('ctrls');
+var playing = true, month = 0;
+var monthSlider = LM.ui.slider(ctrls, {
+  label:'Study month', min:0, max:MONTHS-1, step:0.05, value:0,
+  fmt:function(v){ return 'M' + Math.round(v); },
+  on:function(v){ month = v; }
+});
+LM.ui.seg(ctrls, { label:'Playback', index:0, options:[
+  {label:'Play', value:'p'}, {label:'Pause', value:'s'}, {label:'Restart', value:'r'}
+], on:function(v){
+  if (v==='p') playing = true;
+  if (v==='s') playing = false;
+  if (v==='r'){ month = 0; monthSlider.set(0); playing = true; }
+}});
+LM.ui.slider(ctrls, {
+  label:'Column scale', min:0.3, max:3, step:0.05, value:1.15,
+  fmt:function(v){return v.toFixed(2)+'x';},
+  on:function(v){ colScale = v; }
+});
+var colScale = 1.15;
+LM.ui.slider(ctrls, {
+  label:'Enrolment flow', min:0, max:3, step:0.05, value:1.0,
+  fmt:function(v){return v.toFixed(2)+'x';},
+  on:function(v){ gpu.uniforms.uSpeed.value = v; }
+});
+
+var activeRegions = {NA:1,LATAM:1,EU:1,EMEA:1,APAC:1};
+var rbox = LM.ui.el('div','ctrl');
+rbox.appendChild(LM.ui.el('label',null,'<span>Regions</span>'));
+Object.keys(LM.REGIONS).forEach(function(k){
+  LM.ui.check(rbox, {label:LM.REGIONS[k].label, value:true, on:function(v){ activeRegions[k]=v?1:0; }});
+});
+ctrls.appendChild(rbox);
+
+var setStat = LM.ui.stats(document.getElementById('stats'), [
+  {k:'Randomised', id:'enr', accent:true},
+  {k:'of target', id:'pct'},
+  {k:'Active sites', id:'act'},
+  {k:'Countries', id:'ctry'},
+  {k:'Study month', id:'mo'},
+  {k:'Run-in rate', id:'rate'}
+]);
+
+LM.ui.legend(document.getElementById('legend'),
+  Object.keys(LM.REGIONS).map(function(k){
+    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true};
+  })
+);
+
+/* ---- hover picking ---- */
+var ray = new THREE.Raycaster();
+ray.params.Points = {threshold:0.1};
+var mouse = LM.pointer(ctx.renderer.domElement, null);
+var lastMouse = {x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove', function(e){ lastMouse.x=e.clientX; lastMouse.y=e.clientY; });
+
+/* ---- frame ---- */
+var smoothRate = 0;
+ctx.onFrame(function(dt,t){
+  if (playing){
+    month += dt * 1.25;
+    if (month > MONTHS-1){ month = MONTHS-1; playing = false; }
+    monthSlider.el.value = month;
+    monthSlider.el.previousSibling.lastChild.textContent = 'M'+Math.round(month);
+  }
+  uMonth.value = month;
+
+  // update columns
+  var total=0, totalPrev=0, active=0, ctrySet={};
+  var pm = Math.max(0, month-1);
+  for (var i=0;i<N;i++){
+    var s = sites[i];
+    var on = activeRegions[s.region];
+    var e = on ? enrolledAt(i, month) : 0;
+    total += e;
+    if (on) totalPrev += enrolledAt(i, pm);
+    var h = Math.max(e * 0.0165 * colScale, 0.0001);
+    if (e > 0.5){ active++; ctrySet[s.country]=1; }
+    tmpO.position.copy(basePos[i]);
+    tmpO.quaternion.copy(upQ[i]);
+    tmpO.scale.set(1, h, 1);
+    tmpO.updateMatrix();
+    cols.setMatrixAt(i, tmpO.matrix);
+  }
+  cols.instanceMatrix.needsUpdate = true;
+
+  // activation rings for sites that just opened
+  for (var i=0;i<RINGS;i++){
+    var r = ringState[i];
+    r.t += dt;
+    if (r.t > 1.6){
+      // find a site whose activation month is near "now"
+      var cand = -1;
+      for (var k=0;k<N;k++){
+        var am = sites[k].activation/30.4;
+        if (activeRegions[sites[k].region] && Math.abs(am-month) < 0.35 && Math.random()<0.25){ cand=k; break; }
+      }
+      if (cand>=0){ r.site=cand; r.t=0; } else { r.site=-1; }
+    }
+    if (r.site>=0 && r.t<1.6){
+      var sc = 1 + r.t*7;
+      tmpO.position.copy(basePos[r.site].clone().multiplyScalar(1.006));
+      tmpO.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1), basePos[r.site].clone().normalize()));
+      tmpO.scale.set(sc,sc,1);
+    } else {
+      tmpO.position.set(0,-999,0); tmpO.scale.set(0.001,0.001,0.001);
+    }
+    tmpO.updateMatrix();
+    rings.setMatrixAt(i, tmpO.matrix);
+  }
+  rings.instanceMatrix.needsUpdate = true;
+  var anyRing = ringState.some(function(r){return r.site>=0 && r.t<1.6;});
+  ringMat.opacity = anyRing ? 0.5 : 0;
+  // fade handled crudely across the batch; individual fade would need per-instance alpha
+  var minT = Math.min.apply(null, ringState.filter(function(r){return r.site>=0;}).map(function(r){return r.t;}).concat([1.6]));
+  ringMat.opacity = Math.max(0, 0.55 * (1 - minT/1.6));
+
+  // gpu step
+  gpu.step(Math.min(dt,0.033), t);
+  pMat.uniforms.uPos.value = gpu.texture;
+
+  // stats
+  var rate = Math.max(0, total - totalPrev);               // patients randomised in the trailing month
+  smoothRate += (rate - smoothRate) * 0.12;
+  setStat('enr', LM.fmt(Math.round(total)));
+  setStat('pct', LM.pct(total/study.planned, 0));
+  setStat('act', active + '<small> / '+N+'</small>');
+  setStat('ctry', Object.keys(ctrySet).length);
+  setStat('mo', 'M'+Math.round(month));
+  setStat('rate', LM.fmt(Math.max(0,smoothRate),0)+'<small>/mo</small>');
+
+  // hover
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit = ray.intersectObject(cols);
+  if (hit.length && hit[0].instanceId !== undefined){
+    var s = sites[hit[0].instanceId];
+    var e = Math.round(enrolledAt(hit[0].instanceId, month));
+    LM.tip.show(lastMouse.x, lastMouse.y,
+      '<span class="t">'+s.name+'</span>'+
+      '<span class="m">'+s.country+' · '+LM.REGIONS[s.region].label+' · site '+s.id+'</span>'+
+      '<div style="margin-top:5px">Randomised <b>'+e+'</b> of '+s.target+'<br>'+
+      'Activated day <b>'+s.activation+'</b> · screen fail '+LM.pct(s.screenFail,0)+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

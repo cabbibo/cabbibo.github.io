@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Follow the Sun</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Computing terminator<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">07 · Global Operations</p>
+  <h1 class="viz">Follow the <em>Sun</em></h1>
+  <p class="lede">A global trial never closes. Watch the working day sweep around the planet: sites waking, dosing, capturing data, and handing off to the next time zone.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Clock</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Right now</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <div id="handoff"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('07-timezone-wave');
+
+var R = 5.0, sites = LM.study.sites, N = sites.length;
+
+var ctx = LM.boot({
+  cam:[0,3.4,15], fov:38, fit:R*1.40, fitMargin:1.08,
+  orbit:{ minDist:7, maxDist:40, autoRotate:true, autoRotateSpeed:0.09, pan:false },
+  fog:[22,62]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.56,key:0.78,fill:0.30,rim:0.18});
+var uPix = LM.pixUniform(ctx);
+var globe = LM.globe(ctx, R, {pix:uPix, rimStrength:0.20, dotAlpha:0.58});
+
+/* ---------- day/night shell driven by UTC hour ---------- */
+var uUTC = { value: 9.0 };
+var night = new THREE.Mesh(
+  new THREE.SphereGeometry(R*1.012, 128, 80),
+  new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false,
+    uniforms:{ uUTC:uUTC, uNight:{value:new THREE.Color(0x1d2a38)} },
+    vertexShader:'varying vec3 vW;void main(){vW=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:[
+      'uniform float uUTC;uniform vec3 uNight;varying vec3 vW;',
+      'void main(){',
+      ' // sub-solar longitude from UTC; mild axial tilt for seasonal realism',
+      ' float lon=radians(180.0-uUTC*15.0);',
+      ' float tilt=radians(12.0);',
+      ' vec3 sun=vec3(sin(lon)*cos(tilt),sin(tilt),cos(lon)*cos(tilt));',
+      ' float d=dot(normalize(vW),normalize(sun));',
+      ' float nite=smoothstep(0.12,-0.22,d);',
+      ' gl_FragColor=vec4(uNight,nite*0.30);}'
+    ].join('\n')
+  })
+);
+ctx.add(night);
+
+/* ---------- site markers ---------- */
+var dotGeo = new THREE.SphereGeometry(0.052, 10, 8);
+var dots = new THREE.InstancedMesh(dotGeo, new THREE.MeshBasicMaterial({vertexColors:true}), N);
+dots.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var dCol = new Float32Array(N*3);
+dots.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(dCol,3));
+ctx.add(dots);
+
+var beamGeo = new THREE.CylinderGeometry(0.016,0.016,1,6,1,true);
+beamGeo.translate(0,0.5,0);
+var beams = new THREE.InstancedMesh(beamGeo, new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0.75}), N);
+beams.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var bCol = new Float32Array(N*3);
+beams.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(bCol,3));
+ctx.add(beams);
+
+var pos=[], quat=[], UP=new THREE.Vector3(0,1,0);
+for (var i=0;i<N;i++){
+  var p = LM.geo.toVec3(sites[i].lat, sites[i].lon, R*1.012);
+  pos.push(p);
+  quat.push(new THREE.Quaternion().setFromUnitVectors(UP, p.clone().normalize()));
+}
+
+/* ---------- data-capture particles riding the working day ---------- */
+var PW=56, PH=56;
+var stW=128, sdata=new Float32Array(stW*4);
+for (var i=0;i<N;i++){
+  var p=pos[i];
+  sdata[i*4]=p.x; sdata[i*4+1]=p.y; sdata[i*4+2]=p.z; sdata[i*4+3]=sites[i].tz;
+}
+var siteTex=new THREE.DataTexture(sdata,stW,1,THREE.RGBAFormat,THREE.FloatType);
+siteTex.minFilter=siteTex.magFilter=THREE.NearestFilter; siteTex.needsUpdate=true;
+
+var frag=[
+ 'uniform sampler2D uPrev,uSites;uniform float uDt,uTime,uUTC,uN,uStW,uR,uRate;',
+ 'varying vec2 vUv;',
+ LM.glsl.hash,
+ 'void main(){',
+ ' vec4 st=texture2D(uPrev,vUv);',
+ ' float idx=floor(vUv.x*'+PW+'.0)+floor(vUv.y*'+PH+'.0)*'+PW+'.0;',
+ ' float site=mod(idx,uN);',
+ ' vec4 S=texture2D(uSites,vec2((site+0.5)/uStW,0.5));',
+ ' float localH=mod(uUTC+S.w+24.0,24.0);',
+ ' float open=smoothstep(7.0,8.5,localH)*(1.0-smoothstep(17.5,19.5,localH));',
+ ' float life=st.w;',
+ ' if(life<=0.0){',
+ '   if(hash11(idx*3.1+uTime*7.0)<open*uRate*uDt*7.0){',
+ '     st.xyz=S.xyz*1.004; life=1.0;',
+ '   }',
+ ' } else {',
+ '   // rise off the site and drift toward the data lake above the pole',
+ '   vec3 n=normalize(st.xyz);',
+ '   float h=length(st.xyz);',
+ '   st.xyz=n*(h+uDt*0.95)+vec3(0.0,uDt*0.55,0.0);',
+ '   life-=uDt*0.40;',
+ '   if(h>uR*2.3) life=0.0;',
+ ' }',
+ ' gl_FragColor=vec4(st.xyz,max(life,0.0));',
+ '}'].join('\n');
+
+var gpu=new LM.GPGPU(ctx.renderer,PW,PH,frag,{
+  uSites:{value:siteTex}, uN:{value:N}, uStW:{value:stW}, uR:{value:R},
+  uUTC:uUTC, uRate:{value:1.0}
+},function(d,w,h){ for(var i=0;i<w*h;i++){ d[i*4]=0;d[i*4+1]=0;d[i*4+2]=0;d[i*4+3]=0; } });
+
+var pMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  uniforms:{ uPos:{value:gpu.texture}, uPix:uPix, uSize:{value:0.048},
+             uCol:{value:new THREE.Color(LM.C.accent)} },
+  vertexShader:[
+    LM.glsl.psize,
+    'uniform sampler2D uPos;uniform float uSize;attribute vec2 aRef;varying float vA;',
+    'void main(){vec4 s=texture2D(uPos,aRef);vA=s.w;',
+    ' if(s.w<=0.0){gl_Position=vec4(2.0,2.0,2.0,1.0);gl_PointSize=0.0;return;}',
+    ' vec4 mv=modelViewMatrix*vec4(s.xyz,1.0);',
+    ' gl_PointSize=lmSize(uSize*(0.4+s.w*0.8),mv);gl_Position=projectionMatrix*mv;}'
+  ].join('\n'),
+  fragmentShader:[
+    'uniform vec3 uCol;varying float vA;',
+    'void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;',
+    ' gl_FragColor=vec4(uCol,(1.0-smoothstep(0.15,1.0,d))*vA*0.9);}'
+  ].join('\n')
+});
+ctx.add(new THREE.Points(LM.indexGeometry(PW,PH),pMat));
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+var playing=true, utc=9.0, speed=1.0;
+var utcSlider=LM.ui.slider(ctrls,{label:'UTC hour', min:0, max:24, step:0.05, value:9,
+  fmt:function(v){var h=Math.floor(v),m=Math.floor((v-h)*60);return String(h%24).padStart(2,'0')+':'+String(m).padStart(2,'0');},
+  on:function(v){utc=v;}});
+LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
+  {label:'Play',value:'p'},{label:'Pause',value:'s'}
+], on:function(v){playing=(v==='p');}});
+LM.ui.slider(ctrls,{label:'Clock speed', min:0.1, max:6, step:0.1, value:1.4,
+  fmt:function(v){return v.toFixed(1)+' h/s';}, on:function(v){speed=v;}});
+LM.ui.slider(ctrls,{label:'Data capture rate', min:0, max:3, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uRate.value=v;}});
+LM.ui.slider(ctrls,{label:'Working day start', min:5, max:10, step:0.5, value:8,
+  fmt:function(v){return v.toFixed(1)+':00';}, on:function(v){dayStart=v;}});
+var dayStart=8;
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Sites open', id:'open', accent:true},
+  {k:'In working hrs', id:'wh'},
+  {k:'Asleep', id:'sleep'},
+  {k:'Coverage', id:'cov'},
+  {k:'UTC', id:'utc'},
+  {k:'Busiest region', id:'reg'}
+]);
+
+LM.ui.legend(document.getElementById('legend'),[
+  {color:'#d82591', label:'Open — working hours', sub:'Dosing, visits, data entry', round:true},
+  {color:'#ed9e2f', label:'Opening / closing', sub:'Shoulder hours', round:true},
+  {color:'#698cb5', label:'On call only', sub:'SAE reporting still live', round:true},
+  {color:'#d5dbe3', label:'Closed', sub:'Local night', round:true}
+]);
+
+var handoff=document.getElementById('handoff');
+
+/* ---------- frame ---------- */
+var O=new THREE.Object3D(), C=new THREE.Color();
+var cOpen=new THREE.Color(LM.C.accent), cEdge=new THREE.Color(LM.C.amber),
+    cCall=new THREE.Color(LM.C.slate), cShut=new THREE.Color(LM.C.line);
+
+ctx.onFrame(function(dt,t){
+  if (playing){
+    utc = (utc + dt*speed) % 24;
+    utcSlider.el.value = utc;
+    var h=Math.floor(utc), m=Math.floor((utc-h)*60);
+    utcSlider.el.previousSibling.lastChild.textContent =
+      String(h%24).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+  uUTC.value = utc;
+
+  var open=0, edge=0, call=0, regCount={NA:0,LATAM:0,EU:0,EMEA:0,APAC:0};
+  for (var i=0;i<N;i++){
+    var s=sites[i];
+    var local=(utc + s.tz + 24)%24;
+    var state;
+    if (local>=dayStart && local<dayStart+9.5){ state=2; open++; regCount[s.region]++; }
+    else if ((local>=dayStart-1.5 && local<dayStart) || (local>=dayStart+9.5 && local<dayStart+11.5)){ state=1; edge++; }
+    else if (local>=6 && local<22){ state=0.5; call++; }
+    else state=0;
+
+    C.copy(state===2?cOpen:state===1?cEdge:state===0.5?cCall:cShut);
+    dCol[i*3]=C.r; dCol[i*3+1]=C.g; dCol[i*3+2]=C.b;
+    bCol[i*3]=C.r; bCol[i*3+1]=C.g; bCol[i*3+2]=C.b;
+
+    var pulse = state===2 ? 1.5+0.35*Math.sin(t*3.2+i*0.6) : state===1 ? 1.1 : 0.72;
+    O.position.copy(pos[i]); O.quaternion.identity(); O.scale.set(pulse,pulse,pulse);
+    O.updateMatrix(); dots.setMatrixAt(i,O.matrix);
+
+    var bh = state===2 ? 0.55+0.18*Math.sin(t*2.4+i) : state===1 ? 0.22 : 0.0001;
+    O.position.copy(pos[i]); O.quaternion.copy(quat[i]); O.scale.set(1,bh,1);
+    O.updateMatrix(); beams.setMatrixAt(i,O.matrix);
+  }
+  dots.instanceMatrix.needsUpdate=true;
+  dots.geometry.attributes.color.needsUpdate=true;
+  beams.instanceMatrix.needsUpdate=true;
+  beams.geometry.attributes.color.needsUpdate=true;
+
+  gpu.step(Math.min(dt,0.033), t);
+  pMat.uniforms.uPos.value = gpu.texture;
+
+  var best='—', bestN=-1;
+  Object.keys(regCount).forEach(function(k){ if(regCount[k]>bestN){bestN=regCount[k];best=k;} });
+  var hh=Math.floor(utc), mm=Math.floor((utc-hh)*60);
+  setStat('open', open);
+  setStat('wh', LM.pct(open/N,0));
+  setStat('sleep', N-open-edge-call);
+  setStat('cov', LM.pct((open+edge)/N,0));
+  setStat('utc', String(hh%24).padStart(2,'0')+':'+String(mm).padStart(2,'0'));
+  setStat('reg', bestN>0?LM.REGIONS[best].label.split(' ')[0]:'—');
+
+  if (ctx.frame % 12 === 0){
+    handoff.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Open sites by region</div>'+
+      Object.keys(regCount).map(function(k){
+        var c='#'+LM.REGIONS[k].color.toString(16).padStart(6,'0');
+        var w=regCount[k]/Math.max(1,N)*100*3;
+        return '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;margin-bottom:3px">'+
+          '<span>'+LM.REGIONS[k].label+'</span><span style="color:'+c+'">'+regCount[k]+'</span></div>'+
+          '<div style="height:4px;background:rgba(13,22,31,.06);border-radius:2px;overflow:hidden">'+
+          '<div style="height:100%;width:'+Math.min(w,100)+'%;background:'+c+';border-radius:2px"></div></div></div>';
+      }).join('');
+  }
+});
+})();
+</script>
+</body>
+</html>

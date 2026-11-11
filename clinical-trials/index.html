@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinical Trial Atlas — Labmarket</title>
+<link rel="stylesheet" href="assets/css/base.css">
+<style>
+  body{overflow-x:hidden;overflow-y:auto;}
+  #hero{position:relative;height:clamp(340px,52vh,520px);overflow:hidden;
+        background:linear-gradient(180deg,#fdfdfc 0%,#f4f3f0 100%);}
+  #heroCanvas{position:absolute;inset:0;}
+  #heroCanvas canvas{width:100%;height:100%;display:block;}
+  .hero-fade{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(253,253,252,.55) 0%,rgba(253,253,252,0) 38%,rgba(244,243,240,.92) 100%);}
+  .hero-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:54px 40px 0;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 40px 90px;}
+
+  h1.atlas{font-size:clamp(38px,5.4vw,70px);line-height:0.98;letter-spacing:-.042em;
+           font-weight:800;margin:16px 0 18px;max-width:14ch;}
+  h1.atlas em{font-style:normal;color:var(--accent);}
+  .sub{font-size:clamp(14px,1.35vw,17px);line-height:1.6;color:var(--muted);max-width:60ch;margin:0;}
+
+  .meta{display:flex;flex-wrap:wrap;gap:26px;margin-top:30px;padding-top:22px;
+        border-top:1px solid var(--line);}
+  .meta div{min-width:88px;}
+  .meta .k{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+  .meta .v{font-size:21px;font-weight:700;letter-spacing:-.03em;margin-top:3px;}
+  .meta .v em{font-style:normal;color:var(--accent);}
+
+  .group{margin-top:62px;}
+  .group-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;
+              padding-bottom:13px;border-bottom:1px solid var(--line);}
+  .group-head h2{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0;}
+  .group-head span{font-size:11px;color:var(--faint);font-weight:600;
+                   font-family:var(--mono);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px;}
+
+  a.card{
+    position:relative;display:block;text-decoration:none;color:inherit;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);
+    padding:19px 19px 21px;overflow:hidden;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1),box-shadow .22s,border-color .22s;
+  }
+  a.card::before{
+    content:'';position:absolute;inset:0 0 auto 0;height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-lt));
+    transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.3,1);
+  }
+  a.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent;}
+  a.card:hover::before{transform:scaleX(1);}
+  a.card:hover .num{color:var(--accent);}
+  a.card:hover .go{opacity:1;transform:translateX(0);}
+
+  .num{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--faint);
+       letter-spacing:.04em;transition:color .22s;}
+  .card h3{font-size:16.5px;font-weight:700;letter-spacing:-.025em;margin:9px 0 8px;line-height:1.18;}
+  .card p{font-size:12.5px;line-height:1.52;color:var(--muted);margin:0;}
+  .tags{display:flex;gap:5px;margin-top:13px;flex-wrap:wrap;}
+  .tag{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+       padding:3.5px 7px;border-radius:5px;background:rgba(13,22,31,.055);color:var(--muted);}
+  .go{position:absolute;right:17px;bottom:19px;font-size:15px;color:var(--accent);
+      opacity:0;transform:translateX(-5px);transition:.22s;}
+
+  footer{margin-top:76px;padding-top:26px;border-top:1px solid var(--line);
+         font-size:12px;color:var(--faint);line-height:1.7;}
+  footer b{color:var(--muted);font-weight:600;}
+  footer code{font-family:var(--mono);font-size:11px;background:rgba(13,22,31,.05);
+              padding:2px 6px;border-radius:4px;color:var(--muted);}
+
+  @media (max-width:760px){
+    .hero-inner,.wrap{padding-left:20px;padding-right:20px;}
+    .grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body class="doc">
+
+<section id="hero">
+  <div id="heroCanvas"></div>
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <a class="brand" href="https://labmarket.bio/" style="position:static;display:inline-flex;margin-bottom:6px">
+      <span class="dot"></span><span><b>Labmarket</b> <span>Clinical Trial Atlas</span></span>
+    </a>
+    <h1 class="atlas">Twenty ways to <em>see</em> a clinical trial.</h1>
+    <p class="sub">A set of GPU-rendered, self-hosted explanations of how global clinical trials actually work &mdash;
+      from phase attrition and eligibility criteria to enrolment, supply, safety signals and the digital twin.
+      Every one is interactive. Every one runs on a single shared study.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="meta" id="meta"></div>
+  <div id="groups"></div>
+
+  <footer>
+    <b>Self-hosted.</b> No build step, no CDN, no network calls at runtime.
+    three.js, the Archivo typeface and the world geometry are all vendored under <code>assets/</code>.<br>
+    <b>To run:</b> double-click any file in <code>viz/</code>, or serve the folder
+    (<code>serve.cmd</code> on Windows, <code>serve.sh</code> on macOS/Linux) and open
+    <code>http://127.0.0.1:8731</code>.<br>
+    <b>Data.</b> The study behind every page &mdash; LMK-204, 84 sites, 49 countries, 2,400 planned patients &mdash;
+    is synthetic but modelled on real Phase&nbsp;III oncology parameters. Nothing here is patient data.<br>
+    <b>Keys.</b> <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> move between visuals,
+    <span class="kbd">Esc</span> returns here.
+  </footer>
+</div>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/js/land.js"></script>
+<script src="assets/js/lmviz.js"></script>
+<script>
+(function(){
+
+/* ---------- gallery ---------- */
+var groups = [];
+LM.manifest.forEach(function(m){
+  var g = groups.filter(function(x){return x.n===m.g;})[0];
+  if (!g){ g = {n:m.g, items:[]}; groups.push(g); }
+  g.items.push(m);
+});
+
+var TECH = {
+  1:['GPGPU','Particles'], 2:['Instancing','Lattice'], 3:['GPGPU','Sieve'],
+  4:['Globe','Instancing'], 5:['Gantt','Instancing'], 6:['Globe','GPGPU'],
+  7:['Globe','Shader'], 8:['Map','Instancing'], 9:['GPGPU','Alluvial'],
+  10:['Globe','GPGPU'], 11:['GPGPU','Shader'], 12:['Simulation','Instancing'],
+  13:['Survival','Geometry'], 14:['Scatter','Instancing'], 15:['Lattice','Instancing'],
+  16:['GPGPU','Pipeline'], 17:['Terrain','Vertex shader'], 18:['Forest','Instancing'],
+  19:['GPGPU','n-body'], 20:['Globe','All layers']
+};
+
+var html = '';
+groups.forEach(function(g){
+  html += '<section class="group"><div class="group-head">'+
+    '<h2>'+g.n+'</h2><span>'+g.items.length+' visuals</span></div><div class="grid">';
+  g.items.forEach(function(m){
+    var tags = (TECH[m.n]||[]).map(function(t){return '<span class="tag">'+t+'</span>';}).join('');
+    html += '<a class="card" href="viz/'+m.slug+'.html">'+
+      '<span class="num">'+String(m.n).padStart(2,'0')+'</span>'+
+      '<h3>'+m.t+'</h3>'+
+      '<p>'+m.d+'</p>'+
+      '<div class="tags">'+tags+'</div>'+
+      '<span class="go">&rarr;</span></a>';
+  });
+  html += '</div></section>';
+});
+document.getElementById('groups').innerHTML = html;
+
+var s = LM.study;
+document.getElementById('meta').innerHTML = [
+  {k:'Visuals', v:'<em>20</em>'},
+  {k:'Study', v:s.protocol},
+  {k:'Sites', v:s.sites.length},
+  {k:'Countries', v:new Set(s.sites.map(function(x){return x.country;})).size},
+  {k:'Planned patients', v:LM.fmt(s.planned)},
+  {k:'Dependencies', v:'1'}
+].map(function(d){
+  return '<div><div class="k">'+d.k+'</div><div class="v">'+d.v+'</div></div>';
+}).join('');
+
+/* ---------- hero: slowly turning site globe ---------- */
+(function(){
+  var host = document.getElementById('heroCanvas');
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); }
+  catch(e){ return; }
+  if (!renderer || !renderer.getContext()) return;
+
+  function size(){ return {w:host.clientWidth||window.innerWidth, h:host.clientHeight||420}; }
+  var sz = size();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(sz.w, sz.h);
+  renderer.setClearColor(0x000000, 0);
+  host.appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  var cam = new THREE.PerspectiveCamera(34, sz.w/sz.h, 0.1, 200);
+
+  var R = 5;
+  var g = new THREE.Group();
+  g.rotation.z = -0.22;
+  scene.add(g);
+
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(R*0.995,72,48),
+    new THREE.MeshBasicMaterial({color:0xffffff})));
+  g.add(LM.geo.graticule(R*1.001,{opacity:0.08}));
+  g.add(LM.geo.landGlobe(R*1.003,{opacity:0.22,color:LM.C.ink}));
+
+  // land dots
+  var uPix = {value: renderer.domElement.height*0.5};
+  (function(){
+    var mask = LM.geo.landMask(600,300), pts=[], step=1.9;
+    for (var lat=-80;lat<=80;lat+=step){
+      var circ=Math.cos(lat*Math.PI/180), ls=step/Math.max(circ,0.16);
+      for (var lon=-180;lon<180;lon+=ls){
+        if(!mask.sampler(lat,lon)) continue;
+        var p=LM.geo.toVec3(lat,lon,R*1.004); pts.push(p.x,p.y,p.z);
+      }
+    }
+    var bg=new THREE.BufferGeometry();
+    bg.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+    g.add(new THREE.Points(bg,new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:{uCol:{value:new THREE.Color(0x3a4a5a)},uSize:{value:0.040},uPix:uPix},
+      vertexShader:LM.glsl.psize+'\nuniform float uSize;varying float vF;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vec3 n=normalize(normalMatrix*normalize(position));vF=smoothstep(-0.05,0.4,dot(n,normalize(-mv.xyz)));gl_PointSize=lmSize(uSize,mv);gl_Position=projectionMatrix*mv;}',
+      fragmentShader:'uniform vec3 uCol;varying float vF;void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;gl_FragColor=vec4(uCol,(1.0-smoothstep(0.5,1.0,d))*vF*0.55);}'
+    })));
+  })();
+
+  // site markers sized by target enrolment
+  (function(){
+    var sites = LM.study.sites;
+    var geo = new THREE.SphereGeometry(0.055,9,7);
+    var m = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({vertexColors:true}), sites.length);
+    var cols = new Float32Array(sites.length*3);
+    m.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(cols,3));
+    var O=new THREE.Object3D(), C=new THREE.Color();
+    sites.forEach(function(s,i){
+      O.position.copy(LM.geo.toVec3(s.lat,s.lon,R*1.012));
+      var sc = 0.7 + s.target/34;
+      O.scale.setScalar(sc); O.updateMatrix(); m.setMatrixAt(i,O.matrix);
+      C.setHex(LM.REGIONS[s.region].color);
+      cols[i*3]=C.r; cols[i*3+1]=C.g; cols[i*3+2]=C.b;
+    });
+    m.instanceMatrix.needsUpdate=true;
+    g.add(m);
+  })();
+
+  // a handful of arcs for motion
+  var arcs=[];
+  (function(){
+    var sites=LM.study.sites, rnd=LM.rng(5);
+    for (var k=0;k<22;k++){
+      var a=sites[Math.floor(rnd()*sites.length)], b=sites[Math.floor(rnd()*sites.length)];
+      var curve=LM.geo.arc(LM.geo.toVec3(a.lat,a.lon,R*1.01), LM.geo.toVec3(b.lat,b.lon,R*1.01), 0.34);
+      var pts=curve.getPoints(60);
+      var bg=new THREE.BufferGeometry().setFromPoints(pts);
+      var mat=new THREE.LineBasicMaterial({color:LM.C.accent,transparent:true,opacity:0.22});
+      var line=new THREE.Line(bg,mat);
+      bg.setDrawRange(0,0);
+      g.add(line);
+      arcs.push({line:line, n:pts.length, t:rnd()*1.0, sp:0.22+rnd()*0.3});
+    }
+  })();
+
+  function fit(){
+    var s2=size();
+    renderer.setSize(s2.w,s2.h);
+    cam.aspect=s2.w/s2.h;
+    uPix.value = renderer.domElement.height*0.5;
+    var vf=cam.fov*Math.PI/360, hf=Math.atan(Math.tan(vf)*cam.aspect);
+    cam.position.set(0, 1.0, R*1.42/Math.max(Math.tan(Math.min(vf,hf)),1e-4));
+    cam.lookAt(0,0,0);
+    cam.updateProjectionMatrix();
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  var clock=new THREE.Clock(), vis=true;
+  document.addEventListener('visibilitychange',function(){vis=!document.hidden; if(vis)clock.getDelta();});
+  (function loop(){
+    requestAnimationFrame(loop);
+    if (!vis) return;
+    var dt=Math.min(clock.getDelta(),0.05);
+    g.rotation.y += dt*0.075;
+    arcs.forEach(function(a){
+      a.t += dt*a.sp;
+      if (a.t>1.55) a.t=0;
+      var head=Math.min(a.t,1)*a.n;
+      var tail=Math.max(0,(a.t-0.35))*a.n;
+      a.line.geometry.setDrawRange(Math.floor(tail), Math.max(0,Math.floor(head-tail)));
+      a.line.material.opacity = 0.26*(1-Math.max(0,(a.t-1)/0.55));
+    });
+    renderer.render(scene,cam);
+  })();
+})();
+})();
+</script>
+</body>
+</html>

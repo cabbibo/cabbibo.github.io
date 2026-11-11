@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safety Signal Space</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Coding adverse events<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">14 · Conduct &amp; Safety</p>
+  <h1 class="viz">Safety <em>Signal Space</em></h1>
+  <p class="lede">Every adverse event coded to MedDRA, plotted by how much more often it happened on drug and how sure you are it isn&rsquo;t noise. The cloud is background. The outliers are the label.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Signal detection</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Signals</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="top"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('14-adverse-events');
+
+/* ---------- MedDRA system organ classes and preferred terms ---------- */
+var SOC = [
+  {n:'Gastrointestinal', c:LM.C.accent, pts:['Nausea','Vomiting','Diarrhoea','Constipation','Abdominal pain','Dyspepsia','Stomatitis','Dysphagia','Gastritis','Colitis']},
+  {n:'General', c:LM.C.slate, pts:['Fatigue','Pyrexia','Oedema peripheral','Asthenia','Chills','Influenza-like illness','Pain','Malaise']},
+  {n:'Blood &amp; lymphatic', c:LM.C.violet, pts:['Anaemia','Neutropenia','Thrombocytopenia','Leukopenia','Lymphopenia','Febrile neutropenia']},
+  {n:'Skin', c:LM.C.amber, pts:['Rash','Pruritus','Alopecia','Dry skin','Erythema','Palmar-plantar erythrodysaesthesia','Urticaria']},
+  {n:'Metabolism', c:LM.C.teal, pts:['Decreased appetite','Hypokalaemia','Hyperglycaemia','Hypomagnesaemia','Dehydration','Hyponatraemia']},
+  {n:'Nervous system', c:LM.C.green, pts:['Headache','Dizziness','Peripheral neuropathy','Dysgeusia','Paraesthesia','Somnolence','Tremor']},
+  {n:'Respiratory', c:LM.C.red, pts:['Cough','Dyspnoea','Epistaxis','Pneumonitis','Oropharyngeal pain','Pleural effusion']},
+  {n:'Investigations', c:LM.C.slate, pts:['ALT increased','AST increased','Blood creatinine increased','Weight decreased','Lipase increased','Amylase increased','TSH increased']},
+  {n:'Musculoskeletal', c:LM.C.violet, pts:['Arthralgia','Myalgia','Back pain','Pain in extremity','Muscular weakness']},
+  {n:'Infections', c:LM.C.amber, pts:['Upper respiratory tract infection','Urinary tract infection','Pneumonia','Nasopharyngitis','Sepsis']},
+  {n:'Psychiatric', c:LM.C.teal, pts:['Insomnia','Anxiety','Depression','Confusional state']},
+  {n:'Endocrine', c:LM.C.accent, pts:['Hypothyroidism','Hyperthyroidism','Adrenal insufficiency','Hypophysitis']}
+];
+
+/* Immune-mediated and on-target toxicities get a real treatment effect. */
+var TRUE_SIGNAL = {
+  'Hypothyroidism':3.9,'Pneumonitis':3.4,'Colitis':3.1,'Hypophysitis':4.6,'Adrenal insufficiency':3.2,
+  'Rash':2.1,'Pruritus':2.3,'ALT increased':2.4,'AST increased':2.2,'Diarrhoea':1.8,
+  'Fatigue':1.35,'Hyperthyroidism':2.8,'Arthralgia':1.6,'Decreased appetite':1.4,
+  'Palmar-plantar erythrodysaesthesia':2.6,'Lipase increased':2.0,'Nausea':1.25
+};
+
+var N_TRT = 1440, N_PBO = 960;
+var events = [];
+(function build(){
+  var rnd = LM.rng(20260714);
+  SOC.forEach(function(S, si){
+    S.pts.forEach(function(pt){
+      var p0 = 0.012 + Math.pow(rnd(), 2.0)*0.22;          // placebo incidence
+      var rr = TRUE_SIGNAL[pt] || (0.85 + rnd()*0.35);     // true risk ratio
+      var p1 = LM.clamp(p0*rr, 0, 0.92);
+      var aT = 0, aP = 0, g3T = 0, g3P = 0;
+      for (var i=0;i<N_TRT;i++) if (rnd()<p1){ aT++; if (rnd()<0.22) g3T++; }
+      for (var i=0;i<N_PBO;i++) if (rnd()<p0){ aP++; if (rnd()<0.18) g3P++; }
+      events.push({
+        pt:pt, soc:si, socName:S.n, c:S.c,
+        aT:aT, aP:aP, g3T:g3T, g3P:g3P, trueRR:rr
+      });
+    });
+  });
+})();
+
+function normCdf(x){
+  var t=1/(1+0.2316419*Math.abs(x)), d=0.3989423*Math.exp(-x*x/2);
+  var pr=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  return x>0?1-pr:pr;
+}
+function analyse(grade3Only){
+  events.forEach(function(e){
+    var a = grade3Only ? e.g3T : e.aT;
+    var b = grade3Only ? e.g3P : e.aP;
+    var p1 = a/N_TRT, p0 = b/N_PBO;
+    e.rr = (p0>0) ? p1/p0 : (p1>0 ? 8 : 1);
+    e.rd = p1 - p0;
+    var pPool = (a+b)/(N_TRT+N_PBO);
+    var se = Math.sqrt(Math.max(pPool*(1-pPool)*(1/N_TRT+1/N_PBO), 1e-12));
+    var z = se>0 ? (p1-p0)/se : 0;
+    e.z = z;
+    e.p = 2*(1-normCdf(Math.abs(z)));
+    e.logRR = Math.log2(LM.clamp(e.rr, 0.06, 16));
+    e.negLogP = -Math.log10(Math.max(e.p, 1e-12));
+    e.n = a + b;
+    e.incT = p1; e.incP = p0;
+  });
+}
+analyse(false);
+
+/* ---------- scene ---------- */
+var XS = 1.9, YS = 0.52, ZS = 0.80;
+var ctx = LM.boot({
+  cam:[0,5,22], fov:36, fit:10.4, fitMargin:1.08,
+  orbit:{ target:new THREE.Vector3(0,2.6,0), minDist:8, maxDist:56,
+          autoRotate:true, autoRotateSpeed:0.06, minPolar:0.14, maxPolar:1.76 },
+  fog:[30,92]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.78,key:0.64,fill:0.24,rim:0.14});
+
+function X(v){ return LM.clamp(v,-4,4)*XS; }
+function Y(v){ return LM.clamp(v,0,12)*YS; }
+function Z(si){ return (si-(SOC.length-1)/2)*ZS; }
+
+/* grid + reference planes */
+(function(){
+  var pts=[], zMin=Z(0)-0.6, zMax=Z(SOC.length-1)+0.6;
+  for (var v=-4;v<=4;v++){ pts.push(X(v),0,zMin, X(v),0,zMax); pts.push(X(v),0,zMin, X(v),Y(11),zMin); }
+  for (var y=0;y<=11;y+=2){ pts.push(X(-4),Y(y),zMin, X(4),Y(y),zMin); }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.07})));
+
+  // RR = 1 plane
+  var np=new THREE.Mesh(new THREE.PlaneGeometry(Y(11), zMax-zMin),
+    new THREE.MeshBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.05,side:THREE.DoubleSide,depthWrite:false}));
+  np.rotation.y=Math.PI/2; np.position.set(0, Y(11)/2, 0);
+  ctx.add(np);
+
+  for (var v=-4;v<=4;v+=2){
+    var l=LM.label(v===0?'no effect':(v>0?(Math.pow(2,v)+'×'):('1/'+Math.pow(2,-v)+'×')),
+      {size:24,weight:600,color:'#8d97a3',scale:0.64,depthTest:false});
+    l.position.set(X(v),-0.42,zMin); ctx.add(l);
+  }
+  var xl=LM.label('RISK RATIO  —  DRUG vs PLACEBO',{size:24,weight:700,color:'#8d97a3',scale:0.70,depthTest:false});
+  xl.position.set(0,-1.05,zMin); ctx.add(xl);
+  var yl=LM.label('−log₁₀ p',{size:24,weight:700,color:'#8d97a3',scale:0.70,depthTest:false});
+  yl.position.set(X(-4)-1.0,Y(5.5),zMin); ctx.add(yl);
+
+  SOC.forEach(function(S,si){
+    var l=LM.label(S.n.replace(/&amp;/g,'&'),{size:24,weight:600,color:'#'+S.c.toString(16).padStart(6,'0'),scale:0.62,depthTest:false});
+    l.position.set(X(4)+0.5+l.scale.x/2, 0.05, Z(si)); ctx.add(l);
+  });
+})();
+
+// significance threshold plane
+var sigPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(X(4)*2, Z(SOC.length-1)-Z(0)+1.2),
+  new THREE.MeshBasicMaterial({color:LM.C.red, transparent:true, opacity:0.07, side:THREE.DoubleSide, depthWrite:false})
+);
+sigPlane.rotation.x = -Math.PI/2;
+ctx.add(sigPlane);
+
+/* ---------- points ---------- */
+var NE = events.length;
+var eGeo = new THREE.SphereGeometry(0.11, 12, 9);
+var eMesh = new THREE.InstancedMesh(eGeo, new THREE.MeshLambertMaterial({vertexColors:true, transparent:true, opacity:0.95}), NE);
+eMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var eCol = new Float32Array(NE*3);
+eMesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(eCol,3));
+ctx.add(eMesh);
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+var pThresh=0.05, minN=8, grade3=false, fdr=false, socFilter=-1;
+
+LM.ui.seg(ctrls,{label:'Severity', index:0, options:[
+  {label:'All grades', value:false},{label:'Grade ≥3', value:true}
+], on:function(v){ grade3=v; analyse(v); refresh(); }});
+
+LM.ui.slider(ctrls,{label:'Significance threshold', min:0.001, max:0.25, step:0.001, value:0.05,
+  fmt:function(v){return 'p < '+v.toFixed(3);}, on:function(v){ pThresh=v; refresh(); }});
+LM.ui.slider(ctrls,{label:'Minimum events', min:1, max:60, step:1, value:8,
+  fmt:function(v){return v+' events';}, on:function(v){ minN=v; refresh(); }});
+LM.ui.check(ctrls,{label:'Benjamini-Hochberg correction', value:false, on:function(v){ fdr=v; refresh(); }});
+
+var socOpts = [{label:'All SOCs', value:-1}].concat(SOC.slice(0,3).map(function(S,i){
+  return {label:S.n.replace(/&amp;/g,'&').split(' ')[0], value:i};
+}));
+LM.ui.seg(ctrls,{label:'Focus', index:0, options:socOpts, on:function(v){ socFilter=v; refresh(); }});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Signals', id:'sig', accent:true},
+  {k:'Terms coded', id:'pts'},
+  {k:'Total events', id:'ev'},
+  {k:'Threshold', id:'th'},
+  {k:'Strongest RR', id:'rr'},
+  {k:'Events / patient', id:'rate'}
+]);
+
+var topEl=document.getElementById('top');
+
+/* ---------- analysis + render state ---------- */
+var flagged = [];
+function refresh(){
+  // Benjamini-Hochberg
+  var eligible = events.filter(function(e){ return e.n >= minN; });
+  var cutoff = pThresh;
+  if (fdr && eligible.length){
+    var sorted = eligible.slice().sort(function(a,b){return a.p-b.p;});
+    var m = sorted.length, k = 0;
+    for (var i=0;i<m;i++) if (sorted[i].p <= (i+1)/m*pThresh) k = i+1;
+    cutoff = k>0 ? sorted[k-1].p : 0;
+  }
+  flagged = [];
+  events.forEach(function(e){
+    e.sig = (e.n >= minN) && (e.p <= cutoff) && (e.rr > 1);
+    e.visible = (socFilter < 0 || e.soc === socFilter);
+    if (e.sig && e.visible) flagged.push(e);
+  });
+  flagged.sort(function(a,b){ return b.rr-a.rr; });
+
+  sigPlane.position.y = Y(-Math.log10(Math.max(cutoff,1e-12)));
+
+  var totEv = events.reduce(function(a,e){return a+e.n;},0);
+  setStat('sig', flagged.length);
+  setStat('pts', events.filter(function(e){return e.visible;}).length);
+  setStat('ev', LM.fmt(totEv));
+  setStat('th', fdr ? 'BH '+pThresh.toFixed(3) : 'p '+pThresh.toFixed(3));
+  setStat('rr', flagged.length ? flagged[0].rr.toFixed(1)+'×' : '—');
+  setStat('rate', (totEv/(N_TRT+N_PBO)).toFixed(1));
+
+  topEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Flagged terms</div>'+
+    (flagged.length ? flagged.slice(0,9).map(function(e){
+      var c='#'+e.c.toString(16).padStart(6,'0');
+      return '<div style="display:flex;align-items:baseline;gap:7px;margin-bottom:5px;font-size:11px">'+
+        '<span style="width:7px;height:7px;border-radius:50%;background:'+c+';flex:none"></span>'+
+        '<span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.pt+'</span>'+
+        '<span style="font-family:var(--mono);font-size:10px;color:var(--accent);flex:none">'+e.rr.toFixed(1)+'×</span>'+
+        '<span style="font-family:var(--mono);font-size:9.5px;color:var(--faint);flex:none;width:44px;text-align:right">'+
+          (e.p<0.0001?'<1e-4':e.p.toFixed(4))+'</span></div>';
+    }).join('') : '<p class="note">No terms meet the threshold.</p>');
+}
+refresh();
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+var O=new THREE.Object3D(), C=new THREE.Color(), GREY=new THREE.Color(LM.C.line);
+ctx.onFrame(function(dt,t){
+  for (var i=0;i<NE;i++){
+    var e = events[i];
+    if (!e.visible){ O.position.set(0,-999,0); O.scale.setScalar(0.001); O.updateMatrix(); eMesh.setMatrixAt(i,O.matrix); continue; }
+    var s = 0.45 + Math.sqrt(e.n)*0.085;
+    if (e.sig) s *= 1.35 + 0.10*Math.sin(t*2.6 + i);
+    O.position.set(X(e.logRR), Y(e.negLogP), Z(e.soc));
+    O.scale.setScalar(s);
+    O.updateMatrix(); eMesh.setMatrixAt(i,O.matrix);
+    if (e.sig) C.setHex(e.c); else { C.copy(GREY); }
+    eCol[i*3]=C.r; eCol[i*3+1]=C.g; eCol[i*3+2]=C.b;
+  }
+  eMesh.instanceMatrix.needsUpdate=true;
+  eMesh.geometry.attributes.color.needsUpdate=true;
+  sigPlane.material.opacity = 0.055 + 0.03*Math.sin(t*1.4);
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObject(eMesh);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var e=events[hit[0].instanceId];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+e.pt+'</span>'+
+      '<span class="m">'+e.socName.replace(/&amp;/g,'&')+(e.sig?' &middot; <b>SIGNAL</b>':'')+'</span>'+
+      '<div style="margin-top:5px">Drug <b>'+(grade3?e.g3T:e.aT)+'</b>/'+N_TRT+' ('+LM.pct(e.incT,1)+')<br>'+
+      'Placebo <b>'+(grade3?e.g3P:e.aP)+'</b>/'+N_PBO+' ('+LM.pct(e.incP,1)+')<br>'+
+      'RR '+e.rr.toFixed(2)+' &middot; p '+(e.p<0.0001?'<0.0001':e.p.toFixed(4))+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

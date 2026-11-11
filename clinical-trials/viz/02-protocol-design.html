@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protocol Lattice</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Assembling schedule<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">02 · Design &amp; Startup</p>
+  <h1 class="viz">Protocol <em>Lattice</em></h1>
+  <p class="lede">The schedule of assessments is the trial. Every column is a visit, every row a procedure, and every block is time taken out of a patient&rsquo;s life. Height is burden in minutes.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Protocol controls</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Patient burden</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+  <hr class="sep">
+  <p class="note">Hover a block for the procedure, visit and burden. Tall red stacks are where patients drop out.</p>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('02-protocol-design');
+
+/* ---------- protocol definition ---------- */
+var VISITS = [
+  {n:'Screening', d:-28, typ:'scr'},
+  {n:'Baseline / D1', d:0, typ:'trt'},
+  {n:'Week 1', d:7, typ:'trt'},
+  {n:'Week 2', d:14, typ:'trt'},
+  {n:'Week 4', d:28, typ:'trt'},
+  {n:'Week 8', d:56, typ:'trt'},
+  {n:'Week 12', d:84, typ:'trt'},
+  {n:'Week 16', d:112, typ:'trt'},
+  {n:'Week 24', d:168, typ:'trt'},
+  {n:'Week 36', d:252, typ:'trt'},
+  {n:'Week 48', d:336, typ:'trt'},
+  {n:'End of Treatment', d:364, typ:'eot'},
+  {n:'Safety Follow-up', d:392, typ:'fu'},
+  {n:'Survival Follow-up', d:548, typ:'fu'}
+];
+
+// group, name, minutes, invasive, which visits (fn of visit index/type)
+var PROCS = [
+  {g:'Admin',    n:'Informed consent',      m:45, inv:0, at:function(i,v){return i===0;}},
+  {g:'Admin',    n:'Eligibility review',    m:25, inv:0, at:function(i,v){return i<=1;}},
+  {g:'Admin',    n:'Randomisation',         m:10, inv:0, at:function(i,v){return i===1;}},
+  {g:'Clinical', n:'Vital signs',           m:10, inv:0, at:function(i,v){return true;}},
+  {g:'Clinical', n:'Physical exam',         m:20, inv:0, at:function(i,v){return i===0||i===1||v.d%56===0||v.typ==='eot';}},
+  {g:'Clinical', n:'ECOG performance',      m:5,  inv:0, at:function(i,v){return v.typ!=='fu';}},
+  {g:'Clinical', n:'12-lead ECG',           m:15, inv:0, at:function(i,v){return i===0||i===1||i===4||i===6||v.typ==='eot';}},
+  {g:'Clinical', n:'Echocardiogram',        m:40, inv:0, at:function(i,v){return i===0||i===6||i===10;}},
+  {g:'Lab',      n:'Haematology',           m:12, inv:1, at:function(i,v){return v.typ!=='fu'||i===12;}},
+  {g:'Lab',      n:'Chemistry panel',       m:12, inv:1, at:function(i,v){return v.typ!=='fu'||i===12;}},
+  {g:'Lab',      n:'Coagulation',           m:10, inv:1, at:function(i,v){return i===0||i===1||i===4||i===8;}},
+  {g:'Lab',      n:'Urinalysis',            m:8,  inv:0, at:function(i,v){return i===0||i%3===1;}},
+  {g:'Lab',      n:'Pregnancy test',        m:8,  inv:1, at:function(i,v){return v.typ!=='fu'&&i%2===0;}},
+  {g:'PK/PD',    n:'PK sampling (serial)',  m:55, inv:1, at:function(i,v){return i===1||i===2||i===4;}},
+  {g:'PK/PD',    n:'PK sampling (sparse)',  m:15, inv:1, at:function(i,v){return i>=5&&v.typ==='trt';}},
+  {g:'PK/PD',    n:'Immunogenicity (ADA)',  m:12, inv:1, at:function(i,v){return i===1||i===4||i===8||v.typ==='eot';}},
+  {g:'Biomarker',n:'Tumour biopsy',         m:95, inv:2, at:function(i,v){return i===0||i===6;}},
+  {g:'Biomarker',n:'ctDNA / liquid biopsy', m:18, inv:1, at:function(i,v){return i===0||i===4||i===8||i===10;}},
+  {g:'Biomarker',n:'Genomic profiling',     m:20, inv:1, at:function(i,v){return i===0;}},
+  {g:'Imaging',  n:'CT chest/abdo/pelvis',  m:70, inv:1, at:function(i,v){return i===0||(v.d>0&&v.d%84===0)||v.typ==='eot';}},
+  {g:'Imaging',  n:'Brain MRI',             m:65, inv:0, at:function(i,v){return i===0||i===8;}},
+  {g:'Imaging',  n:'RECIST assessment',     m:25, inv:0, at:function(i,v){return i===0||(v.d>0&&v.d%84===0)||v.typ==='eot';}},
+  {g:'PRO',      n:'EORTC QLQ-C30',         m:18, inv:0, at:function(i,v){return i===0||v.d%56===0||v.typ!=='trt';}},
+  {g:'PRO',      n:'EQ-5D-5L',              m:8,  inv:0, at:function(i,v){return i===0||v.d%56===0;}},
+  {g:'PRO',      n:'Symptom e-diary',       m:6,  inv:0, at:function(i,v){return v.typ==='trt';}},
+  {g:'Safety',   n:'AE / con-med review',   m:15, inv:0, at:function(i,v){return i>0;}},
+  {g:'Safety',   n:'IMP accountability',    m:10, inv:0, at:function(i,v){return v.typ==='trt'||v.typ==='eot';}},
+  {g:'Safety',   n:'Dosing / administration',m:90,inv:1, at:function(i,v){return v.typ==='trt'&&i>0;}}
+];
+
+var GROUPS = {
+  Admin:    {c:LM.C.faint,  label:'Administrative'},
+  Clinical: {c:LM.C.slate,  label:'Clinical assessment'},
+  Lab:      {c:LM.C.teal,   label:'Laboratory'},
+  'PK/PD':  {c:LM.C.violet, label:'PK / PD'},
+  Biomarker:{c:LM.C.accent, label:'Biomarker'},
+  Imaging:  {c:LM.C.amber,  label:'Imaging'},
+  PRO:      {c:LM.C.green,  label:'Patient-reported'},
+  Safety:   {c:LM.C.red,    label:'Safety / dosing'}
+};
+
+var NV = VISITS.length, NP = PROCS.length;
+var CX = 1.30, CZ = 0.74, GAPX = 0.16, GAPZ = 0.10;
+var W = NV*(CX+GAPX), D = NP*(CZ+GAPZ);
+
+var ctx = LM.boot({
+  cam:[0,14,18], fov:34, fit:Math.max(W,D)*0.50, fitMargin:1.05,
+  orbit:{ target:new THREE.Vector3(0,1.2,0), minDist:10, maxDist:90,
+          autoRotate:true, autoRotateSpeed:0.055, minPolar:0.22, maxPolar:1.45 },
+  fog:[40,120]
+});
+if(!ctx) return;
+LM.studio(ctx.scene, {hemi:0.72, key:0.74, fill:0.26, rim:0.16});
+
+/* ---------- ground plane + grid ---------- */
+(function(){
+  var pts=[];
+  for (var i=0;i<=NV;i++){ var x=-W/2+i*(CX+GAPX)-GAPX/2; pts.push(x,0,-D/2, x,0,D/2); }
+  for (var j=0;j<=NP;j++){ var z=-D/2+j*(CZ+GAPZ)-GAPZ/2; pts.push(-W/2,0,z, W/2,0,z); }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.07})));
+})();
+
+/* ---------- build the lattice ---------- */
+var cells = [];
+for (var vi=0; vi<NV; vi++){
+  for (var pi=0; pi<NP; pi++){
+    var P = PROCS[pi], V = VISITS[vi];
+    if (!P.at(vi, V)) continue;
+    cells.push({vi:vi, pi:pi, proc:P, visit:V, m:P.m, inv:P.inv});
+  }
+}
+var NC = cells.length;
+
+var geo = new THREE.BoxGeometry(CX*0.78, 1, CZ*0.80);
+geo.translate(0,0.5,0);
+var mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({vertexColors:true, transparent:true, opacity:0.95}), NC);
+mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var colArr = new Float32Array(NC*3);
+mesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(colArr,3));
+ctx.add(mesh);
+
+var O = new THREE.Object3D(), C = new THREE.Color();
+function cellPos(c){
+  return new THREE.Vector3(-W/2 + c.vi*(CX+GAPX) + CX/2, 0, -D/2 + c.pi*(CZ+GAPZ) + CZ/2);
+}
+cells.forEach(function(c,i){
+  C.setHex(GROUPS[c.proc.g].c);
+  colArr[i*3]=C.r; colArr[i*3+1]=C.g; colArr[i*3+2]=C.b;
+});
+mesh.geometry.attributes.color.needsUpdate = true;
+
+/* ---------- axis labels ---------- */
+var visitLabels = [], procLabels = [];
+VISITS.forEach(function(V,i){
+  var l = LM.label(V.n, {size:32, weight:600, color:'#525c67', scale:0.78, depthTest:false});
+  // stagger alternate labels so long visit names do not collide
+  l.position.set(-W/2 + i*(CX+GAPX) + CX/2, 0.12, D/2 + 1.3 + (i%2)*1.25);
+  ctx.add(l); visitLabels.push(l);
+});
+PROCS.forEach(function(P,i){
+  var l = LM.label(P.n, {size:30, weight:600, color:'#'+GROUPS[P.g].c.toString(16).padStart(6,'0'), scale:0.70, depthTest:false});
+  l.position.set(-W/2 - 2.4, 0.12, -D/2 + i*(CZ+GAPZ) + CZ/2);
+  ctx.add(l); procLabels.push(l);
+});
+
+/* ---------- UI ---------- */
+var ctrls = document.getElementById('ctrls');
+var heightScale = 0.040, showInvasiveOnly = false, grow = 0, filterGroup = null;
+
+LM.ui.seg(ctrls, {label:'Highlight', index:0, options:[
+  {label:'All', value:null},
+  {label:'Invasive', value:'inv'},
+  {label:'Imaging', value:'Imaging'},
+  {label:'PRO', value:'PRO'}
+], on:function(v){ filterGroup = v; }});
+
+LM.ui.slider(ctrls, {label:'Burden scale', min:0.01, max:0.12, step:0.002, value:0.040,
+  fmt:function(v){return (v*1000).toFixed(0);}, on:function(v){ heightScale=v; }});
+
+var armIdx = 0;
+LM.ui.seg(ctrls, {label:'Study arm', index:0, options:[
+  {label:'200 mg', value:0},{label:'100 mg', value:1},{label:'Placebo', value:2}
+], on:function(v){ armIdx = v; }});
+
+LM.ui.slider(ctrls, {label:'Visit window (± days)', min:0, max:14, step:1, value:3,
+  fmt:function(v){return '±'+v+'d';}, on:function(v){ windowDays=v; refresh(); }});
+var windowDays = 3;
+
+LM.ui.check(ctrls, {label:'Show decentralised swap', value:false, on:function(v){ dct=v; refresh(); }});
+var dct = false;
+
+var setStat = LM.ui.stats(document.getElementById('stats'), [
+  {k:'Visits', id:'v'},
+  {k:'Procedures', id:'p'},
+  {k:'Data points', id:'dp', accent:true},
+  {k:'Chair time', id:'hrs'},
+  {k:'Needle sticks', id:'ns'},
+  {k:'Est. dropout', id:'do'}
+]);
+
+LM.ui.legend(document.getElementById('legend'),
+  Object.keys(GROUPS).map(function(k){
+    return {color:'#'+GROUPS[k].c.toString(16).padStart(6,'0'), label:GROUPS[k].label};
+  })
+);
+
+function refresh(){
+  var totalMin=0, sticks=0, dp=0;
+  cells.forEach(function(c){
+    var m = c.m;
+    if (dct && (c.proc.g==='PRO' || c.proc.n==='Symptom e-diary' || c.proc.n==='Vital signs')) m *= 0.25;
+    if (armIdx===2 && c.proc.n==='PK sampling (serial)') m *= 0.4;
+    c.mEff = m;
+    totalMin += m;
+    if (c.inv>0) sticks += c.inv;
+    dp += Math.round(m*1.6);
+  });
+  var hrs = totalMin/60;
+  // crude but defensible: dropout rises with chair time and invasiveness
+  var dropout = LM.clamp(0.06 + hrs/260 + sticks/900, 0, 0.6);
+  setStat('v', NV);
+  setStat('p', NP);
+  setStat('dp', LM.fmt(dp));
+  setStat('hrs', hrs.toFixed(1)+'<small>h</small>');
+  setStat('ns', sticks);
+  setStat('do', LM.pct(dropout,0));
+}
+refresh();
+
+/* ---------- hover ---------- */
+var ray = new THREE.Raycaster();
+var mouse = LM.pointer(ctx.renderer.domElement, null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove', function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+/* ---------- frame ---------- */
+ctx.onFrame(function(dt,t){
+  grow = Math.min(1, grow + dt*0.5);
+  for (var i=0;i<NC;i++){
+    var c = cells[i];
+    var hi = (filterGroup===null) ? 1 :
+             (filterGroup==='inv' ? (c.inv>0?1:0.12) : (c.proc.g===filterGroup?1:0.12));
+    var wave = LM.smooth(0, 1, grow*1.35 - c.vi/NV*0.35);
+    var h = Math.max(0.004, c.mEff*heightScale*wave);
+    var p = cellPos(c);
+    O.position.set(p.x, 0, p.z);
+    O.scale.set(0.55+hi*0.45, h, 0.55+hi*0.45);
+    O.rotation.y = 0;
+    O.updateMatrix();
+    mesh.setMatrixAt(i, O.matrix);
+    C.setHex(GROUPS[c.proc.g].c);
+    if (hi<1) C.lerp(new THREE.Color(LM.C.line), 0.78);
+    colArr[i*3]=C.r; colArr[i*3+1]=C.g; colArr[i*3+2]=C.b;
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.geometry.attributes.color.needsUpdate = true;
+
+  // keep axis labels facing the camera plane
+  var camY = ctx.camera.position.y;
+  visitLabels.concat(procLabels).forEach(function(l){ l.material.opacity = LM.clamp((camY-2)/10,0.15,1); });
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit = ray.intersectObject(mesh);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var c = cells[hit[0].instanceId];
+    LM.tip.show(lastM.x, lastM.y,
+      '<span class="t">'+c.proc.n+'</span>'+
+      '<span class="m">'+GROUPS[c.proc.g].label+' &middot; '+c.visit.n+'</span>'+
+      '<div style="margin-top:5px">Burden <b>'+Math.round(c.mEff)+' min</b>'+
+      (c.inv>0?' &middot; invasive':'')+'<br>Day '+c.visit.d+' &plusmn;'+windowDays+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

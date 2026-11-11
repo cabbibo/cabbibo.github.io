@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Activation Cascade</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Opening sites<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">08 · Global Operations</p>
+  <h1 class="viz">Activation <em>Cascade</em></h1>
+  <p class="lede">Sites do not open at once &mdash; they ripple outward from the first country to clear regulatory. The shape of that ripple is the shape of your enrolment curve, six months later.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Timeline</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Activation</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="curve"></div>
+  <hr class="sep">
+  <div id="legend"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('08-site-activation');
+
+var MAPW = 26, sites = LM.study.sites, N = sites.length;
+var MAXD = 260;
+
+var ctx = LM.boot({
+  cam:[0,15,12], fov:36, fit:MAPW*0.52, fitMargin:1.04,
+  orbit:{ target:new THREE.Vector3(0,0,0), minDist:8, maxDist:70,
+          autoRotate:true, autoRotateSpeed:0.04, minPolar:0.12, maxPolar:1.38 },
+  fog:[34,110]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.78,key:0.66,fill:0.24,rim:0.14});
+var uPix = LM.pixUniform(ctx);
+
+/* ---------- flat world ---------- */
+ctx.add(LM.geo.landFlat(MAPW,{opacity:0.30, color:LM.C.ink}));
+
+// graticule for the flat projection
+(function(){
+  var pts=[], h=MAPW/2;
+  for (var lat=-60; lat<=60; lat+=30){ var z=-lat/180*h; pts.push(-MAPW/2,0,z, MAPW/2,0,z); }
+  for (var lon=-180; lon<=180; lon+=30){ var x=lon/360*MAPW; pts.push(x,0,-h/2, x,0,h/2); }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.slate,transparent:true,opacity:0.10})));
+})();
+
+// land dot matrix, flat
+(function(){
+  var mask=LM.geo.landMask(700,350), pts=[], step=2.2;
+  for (var lat=-84; lat<=84; lat+=step)
+    for (var lon=-180; lon<180; lon+=step*1.05){
+      if(!mask.sampler(lat,lon)) continue;
+      var p=LM.geo.toFlat(lat,lon,MAPW); pts.push(p.x,0,p.z);
+    }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.Points(g,new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false,
+    uniforms:{uCol:{value:new THREE.Color(0x253341)},uSize:{value:0.085},uPix:uPix},
+    vertexShader:LM.glsl.psize+'\nuniform float uSize;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=lmSize(uSize,mv);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 uCol;void main(){float d=length(gl_PointCoord-0.5)*2.0;if(d>1.0)discard;gl_FragColor=vec4(uCol,(1.0-smoothstep(0.55,1.0,d))*0.42);}'
+  })));
+})();
+
+/* ---------- site pins + ripples ---------- */
+var pos=[];
+for (var i=0;i<N;i++) pos.push(LM.geo.toFlat(sites[i].lat, sites[i].lon, MAPW));
+
+var pinGeo=new THREE.CylinderGeometry(0.030,0.030,1,7,1,false);
+pinGeo.translate(0,0.5,0);
+var pins=new THREE.InstancedMesh(pinGeo,new THREE.MeshLambertMaterial({vertexColors:true}),N);
+pins.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var pCol=new Float32Array(N*3);
+pins.geometry.setAttribute('color',new THREE.InstancedBufferAttribute(pCol,3));
+ctx.add(pins);
+
+var capGeo=new THREE.SphereGeometry(0.058,10,8);
+var caps=new THREE.InstancedMesh(capGeo,new THREE.MeshBasicMaterial({vertexColors:true}),N);
+caps.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var cCol=new Float32Array(N*3);
+caps.geometry.setAttribute('color',new THREE.InstancedBufferAttribute(cCol,3));
+ctx.add(caps);
+
+var ringGeo=new THREE.RingGeometry(0.80,0.88,40);
+var rings=new THREE.InstancedMesh(ringGeo,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:0.45,side:THREE.DoubleSide}),N);
+rings.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var rCol=new Float32Array(N*3);
+rings.geometry.setAttribute('color',new THREE.InstancedBufferAttribute(rCol,3));
+ctx.add(rings);
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+var day=0, playing=true, speed=28, pinScale=1.0;
+var daySlider=LM.ui.slider(ctrls,{label:'Day', min:0, max:MAXD, step:1, value:0,
+  fmt:function(v){return 'D'+Math.round(v);}, on:function(v){day=v;}});
+LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
+  {label:'Play',value:'p'},{label:'Pause',value:'s'},{label:'Restart',value:'r'}
+], on:function(v){
+  if(v==='p')playing=true; if(v==='s')playing=false;
+  if(v==='r'){day=0;daySlider.set(0);playing=true;}
+}});
+LM.ui.slider(ctrls,{label:'Speed', min:4, max:90, step:1, value:28,
+  fmt:function(v){return v+' d/s';}, on:function(v){speed=v;}});
+LM.ui.slider(ctrls,{label:'Pin height', min:0.2, max:3, step:0.05, value:1,
+  fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){pinScale=v;}});
+var showRipple=true;
+LM.ui.check(ctrls,{label:'Show activation ripple', value:true, on:function(v){showRipple=v;}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Activated', id:'act', accent:true},
+  {k:'Remaining', id:'rem'},
+  {k:'Countries live', id:'ctry'},
+  {k:'Day', id:'d'},
+  {k:'Rate', id:'rate'},
+  {k:'Median open', id:'med'}
+]);
+
+LM.ui.legend(document.getElementById('legend'),
+  Object.keys(LM.REGIONS).map(function(k){
+    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true};
+  })
+);
+
+// cumulative curve, drawn as an inline sparkline
+var curveEl=document.getElementById('curve');
+var acts = sites.map(function(s){return s.activation;}).sort(function(a,b){return a-b;});
+var medianAct = acts[Math.floor(acts.length/2)];
+function drawCurve(d){
+  var w=252,h=56,pts=[];
+  for (var x=0;x<=60;x++){
+    var dd=x/60*MAXD, c=0;
+    for (var i=0;i<N;i++) if(sites[i].activation<=dd) c++;
+    pts.push([x/60*w, h - c/N*h]);
+  }
+  var path=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+  var cx=d/MAXD*w;
+  curveEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Cumulative activation</div>'+
+   '<svg width="'+w+'" height="'+h+'" style="display:block;overflow:visible">'+
+   '<path d="'+path+'" fill="none" stroke="#d82591" stroke-width="1.8" stroke-linejoin="round"/>'+
+   '<path d="'+path+' L'+w+','+h+' L0,'+h+' Z" fill="#d82591" opacity=".08"/>'+
+   '<line x1="'+cx.toFixed(1)+'" y1="-2" x2="'+cx.toFixed(1)+'" y2="'+h+'" stroke="#0d161f" stroke-width="1" opacity=".35"/>'+
+   '<line x1="0" y1="'+h+'" x2="'+w+'" y2="'+h+'" stroke="#d5dbe3" stroke-width="1"/>'+
+   '</svg>';
+}
+drawCurve(0);
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+/* ---------- frame ---------- */
+var O=new THREE.Object3D(), C=new THREE.Color(), FLAT=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
+var prevDay=0, smoothRate=0;
+
+ctx.onFrame(function(dt,t){
+  if (playing){
+    day += dt*speed;
+    if (day>MAXD){ day=MAXD; playing=false; }
+    daySlider.el.value=day;
+    daySlider.el.previousSibling.lastChild.textContent='D'+Math.round(day);
+  }
+
+  var act=0, ctry={};
+  for (var i=0;i<N;i++){
+    var s=sites[i], age=day-s.activation, on=age>=0;
+    if (on){ act++; ctry[s.country]=1; }
+    C.setHex(on?LM.REGIONS[s.region].color:LM.C.line);
+
+    var grow = on ? LM.clamp(age/9,0,1) : 0;
+    var h = Math.max(0.004, grow*(0.30+s.target/46)*pinScale);
+    O.position.copy(pos[i]); O.quaternion.identity(); O.scale.set(1,h,1);
+    O.updateMatrix(); pins.setMatrixAt(i,O.matrix);
+    pCol[i*3]=C.r; pCol[i*3+1]=C.g; pCol[i*3+2]=C.b;
+
+    var cs = on ? 1 + 0.22*Math.sin(t*2.4+i*0.8) : 0.5;
+    O.position.set(pos[i].x, h+0.02, pos[i].z); O.scale.set(cs,cs,cs);
+    O.updateMatrix(); caps.setMatrixAt(i,O.matrix);
+    cCol[i*3]=C.r; cCol[i*3+1]=C.g; cCol[i*3+2]=C.b;
+
+    // ripple lives for ~16 days after activation
+    var rp = (showRipple && on && age<16) ? age/16 : -1;
+    if (rp>=0){
+      var sc = 0.25 + rp*2.6;
+      O.position.set(pos[i].x, 0.012, pos[i].z);
+      O.quaternion.copy(FLAT); O.scale.set(sc,sc,1);
+      rCol[i*3]=C.r; rCol[i*3+1]=C.g; rCol[i*3+2]=C.b;
+    } else { O.position.set(0,-999,0); O.quaternion.copy(FLAT); O.scale.set(0.001,0.001,0.001); }
+    O.updateMatrix(); rings.setMatrixAt(i,O.matrix);
+  }
+  pins.instanceMatrix.needsUpdate=true; pins.geometry.attributes.color.needsUpdate=true;
+  caps.instanceMatrix.needsUpdate=true; caps.geometry.attributes.color.needsUpdate=true;
+  rings.instanceMatrix.needsUpdate=true; rings.geometry.attributes.color.needsUpdate=true;
+
+  var actPrev=0, pd=Math.max(0,day-30);
+  for (var i=0;i<N;i++) if (sites[i].activation<=pd) actPrev++;
+  smoothRate += ((act-actPrev) - smoothRate)*0.12;
+
+  setStat('act', act+'<small> / '+N+'</small>');
+  setStat('rem', N-act);
+  setStat('ctry', Object.keys(ctry).length);
+  setStat('d', 'D'+Math.round(day));
+  setStat('rate', smoothRate.toFixed(1)+'<small>/mo</small>');
+  setStat('med', 'D'+medianAct);
+
+  if (ctx.frame % 10 === 0) drawCurve(day);
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit=ray.intersectObjects([pins,caps]);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var s=sites[hit[0].instanceId];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+s.name+'</span>'+
+      '<span class="m">'+s.country+' &middot; '+s.id+'</span>'+
+      '<div style="margin-top:5px">Activated day <b>'+s.activation+'</b><br>'+
+      'Target '+s.target+' patients &middot; '+(day>=s.activation?'open '+Math.round(day-s.activation)+'d':'not yet open')+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

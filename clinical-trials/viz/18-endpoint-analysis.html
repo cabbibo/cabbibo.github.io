@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Endpoint Readout</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Unblinding<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">18 · Data &amp; Evidence</p>
+  <h1 class="viz">Endpoint <em>Readout</em></h1>
+  <p class="lede">The moment the trial exists for. One primary estimate, a confidence interval, and a forest of subgroups that are almost all noise &mdash; watch how the intervals tighten as you buy more patients.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Trial parameters</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Primary analysis</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="post"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('18-endpoint-analysis');
+
+/* ---------- subgroups ---------- */
+var SUBS = [
+  {n:'Overall',                frac:1.00, bias:0.00, c:LM.C.accent, primary:true},
+  {n:'Age < 65',               frac:0.52, bias:-0.04, c:LM.C.slate},
+  {n:'Age ≥ 65',          frac:0.48, bias: 0.05, c:LM.C.slate},
+  {n:'Male',                   frac:0.58, bias: 0.02, c:LM.C.slate},
+  {n:'Female',                 frac:0.42, bias:-0.03, c:LM.C.slate},
+  {n:'ECOG 0',                 frac:0.46, bias:-0.08, c:LM.C.teal},
+  {n:'ECOG 1',                 frac:0.54, bias: 0.07, c:LM.C.teal},
+  {n:'PD-L1 ≥ 50%',       frac:0.31, bias:-0.22, c:LM.C.violet},
+  {n:'PD-L1 1–49%',       frac:0.38, bias: 0.01, c:LM.C.violet},
+  {n:'PD-L1 < 1%',             frac:0.31, bias: 0.19, c:LM.C.violet},
+  {n:'North America',          frac:0.33, bias: 0.03, c:LM.C.amber},
+  {n:'Europe',                 frac:0.37, bias:-0.05, c:LM.C.amber},
+  {n:'Asia-Pacific',           frac:0.22, bias:-0.09, c:LM.C.amber},
+  {n:'Rest of world',          frac:0.08, bias: 0.14, c:LM.C.amber},
+  {n:'Prior therapy',          frac:0.61, bias: 0.06, c:LM.C.green},
+  {n:'Treatment naive',        frac:0.39, bias:-0.10, c:LM.C.green}
+];
+
+var trueHR = 0.68, Ntot = 2400, eventFrac = 0.62, alpha = 0.05, seed = 11;
+var ROW_Z = 0.80, XS = 7.2;
+
+var ctx = LM.boot({
+  cam:[0,15,13], fov:36, fit:10.6, fitMargin:1.05,
+  orbit:{ target:new THREE.Vector3(0,0.4,0), minDist:8, maxDist:56,
+          autoRotate:true, autoRotateSpeed:0.045, minPolar:0.10, maxPolar:1.40 },
+  fog:[28,90]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.80,key:0.62,fill:0.22,rim:0.14});
+
+function X(hr){ return Math.log(LM.clamp(hr,0.25,4))/Math.log(4)*XS; }
+function Z(i){ return (i-(SUBS.length-1)/2)*ROW_Z; }
+
+/* ---------- axes ---------- */
+(function(){
+  var ticks=[0.25,0.4,0.5,0.7,1,1.4,2,3,4], pts=[];
+  var zA=Z(0)-0.6, zB=Z(SUBS.length-1)+0.6;
+  ticks.forEach(function(t){ pts.push(X(t),0,zA, X(t),0,zB); });
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  ctx.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.06})));
+
+  ticks.forEach(function(t){
+    var l=LM.label(String(t),{size:24,weight:600,color:'#8d97a3',scale:0.62,depthTest:false});
+    l.position.set(X(t),0.05,zB+0.55); ctx.add(l);
+  });
+  // null line
+  var ng=new THREE.BufferGeometry();
+  ng.setAttribute('position',new THREE.Float32BufferAttribute([X(1),0,zA, X(1),0,zB, X(1),0,zA, X(1),2.4,zA],3));
+  ctx.add(new THREE.LineSegments(ng,new THREE.LineBasicMaterial({color:LM.C.ink,transparent:true,opacity:0.30})));
+  var nl=LM.label('NO EFFECT',{size:22,weight:700,color:'#8d97a3',scale:0.58,depthTest:false});
+  nl.position.set(X(1),2.7,zA); ctx.add(nl);
+
+  var fav=LM.label('← FAVOURS TREATMENT',{size:22,weight:700,color:'#d82591',scale:0.60,depthTest:false});
+  fav.position.set(X(0.45),-0.55,zB+0.55); ctx.add(fav);
+  var fac=LM.label('FAVOURS PLACEBO →',{size:22,weight:700,color:'#698cb5',scale:0.60,depthTest:false});
+  fac.position.set(X(2.2),-0.55,zB+0.55); ctx.add(fac);
+})();
+
+/* ---------- estimation ---------- */
+function normCdf(x){
+  var t=1/(1+0.2316419*Math.abs(x)), d=0.3989423*Math.exp(-x*x/2);
+  var pr=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  return x>0?1-pr:pr;
+}
+var results=[];
+function estimate(){
+  var rnd = LM.rng(seed);
+  results = SUBS.map(function(S){
+    var n = Ntot*S.frac;
+    var events = Math.max(4, Math.round(n*eventFrac));
+    // SE of log HR for a 1:1 comparison with `events` total events
+    var se = 2/Math.sqrt(events);
+    var trueLog = Math.log(trueHR) + S.bias;
+    var est = trueLog + LM.gauss(rnd)*se;
+    var z = est/se;
+    var p = 2*(1-normCdf(Math.abs(z)));
+    var zc = 1.959964;   // 95%
+    return {
+      S:S, n:Math.round(n), events:events,
+      hr:Math.exp(est), lo:Math.exp(est-zc*se), hi:Math.exp(est+zc*se),
+      p:p, se:se, logHR:est,
+      sig:(p<alpha && est<0)
+    };
+  });
+}
+estimate();
+
+/* ---------- geometry ---------- */
+var ciMesh=null, ptMesh=null, labelSprites=[];
+function build(){
+  if (ciMesh){ ctx.scene.remove(ciMesh); ciMesh.geometry.dispose(); ciMesh.material.dispose(); }
+  if (ptMesh){ ctx.scene.remove(ptMesh); ptMesh.geometry.dispose(); ptMesh.material.dispose(); }
+  labelSprites.forEach(function(l){ ctx.scene.remove(l); l.material.map.dispose(); l.material.dispose(); });
+  labelSprites=[];
+
+  var n=results.length;
+  var cg=new THREE.BoxGeometry(1,0.055,0.055);
+  cg.translate(0.5,0,0);
+  ciMesh=new THREE.InstancedMesh(cg,new THREE.MeshLambertMaterial({vertexColors:true}),n);
+  var cc=new Float32Array(n*3);
+  ciMesh.geometry.setAttribute('color',new THREE.InstancedBufferAttribute(cc,3));
+
+  var pg=new THREE.BoxGeometry(0.16,0.16,0.16);
+  ptMesh=new THREE.InstancedMesh(pg,new THREE.MeshLambertMaterial({vertexColors:true}),n);
+  var pc=new Float32Array(n*3);
+  ptMesh.geometry.setAttribute('color',new THREE.InstancedBufferAttribute(pc,3));
+
+  var O=new THREE.Object3D(), C=new THREE.Color();
+  results.forEach(function(r,i){
+    var x0=X(r.lo), x1=X(r.hi), z=Z(i);
+    var y = r.S.primary ? 0.52 : 0;
+    O.position.set(x0, y, z);
+    O.scale.set(Math.max(x1-x0,0.02), r.S.primary?1.9:1, r.S.primary?1.9:1);
+    O.updateMatrix(); ciMesh.setMatrixAt(i,O.matrix);
+
+    var sz = r.S.primary ? 2.2 : (0.7 + Math.sqrt(r.n/Ntot)*1.5);
+    O.position.set(X(r.hr), y, z);
+    O.scale.setScalar(sz);
+    O.rotation.set(0,Math.PI/4,0);
+    O.updateMatrix(); ptMesh.setMatrixAt(i,O.matrix);
+    O.rotation.set(0,0,0);
+
+    C.setHex(r.sig ? r.S.c : LM.C.faint);
+    if (r.S.primary) C.setHex(LM.C.accent);
+    cc[i*3]=C.r; cc[i*3+1]=C.g; cc[i*3+2]=C.b;
+    pc[i*3]=C.r; pc[i*3+1]=C.g; pc[i*3+2]=C.b;
+
+    var l=LM.label(r.S.n,{size:r.S.primary?30:26,weight:r.S.primary?700:600,
+      color:r.S.primary?'#0d161f':'#525c67',scale:r.S.primary?0.74:0.64,depthTest:false});
+    l.position.set(X(0.25)-0.5-l.scale.x/2, y, z);
+    ctx.add(l); labelSprites.push(l);
+
+    var v=LM.label(r.hr.toFixed(2)+'  ('+r.lo.toFixed(2)+'–'+r.hi.toFixed(2)+')',
+      {size:24,weight:600,color:r.sig?'#d82591':'#8d97a3',scale:0.60,depthTest:false});
+    v.position.set(X(4)+0.5+v.scale.x/2, y, z);
+    ctx.add(v); labelSprites.push(v);
+  });
+  ciMesh.instanceMatrix.needsUpdate=true; ciMesh.geometry.attributes.color.needsUpdate=true;
+  ptMesh.instanceMatrix.needsUpdate=true; ptMesh.geometry.attributes.color.needsUpdate=true;
+  ctx.add(ciMesh); ctx.add(ptMesh);
+}
+build();
+
+/* ---------- UI ---------- */
+var ctrls=document.getElementById('ctrls');
+LM.ui.slider(ctrls,{label:'True hazard ratio', min:0.4, max:1.2, step:0.01, value:0.68,
+  fmt:function(v){return v.toFixed(2);}, on:function(v){ trueHR=v; rerun(); }});
+LM.ui.slider(ctrls,{label:'Sample size', min:200, max:6000, step:50, value:2400,
+  fmt:function(v){return LM.fmt(v)+' pts';}, on:function(v){ Ntot=v; rerun(); }});
+LM.ui.slider(ctrls,{label:'Event rate at analysis', min:0.15, max:0.95, step:0.01, value:0.62,
+  fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){ eventFrac=v; rerun(); }});
+LM.ui.seg(ctrls,{label:'Two-sided alpha', index:1, options:[
+  {label:'0.01',value:0.01},{label:'0.05',value:0.05},{label:'0.10',value:0.10}
+], on:function(v){ alpha=v; rerun(); }});
+LM.ui.button(ctrls,{label:'Re-run the trial', solid:true, on:function(){
+  seed = Math.floor(Math.random()*100000); rerun();
+}});
+
+var setStat=LM.ui.stats(document.getElementById('stats'),[
+  {k:'Hazard ratio', id:'hr', accent:true},
+  {k:'95% CI', id:'ci'},
+  {k:'p value', id:'p'},
+  {k:'Events', id:'ev'},
+  {k:'Power', id:'pw'},
+  {k:'Verdict', id:'vd'}
+]);
+
+var postEl=document.getElementById('post');
+function refresh(){
+  var r = results[0];
+  var zc = 1.959964;
+  // power to detect the true effect at this event count
+  var se = 2/Math.sqrt(Math.max(Ntot*eventFrac,4));
+  var zAlpha = alpha===0.01?2.5758:alpha===0.10?1.6449:1.9600;
+  var power = 1 - normCdf(zAlpha + Math.log(trueHR)/se);
+
+  setStat('hr', r.hr.toFixed(3));
+  setStat('ci', r.lo.toFixed(2)+'&ndash;'+r.hi.toFixed(2));
+  setStat('p', r.p<0.0001?'&lt;0.0001':r.p.toFixed(4));
+  setStat('ev', LM.fmt(r.events));
+  setStat('pw', LM.pct(LM.clamp(power,0,1),0));
+  setStat('vd', r.sig ? '<span style="color:#3bb974">MET</span>' : '<span style="color:#e2503f">MISSED</span>');
+
+  // posterior / sampling density of the log-HR
+  var w=252, h=66, pts=[];
+  for (var i=0;i<=80;i++){
+    var lx = LM.lerp(Math.log(0.3), Math.log(2.0), i/80);
+    var d = Math.exp(-0.5*Math.pow((lx-r.logHR)/r.se,2));
+    pts.push([i/80*w, h-d*h*0.92]);
+  }
+  var path=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+  function px(hr){ return (Math.log(hr)-Math.log(0.3))/(Math.log(2.0)-Math.log(0.3))*w; }
+  var sigCount = results.filter(function(x){return x.sig && !x.S.primary;}).length;
+
+  postEl.innerHTML='<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Sampling distribution of log HR</div>'+
+    '<svg width="'+w+'" height="'+h+'" style="display:block;overflow:visible">'+
+    '<path d="'+path+' L'+w+','+h+' L0,'+h+' Z" fill="#d82591" opacity=".12"/>'+
+    '<path d="'+path+'" fill="none" stroke="#d82591" stroke-width="1.6"/>'+
+    '<line x1="'+px(1).toFixed(1)+'" y1="0" x2="'+px(1).toFixed(1)+'" y2="'+h+'" stroke="#0d161f" stroke-width="1" opacity=".5"/>'+
+    '<line x1="'+px(r.hr).toFixed(1)+'" y1="0" x2="'+px(r.hr).toFixed(1)+'" y2="'+h+'" stroke="#d82591" stroke-width="1" stroke-dasharray="2 2"/>'+
+    '<line x1="0" y1="'+h+'" x2="'+w+'" y2="'+h+'" stroke="#d5dbe3" stroke-width="1"/>'+
+    '</svg>'+
+    '<p class="note" style="margin-top:8px"><b>'+sigCount+' of '+(results.length-1)+'</b> subgroups reach significance. '+
+    'With '+(results.length-1)+' tests at &alpha;='+alpha+', you would expect about <b>'+
+    ((results.length-1)*alpha).toFixed(1)+'</b> false positives by chance alone.</p>';
+}
+refresh();
+
+function rerun(){ estimate(); build(); refresh(); }
+
+/* ---------- hover ---------- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+ctx.onFrame(function(dt,t){
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit = ptMesh ? ray.intersectObject(ptMesh) : [];
+  if (hit.length && hit[0].instanceId!==undefined){
+    var r=results[hit[0].instanceId];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+r.S.n+'</span>'+
+      '<span class="m">'+LM.fmt(r.n)+' patients &middot; '+LM.fmt(r.events)+' events</span>'+
+      '<div style="margin-top:5px">HR <b>'+r.hr.toFixed(3)+'</b> (95% CI '+r.lo.toFixed(2)+'–'+r.hi.toFixed(2)+')<br>'+
+      'p = '+(r.p<0.0001?'<0.0001':r.p.toFixed(4))+(r.sig?' &middot; <b>significant</b>':'')+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>

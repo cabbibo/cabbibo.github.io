@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Site Feasibility Field</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div id="boot">Scoring sites<div class="bar"><i></i></div></div>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<div class="title-block">
+  <p class="eyebrow">04 · Design &amp; Startup</p>
+  <h1 class="viz">Site Feasibility <em>Field</em></h1>
+  <p class="lede">Eighty-four candidate sites, five competing factors, one budget. Move a weight and the ranking re-sorts live &mdash; this is site selection as an argument you can actually have.</p>
+</div>
+
+<div class="panel panel-r">
+  <h4>Scoring weights</h4>
+  <div id="ctrls"></div>
+</div>
+
+<div class="panel panel-l">
+  <h4>Projection</h4>
+  <div id="stats"></div>
+  <hr class="sep">
+  <div id="rank"></div>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/js/land.js"></script>
+<script src="../assets/js/lmviz.js"></script>
+<script>
+(function(){
+LM.chrome('04-site-feasibility');
+
+var R = 5.0, sites = LM.study.sites, N = sites.length;
+var COST = {NA:1.00, EU:0.74, LATAM:0.46, EMEA:0.54, APAC:0.52};
+
+/* ---- derive the five factors, deterministically ---- */
+var rnd = LM.rng(4242);
+sites.forEach(function(s,i){
+  var poolBase = {NA:0.62, EU:0.58, LATAM:0.78, EMEA:0.72, APAC:0.84}[s.region];
+  s.f = {
+    pool : LM.clamp(poolBase + (rnd()-0.5)*0.34, 0.05, 1),       // treatment-naive patient access
+    perf : LM.clamp(s.rate/2.0, 0.05, 1),                        // historical enrolment rate
+    speed: LM.clamp(1 - s.activation/230, 0.05, 1),              // startup speed
+    qual : s.quality,                                            // data quality / GCP history
+    cost : LM.clamp(1 - COST[s.region] + (rnd()-0.5)*0.12, 0.05, 1) // cost efficiency
+  };
+});
+
+var W = {pool:0.30, perf:0.26, speed:0.18, qual:0.16, cost:0.10};
+var FACTORS = [
+  {k:'pool',  n:'Patient pool access',  c:LM.C.accent, why:'Treatment-naive patients within reach'},
+  {k:'perf',  n:'Past enrolment rate',  c:LM.C.teal,   why:'Patients per site per month, historical'},
+  {k:'speed', n:'Startup speed',        c:LM.C.amber,  why:'Days from selection to first patient'},
+  {k:'qual',  n:'Data quality / GCP',   c:LM.C.slate,  why:'Query rate, deviations, audit history'},
+  {k:'cost',  n:'Cost efficiency',      c:LM.C.violet, why:'Grant per patient vs. regional benchmark'}
+];
+var TOPN = 30;
+
+var ctx = LM.boot({
+  cam:[0,4,15], fov:38, fit:R*1.42, fitMargin:1.08,
+  orbit:{ minDist:7, maxDist:42, autoRotate:true, autoRotateSpeed:0.10, pan:false },
+  fog:[22,62]
+});
+if(!ctx) return;
+LM.studio(ctx.scene,{hemi:0.58,key:0.80,fill:0.30,rim:0.18});
+var uPix = LM.pixUniform(ctx);
+var globe = LM.globe(ctx, R, {pix:uPix, rimStrength:0.20});
+
+/* ---- bars ---- */
+var geo = new THREE.CylinderGeometry(0.034,0.034,1,8,1,false);
+geo.translate(0,0.5,0);
+var mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({vertexColors:true}), N);
+mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+var cols = new Float32Array(N*3);
+mesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(cols,3));
+ctx.add(mesh);
+
+// halo ring marking a selected site
+var selGeo = new THREE.RingGeometry(0.075,0.098,20);
+var selMesh = new THREE.InstancedMesh(selGeo, new THREE.MeshBasicMaterial({color:LM.C.accent,transparent:true,opacity:0.8,side:THREE.DoubleSide}), N);
+selMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+ctx.add(selMesh);
+
+var pos=[], quat=[], flatQ=[];
+var O=new THREE.Object3D(), C=new THREE.Color(), UP=new THREE.Vector3(0,1,0), FWD=new THREE.Vector3(0,0,1);
+for (var i=0;i<N;i++){
+  var p = LM.geo.toVec3(sites[i].lat, sites[i].lon, R);
+  pos.push(p);
+  quat.push(new THREE.Quaternion().setFromUnitVectors(UP, p.clone().normalize()));
+  flatQ.push(new THREE.Quaternion().setFromUnitVectors(FWD, p.clone().normalize()));
+}
+
+/* ---- scoring ---- */
+var scored = [];
+function score(){
+  var tw = W.pool+W.perf+W.speed+W.qual+W.cost || 1;
+  scored = sites.map(function(s,i){
+    var v = (s.f.pool*W.pool + s.f.perf*W.perf + s.f.speed*W.speed + s.f.qual*W.qual + s.f.cost*W.cost)/tw;
+    return {i:i, s:s, v:v};
+  }).sort(function(a,b){return b.v-a.v;});
+  var sel = {};
+  for (var k=0;k<Math.min(TOPN,scored.length);k++) sel[scored[k].i]=k+1;
+  return sel;
+}
+var selected = score();
+
+var ctrls = document.getElementById('ctrls');
+FACTORS.forEach(function(F){
+  LM.ui.slider(ctrls,{
+    label:F.n, min:0, max:1, step:0.01, value:W[F.k],
+    fmt:function(v){return (v*100).toFixed(0);},
+    on:function(v){ W[F.k]=v; selected=score(); refresh(); }
+  });
+});
+LM.ui.slider(ctrls,{label:'Sites to select', min:5, max:84, step:1, value:30,
+  fmt:function(v){return v+' sites';},
+  on:function(v){ TOPN=v; selected=score(); refresh(); }});
+LM.ui.button(ctrls,{label:'Balanced default', on:function(){
+  var def=[0.30,0.26,0.18,0.16,0.10];
+  var sl=ctrls.querySelectorAll('input[type=range]');
+  for (var i=0;i<5;i++){ sl[i].value=def[i]; sl[i].dispatchEvent(new Event('input')); }
+}});
+
+var setStat = LM.ui.stats(document.getElementById('stats'),[
+  {k:'Selected', id:'sel', accent:true},
+  {k:'Countries', id:'ctry'},
+  {k:'Proj. rate', id:'rate'},
+  {k:'Months to 2,400', id:'mo'},
+  {k:'Mean quality', id:'q'},
+  {k:'Cost index', id:'cost'}
+]);
+
+var rankEl = document.getElementById('rank');
+function refresh(){
+  var rate=0, q=0, cst=0, ctry={};
+  for (var k=0;k<Math.min(TOPN,scored.length);k++){
+    var e = scored[k];
+    rate += e.s.rate; q += e.s.quality; cst += COST[e.s.region];
+    ctry[e.s.country]=1;
+  }
+  var n = Math.min(TOPN,scored.length);
+  setStat('sel', n+'<small> / '+N+'</small>');
+  setStat('ctry', Object.keys(ctry).length);
+  setStat('rate', rate.toFixed(0)+'<small>/mo</small>');
+  setStat('mo', rate>0 ? (2400/rate).toFixed(1) : '∞');
+  setStat('q', (q/n*100).toFixed(0));
+  setStat('cost', (cst/n).toFixed(2));
+
+  rankEl.innerHTML = '<div style="font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px">Top ranked</div>'+
+    scored.slice(0,8).map(function(e,k){
+      var c='#'+LM.REGIONS[e.s.region].color.toString(16).padStart(6,'0');
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px">'+
+        '<span style="font-family:var(--mono);font-size:10px;color:var(--faint);width:16px">'+(k+1)+'</span>'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+c+';flex:none"></span>'+
+        '<span style="font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.s.name+'</span>'+
+        '<span style="font-family:var(--mono);font-size:10.5px;color:var(--accent)">'+(e.v*100).toFixed(0)+'</span></div>';
+    }).join('');
+}
+refresh();
+
+/* ---- hover ---- */
+var ray=new THREE.Raycaster();
+var mouse=LM.pointer(ctx.renderer.domElement,null);
+var lastM={x:0,y:0};
+ctx.renderer.domElement.addEventListener('pointermove',function(e){lastM.x=e.clientX;lastM.y=e.clientY;});
+
+var rank = {};
+ctx.onFrame(function(dt,t){
+  scored.forEach(function(e,k){ rank[e.i]=k; });
+  for (var i=0;i<N;i++){
+    var e = scored[rank[i]];
+    var isSel = rank[i] < TOPN;
+    var h = Math.max(0.02, e.v*e.v*2.4);
+    O.position.copy(pos[i]); O.quaternion.copy(quat[i]);
+    O.scale.set(isSel?1.25:0.7, h, isSel?1.25:0.7);
+    O.updateMatrix(); mesh.setMatrixAt(i,O.matrix);
+
+    if (isSel) C.setHex(LM.REGIONS[sites[i].region].color);
+    else { C.setHex(LM.C.line); }
+    cols[i*3]=C.r; cols[i*3+1]=C.g; cols[i*3+2]=C.b;
+
+    if (isSel){
+      var pulse = 1 + 0.18*Math.sin(t*2.2 + i*0.7);
+      O.position.copy(pos[i].clone().multiplyScalar(1.006));
+      O.quaternion.copy(flatQ[i]); O.scale.set(pulse,pulse,1);
+    } else { O.position.set(0,-999,0); O.scale.set(0.001,0.001,0.001); }
+    O.updateMatrix(); selMesh.setMatrixAt(i,O.matrix);
+  }
+  mesh.instanceMatrix.needsUpdate=true;
+  mesh.geometry.attributes.color.needsUpdate=true;
+  selMesh.instanceMatrix.needsUpdate=true;
+
+  ray.setFromCamera(mouse, ctx.camera);
+  var hit = ray.intersectObject(mesh);
+  if (hit.length && hit[0].instanceId!==undefined){
+    var i = hit[0].instanceId, s = sites[i], e = scored[rank[i]];
+    LM.tip.show(lastM.x,lastM.y,
+      '<span class="t">'+s.name+'</span>'+
+      '<span class="m">'+s.country+' &middot; rank '+(rank[i]+1)+' of '+N+'</span>'+
+      '<div style="margin-top:5px">Score <b>'+(e.v*100).toFixed(0)+'</b>'+
+      '<br>Pool '+(s.f.pool*100).toFixed(0)+' &middot; Perf '+(s.f.perf*100).toFixed(0)+
+      ' &middot; Speed '+(s.f.speed*100).toFixed(0)+
+      '<br>Quality '+(s.f.qual*100).toFixed(0)+' &middot; Cost '+(s.f.cost*100).toFixed(0)+'</div>');
+  } else LM.tip.hide();
+});
+})();
+</script>
+</body>
+</html>
