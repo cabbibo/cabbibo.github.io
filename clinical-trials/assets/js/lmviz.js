@@ -722,6 +722,16 @@
   }
   LM.ui.el = el;
 
+  // tag any element with its plain-English explanation
+  function plain(node, text, title) {
+    if (node && text) {
+      node.setAttribute('data-plain', text);
+      if (title) node.setAttribute('data-plain-title', title);
+    }
+    return node;
+  }
+  LM.ui.plain = plain;
+
   LM.ui.slider = function (parent, o) {
     var wrap = el('div', 'ctrl');
     var lab = el('label');
@@ -737,6 +747,7 @@
       if (o.on) o.on(v);
     });
     wrap.appendChild(lab); wrap.appendChild(inp);
+    plain(wrap, o.plain, o.label);
     parent.appendChild(wrap);
     return {
       el: inp,
@@ -761,7 +772,9 @@
       if (val === o.value || i === o.index) b.classList.add('on');
       btns.push(b); box.appendChild(b);
     });
-    wrap.appendChild(box); parent.appendChild(wrap);
+    wrap.appendChild(box);
+    plain(wrap, o.plain, o.label);
+    parent.appendChild(wrap);
     return { el: box, btns: btns, select: function (i) { btns[i].click(); } };
   };
 
@@ -770,6 +783,7 @@
     var i = el('input'); i.type = 'checkbox'; i.checked = !!o.value;
     l.appendChild(i); l.appendChild(el('span', null, o.label));
     i.addEventListener('change', function () { if (o.on) o.on(i.checked); });
+    plain(l, o.plain, o.label);
     parent.appendChild(l);
     return { el: i, get: function () { return i.checked; }, set: function (v) { i.checked = v; if (o.on) o.on(v); } };
   };
@@ -791,6 +805,7 @@
       s.appendChild(el('div', 'k', d.k));
       var v = el('div', 'v' + (d.accent ? ' accent' : ''), d.v !== undefined ? d.v : '—');
       s.appendChild(v);
+      plain(s, d.plain, d.k);
       box.appendChild(s);
       map[d.id] = v;
     });
@@ -807,6 +822,7 @@
       if (r.ring) { sw.style.background = 'transparent'; sw.style.boxShadow = 'inset 0 0 0 2px ' + r.color; }
       row.appendChild(sw);
       row.appendChild(el('span', null, '<span class="lbl">' + r.label + '</span>' + (r.sub ? '<span class="sub">' + r.sub + '</span>' : '')));
+      plain(row, r.plain, r.label);
       box.appendChild(row);
     });
     parent.appendChild(box);
@@ -1015,28 +1031,136 @@
      MANIFEST — single source of truth for the gallery + nav
      --------------------------------------------------------- */
   LM.manifest = [
-    { n: 1, slug: '01-trial-phases', t: 'The Phase Cascade', g: 'Design & Startup', d: 'Where a molecule loses 90% of its candidates — Phase I to IV attrition as a particle cascade.' },
-    { n: 2, slug: '02-protocol-design', t: 'Protocol Lattice', g: 'Design & Startup', d: 'The schedule of assessments as a procedural lattice: visits, procedures and burden per arm.' },
-    { n: 3, slug: '03-eligibility-sieve', t: 'The Eligibility Sieve', g: 'Design & Startup', d: 'Inclusion and exclusion criteria as stacked filters — watch a population narrow to the eligible few.' },
-    { n: 4, slug: '04-site-feasibility', t: 'Site Feasibility Field', g: 'Design & Startup', d: 'Scoring 84 candidate sites on a globe: population access, past performance, startup drag.' },
-    { n: 5, slug: '05-country-startup', t: 'Regulatory Runway', g: 'Design & Startup', d: 'Country-by-country startup: submission, approval, contract and first-patient-in as a 3D gantt.' },
-    { n: 6, slug: '06-enrollment-globe', t: 'Enrollment Accretion', g: 'Global Operations', d: 'Thirty months of global enrolment accreting onto the planet, site by site.' },
-    { n: 7, slug: '07-timezone-wave', t: 'Follow the Sun', g: 'Global Operations', d: 'A trial never sleeps: the 24-hour terminator sweeping across active sites and data capture.' },
-    { n: 8, slug: '08-site-activation', t: 'Activation Cascade', g: 'Global Operations', d: 'Site activation ripples outward from first-site-ready — the shape of a startup curve.' },
-    { n: 9, slug: '09-patient-journey', t: 'Patient Journeys', g: 'Global Operations', d: 'Every enrolled patient as a thread through screening, randomisation, visits and exit.' },
-    { n: 10, slug: '10-supply-chain', t: 'Cold Chain', g: 'Global Operations', d: 'Investigational product moving from depot to site, with temperature excursions in flight.' },
-    { n: 11, slug: '11-randomization', t: 'Randomisation & Blind', g: 'Conduct & Safety', d: 'A single stream of patients splitting into arms under stratified block randomisation.' },
-    { n: 12, slug: '12-dose-escalation', t: 'Dose Escalation', g: 'Conduct & Safety', d: 'The 3+3 ladder: cohorts climbing until dose-limiting toxicity stops the ascent.' },
-    { n: 13, slug: '13-retention', t: 'Retention Surface', g: 'Conduct & Safety', d: 'Kaplan-Meier survival rendered as a surface — where and when patients are lost.' },
-    { n: 14, slug: '14-adverse-events', t: 'Safety Signal Space', g: 'Conduct & Safety', d: 'Adverse events by MedDRA system organ class, severity and arm imbalance.' },
-    { n: 15, slug: '15-deviations', t: 'Deviation Lattice', g: 'Conduct & Safety', d: 'Protocol deviations and query burden per site, per month — the texture of trial quality.' },
-    { n: 16, slug: '16-data-flow', t: 'Data Pipeline', g: 'Data & Evidence', d: 'Source to lock: capture, query, reconcile, freeze — a GPU particle pipeline.' },
-    { n: 17, slug: '17-risk-monitoring', t: 'Risk Surface', g: 'Data & Evidence', d: 'Risk-based monitoring: key risk indicators as a deforming field over the site network.' },
-    { n: 18, slug: '18-endpoint-analysis', t: 'Endpoint Readout', g: 'Data & Evidence', d: 'The primary endpoint: effect size, confidence, and the posterior you actually care about.' },
-    { n: 19, slug: '19-evidence-graph', t: 'Evidence Graph', g: 'Data & Evidence', d: 'Literature, entities and trials resolved into one force-directed graph, computed on the GPU.' },
-    { n: 20, slug: '20-digital-twin', t: 'The Digital Twin', g: 'Data & Evidence', d: 'Every layer at once — the live, geo-centric twin of a running global trial.' }
+    { n: 1, slug: '01-trial-phases', t: 'The Phase Cascade', g: 'Design & Startup', d: 'Where a molecule loses 90% of its candidates — Phase I to IV attrition as a particle cascade.',
+      plain: 'Drug companies start with thousands of possible medicines and almost all of them fail. This shows you <b>where</b> they fail, and how very few make it out of the bottom.' },
+    { n: 2, slug: '02-protocol-design', t: 'Protocol Lattice', g: 'Design & Startup', d: 'The schedule of assessments as a procedural lattice: visits, procedures and burden per arm.',
+      plain: 'Being in a trial means showing up on set days and having things done to you — blood taken, scans, questionnaires. This is that whole schedule. Taller blocks mean more of your time taken.' },
+    { n: 3, slug: '03-eligibility-sieve', t: 'The Eligibility Sieve', g: 'Design & Startup', d: 'Inclusion and exclusion criteria as stacked filters — watch a population narrow to the eligible few.',
+      plain: 'Trials only accept people who fit a long list of rules. Each plate is one rule. Watch a big crowd of people shrink to the handful who are actually allowed in.' },
+    { n: 4, slug: '04-site-feasibility', t: 'Site Feasibility Field', g: 'Design & Startup', d: 'Scoring 84 candidate sites on a globe: population access, past performance, startup drag.',
+      plain: 'A trial runs at hospitals all over the world, and you cannot use all of them. This scores each hospital on things like how many patients it can find, then picks the best ones.' },
+    { n: 5, slug: '05-country-startup', t: 'Regulatory Runway', g: 'Design & Startup', d: 'Country-by-country startup: submission, approval, contract and first-patient-in as a 3D gantt.',
+      plain: 'Before a hospital can enrol anybody, that country’s government and ethics board have to approve the trial, and lawyers have to sign a contract. This is how long all that paperwork takes.' },
+    { n: 6, slug: '06-enrollment-globe', t: 'Enrollment Accretion', g: 'Global Operations', d: 'Thirty months of global enrolment accreting onto the planet, site by site.',
+      plain: 'Patients join a trial one at a time, all over the world, over several years. Each bar growing out of the planet is one hospital slowly filling up with patients.' },
+    { n: 7, slug: '07-timezone-wave', t: 'Follow the Sun', g: 'Global Operations', d: 'A trial never sleeps: the 24-hour terminator sweeping across active sites and data capture.',
+      plain: 'A worldwide trial is always awake somewhere. Watch daytime sweep around the planet, and see which hospitals are open and seeing patients right now.' },
+    { n: 8, slug: '08-site-activation', t: 'Activation Cascade', g: 'Global Operations', d: 'Site activation ripples outward from first-site-ready — the shape of a startup curve.',
+      plain: 'Hospitals do not all open on the same day. Watch them switch on one by one over nine months, spreading out from the first country to get approval.' },
+    { n: 9, slug: '09-patient-journey', t: 'Patient Journeys', g: 'Global Operations', d: 'Every enrolled patient as a thread through screening, randomisation, visits and exit.',
+      plain: 'To get 2,400 people into a trial you have to approach about 11,400. Every dot is one real person, and you can watch where most of them fall out along the way.' },
+    { n: 10, slug: '10-supply-chain', t: 'Cold Chain', g: 'Global Operations', d: 'Investigational product moving from depot to site, with temperature excursions in flight.',
+      plain: 'The drug has to stay cold the whole way from the warehouse to the hospital. Each dot is a shipment in transit; red ones got too warm and have to be thrown away.' },
+    { n: 11, slug: '11-randomization', t: 'Randomisation & Blind', g: 'Conduct & Safety', d: 'A single stream of patients splitting into arms under stratified block randomisation.',
+      plain: 'Patients are sorted into treatment groups purely by chance, so the comparison is fair, and nobody is told which group they got. This shows that coin-flip happening.' },
+    { n: 12, slug: '12-dose-escalation', t: 'Dose Escalation', g: 'Conduct & Safety', d: 'The 3+3 ladder: cohorts climbing until dose-limiting toxicity stops the ascent.',
+      plain: 'Nobody knows the safe dose at first. So you give a tiny dose to three people, then a bigger one to three more, climbing until people start getting hurt — then stop.' },
+    { n: 13, slug: '13-retention', t: 'Retention Surface', g: 'Conduct & Safety', d: 'Kaplan-Meier survival rendered as a surface — where and when patients are lost.',
+      plain: 'Each line tracks how many people are still doing well as months go by. The line that stays highest is the better treatment, and the gap between the lines is the whole point of the trial.' },
+    { n: 14, slug: '14-adverse-events', t: 'Safety Signal Space', g: 'Conduct & Safety', d: 'Adverse events by MedDRA system organ class, severity and arm imbalance.',
+      plain: 'Every bad thing that happens to a patient gets written down. Most of it is noise. This pulls out the few problems that happen clearly more often on the drug than on the dummy pill.' },
+    { n: 15, slug: '15-deviations', t: 'Deviation Lattice', g: 'Conduct & Safety', d: 'Protocol deviations and query burden per site, per month — the texture of trial quality.',
+      plain: 'Hospitals make mistakes — a missed blood test, a form filled in late. Each block is one hospital in one month. The tall spikes are where something went wrong.' },
+    { n: 16, slug: '16-data-flow', t: 'Data Pipeline', g: 'Data & Evidence', d: 'Source to lock: capture, query, reconcile, freeze — a GPU particle pipeline.',
+      plain: 'Everything measured on a patient has to be typed in, checked, questioned and corrected before anyone is allowed to analyse it. This is that assembly line, running.' },
+    { n: 17, slug: '17-risk-monitoring', t: 'Risk Surface', g: 'Data & Evidence', d: 'Risk-based monitoring: key risk indicators as a deforming field over the site network.',
+      plain: 'You cannot afford to visit every hospital, so you score them all on how likely they are to be in trouble. The hills are the risky ones. The dark line is your travel budget.' },
+    { n: 18, slug: '18-endpoint-analysis', t: 'Endpoint Readout', g: 'Data & Evidence', d: 'The primary endpoint: effect size, confidence, and the posterior you actually care about.',
+      plain: 'At the end you ask one question: did it work? This is the answer, how sure you are of it, and all the sub-groups underneath that look interesting but are mostly random noise.' },
+    { n: 19, slug: '19-evidence-graph', t: 'Evidence Graph', g: 'Data & Evidence', d: 'Literature, entities and trials resolved into one force-directed graph, computed on the GPU.',
+      plain: 'Every paper, gene, drug and trial on a subject, joined up wherever they mention each other, then left to arrange itself. The clumps that form are real research areas.' },
+    { n: 20, slug: '20-digital-twin', t: 'The Digital Twin', g: 'Data & Evidence', d: 'Every layer at once — the live, geo-centric twin of a running global trial.',
+      plain: 'A living model of one worldwide trial: who has enrolled, which hospitals are awake right now, where the drug is in transit, and which sites are heading for trouble.' }
   ];
   LM.bySlug = function (s) { for (var i = 0; i < LM.manifest.length; i++) if (LM.manifest[i].slug === s) return LM.manifest[i]; return null; };
+
+  /* ---------------------------------------------------------
+     PLAIN ENGLISH MODE
+     A global toggle. When on, anything carrying data-plain gets a
+     hover card explaining it without jargon. Uses its own tooltip
+     node so it never fights a page's 3D picking tooltip.
+     --------------------------------------------------------- */
+  LM.layman = (function () {
+    var on = false, cbs = [];
+    try { on = localStorage.getItem('lm-plain') === '1'; } catch (e) { }
+
+    function apply() {
+      document.body.classList.toggle('plain-on', on);
+      var b = document.getElementById('plainBtn');
+      if (b) {
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      if (!on) hide();
+      for (var i = 0; i < cbs.length; i++) cbs[i](on);
+    }
+    function set(v) {
+      on = !!v;
+      try { localStorage.setItem('lm-plain', on ? '1' : '0'); } catch (e) { }
+      apply();
+    }
+
+    var node = null;
+    function tip() {
+      if (!node) {
+        node = el('div');
+        node.id = 'ptip';
+        document.body.appendChild(node);
+      }
+      return node;
+    }
+    function show(x, y, title, body) {
+      var n = tip();
+      n.innerHTML = '<span class="pt">' + title + '</span><div class="pb">' + body + '</div>';
+      n.style.opacity = '1';
+      var w = n.offsetWidth, h = n.offsetHeight;
+      var left = x + 16;
+      if (left + w > window.innerWidth - 12) left = x - w - 16;
+      n.style.left = Math.max(12, left) + 'px';
+      n.style.top = LM.clamp(y - h - 14, 12, Math.max(12, window.innerHeight - h - 12)) + 'px';
+    }
+    function hide() { if (node) node.style.opacity = '0'; }
+
+    return {
+      isOn: function () { return on; },
+      set: set,
+      toggle: function () { set(!on); },
+      onChange: function (f) { cbs.push(f); },
+      _apply: apply,
+      _show: show,
+      _hide: hide
+    };
+  })();
+
+  // Delegated hover for everything tagged with data-plain.
+  LM.plainHover = function () {
+    document.addEventListener('mouseover', function (e) {
+      if (!LM.layman.isOn()) return;
+      var t = e.target, found = null;
+      while (t && t !== document.body) {
+        if (t.getAttribute && t.getAttribute('data-plain')) { found = t; break; }
+        t = t.parentNode;
+      }
+      if (!found) return;
+      LM.layman._show(e.clientX, e.clientY,
+        found.getAttribute('data-plain-title') || 'In plain English',
+        found.getAttribute('data-plain'));
+    });
+    document.addEventListener('mouseout', function (e) {
+      var t = e.target;
+      while (t && t !== document.body) {
+        if (t.getAttribute && t.getAttribute('data-plain')) { LM.layman._hide(); return; }
+        t = t.parentNode;
+      }
+    });
+    window.addEventListener('scroll', function () { LM.layman._hide(); }, true);
+  };
+
+  /* Returns a plain-English block to append inside a page's own 3D tooltip,
+     or an empty string when the toggle is off. */
+  LM.plainNote = function (text) {
+    return LM.layman.isOn() ? '<div class="tip-plain">' + text + '</div>' : '';
+  };
 
   /* ---------------------------------------------------------
      PAGE CHROME — brand + prev/next nav + tooltip node
@@ -1054,11 +1178,15 @@
 
     var nav = el('div', 'nav');
     nav.innerHTML =
+      '<button class="plain-toggle" id="plainBtn" type="button" aria-pressed="false" ' +
+        'title="Explain everything on this page without the jargon">' +
+        '<span class="pip"></span>Plain English</button>' +
       '<a href="' + prev.slug + '.html" title="' + prev.t + '">&larr;</a>' +
       '<span class="idx">' + String(cur.n).padStart(2, '0') + ' / 20</span>' +
       '<a href="' + next.slug + '.html" title="' + next.t + '">&rarr;</a>' +
       '<a href="../index.html">All 20</a>';
     document.body.appendChild(nav);
+    nav.querySelector('#plainBtn').addEventListener('click', function () { LM.layman.toggle(); });
 
     document.title = cur.t + ' — Labmarket Clinical Trial Atlas';
 
@@ -1067,8 +1195,18 @@
       if (e.key === 'ArrowLeft') location.href = prev.slug + '.html';
       if (e.key === 'ArrowRight') location.href = next.slug + '.html';
       if (e.key === 'Escape') location.href = '../index.html';
+      if (e.key === 'e' || e.key === 'E') LM.layman.toggle();
     });
     LM.tip.node();
+    LM.plainHover();
+    LM.layman._apply();
+
+    // the page's own one-line explanation, hoverable like everything else
+    var tb = document.querySelector('.title-block');
+    if (tb && cur.plain){
+      tb.setAttribute('data-plain', cur.plain);
+      tb.setAttribute('data-plain-title', 'What this shows');
+    }
     return cur;
   };
 

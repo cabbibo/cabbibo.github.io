@@ -277,27 +277,32 @@ var ctrls=document.getElementById('ctrls');
 function reflow(){ rebuildNodes(); bakePaths(); refresh(); }
 
 LM.ui.slider(ctrls,{label:'Consent rate', min:0.1, max:1, step:0.01, value:M.consentRate,
+  plain:'Of the patients a doctor approaches about the trial, how many actually say yes. Plenty of people decline — they do not want a dummy pill, or cannot face the extra hospital visits.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){M.consentRate=v;reflow();}});
 LM.ui.slider(ctrls,{label:'Screening pass rate', min:0.1, max:1, step:0.01, value:M.screenPass,
+  plain:'Of the people who agree and get tested, how many turn out to meet every rule. Fail here and you are a "screen failure" — you went through the tests for nothing.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){M.screenPass=v;reflow();}});
 LM.ui.slider(ctrls,{label:'Completed treatment', min:0.1, max:0.9, step:0.01, value:M.completed,
+  plain:'Of the people who actually start treatment, how many make it all the way to the end. Everyone else leaves early, and the rest of the outcomes rebalance around this.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){
     var rest=1-v, k=(M.progressed+M.aeStop+M.withdrew+M.ltfu)||1;
     M.progressed*=rest/k; M.aeStop*=rest/k; M.withdrew*=rest/k; M.ltfu*=rest/k;
     M.completed=v; reflow();
   }});
 LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:4, step:0.05, value:1,
+  plain:'How fast the dots travel. Each dot is one person moving through the trial. Does not change any numbers.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uSpeed.value=v;}});
 LM.ui.slider(ctrls,{label:'Ribbon depth', min:0, max:2.4, step:0.05, value:0.62,
+  plain:'Spreads the stream of people out in 3D so you can see individual paths instead of one flat ribbon. Purely visual.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){pMat.uniforms.uSpread.value=v;}});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Identified', id:'id'},
-  {k:'Screened', id:'sc'},
-  {k:'Randomised', id:'rd', accent:true},
-  {k:'Screen failure', id:'sf'},
-  {k:'Completed', id:'cp'},
-  {k:'Attrition', id:'at'}
+  {k:'Identified', id:'id', plain:'How many people with the right disease had to be found and approached in the first place.'},
+  {k:'Screened', id:'sc', plain:'How many agreed to be tested to see whether they qualify. This involves real scans and blood tests, whether or not they end up joining.'},
+  {k:'Randomised', id:'rd', accent:true, plain:'How many actually made it in and were assigned a treatment group. This is the only number the trial protocol promises.'},
+  {k:'Screen failure', id:'sf', plain:'The share of tested people who were turned away. Every one of them was put through tests for nothing, which is a real cost to them and to the trial.'},
+  {k:'Completed', id:'cp', plain:'How many stayed all the way to the end of treatment. These are the people whose data is most useful.'},
+  {k:'Attrition', id:'at', plain:'The share who started treatment but left early — because the disease got worse, the side effects were too much, or they simply stopped coming.'}
 ]);
 
 var bd=document.getElementById('breakdown');

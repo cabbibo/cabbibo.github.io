@@ -37,12 +37,18 @@
 LM.chrome('16-data-flow');
 
 var STAGES = [
-  {n:'Source document',  c:LM.C.faint,  x:-13.5, note:'Chart, device, ePRO'},
-  {n:'EDC capture',      c:LM.C.slate,  x: -8.1, note:'Site enters the CRF'},
-  {n:'Edit checks',      c:LM.C.teal,   x: -2.7, note:'Automated validation'},
-  {n:'Query resolution', c:LM.C.amber,  x:  2.7, note:'Monitor raises, site answers'},
-  {n:'SDV / reconcile',  c:LM.C.violet, x:  8.1, note:'Source data verification'},
-  {n:'Database lock',    c:LM.C.accent, x: 13.5, note:'Clean, frozen, analysable'}
+  {n:'Source document',  c:LM.C.faint,  x:-13.5, note:'Chart, device, ePRO',
+   eli5:'The original record — the doctor’s notes, the scanner printout, the app on the patient’s phone. Everything downstream has to be traceable back to this.'},
+  {n:'EDC capture',      c:LM.C.slate,  x: -8.1, note:'Site enters the CRF',
+   eli5:'A person at the hospital types what happened into the trial’s database. Yes, really — much of this is still manual retyping.'},
+  {n:'Edit checks',      c:LM.C.teal,   x: -2.7, note:'Automated validation',
+   eli5:'The computer automatically checks for things that cannot be true: a blood pressure of 900, a visit date before the patient consented, a missing required field.'},
+  {n:'Query resolution', c:LM.C.amber,  x:  2.7, note:'Monitor raises, site answers',
+   eli5:'Anything suspicious gets sent back as a question, and the hospital has to go to the original notes and answer it. This is the bottleneck — it is where data goes to wait.'},
+  {n:'SDV / reconcile',  c:LM.C.violet, x:  8.1, note:'Source data verification',
+   eli5:'Someone physically checks the typed-in data against the original records, and makes sure separate systems — the lab, the drug supply, the database — all agree with each other.'},
+  {n:'Database lock',    c:LM.C.accent, x: 13.5, note:'Clean, frozen, analysable',
+   eli5:'The data is declared final and frozen, and nobody is allowed to change it again. Only now is anyone permitted to look at whether the drug worked.'}
 ];
 var NS = STAGES.length;
 
@@ -225,28 +231,32 @@ function stepMirror(dt){
 /* ---------- UI ---------- */
 var ctrls=document.getElementById('ctrls');
 LM.ui.slider(ctrls,{label:'Query rate at edit checks', min:0, max:0.8, step:0.01, value:0.22,
+  plain:'What share of data items get flagged as questionable and sent back to the hospital to check. A quarter is normal. Every single one costs somebody an hour.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){uQueryRate.value=v;}});
 LM.ui.slider(ctrls,{label:'Query resolution speed', min:0.1, max:2.5, step:0.05, value:0.55,
+  plain:'How fast the hospital answers those questions. Slow answers are the single biggest reason a trial cannot close its database on time.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uResolve.value=v;}});
 LM.ui.slider(ctrls,{label:'Capture throughput', min:0.1, max:3, step:0.05, value:1,
+  plain:'How fast data flows in from the hospitals in the first place.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
 LM.ui.seg(ctrls,{label:'Scenario', index:1, options:[
   {label:'Paper-heavy', value:[0.46,0.28]},
   {label:'Typical EDC', value:[0.22,0.55]},
   {label:'Risk-based', value:[0.11,1.30]}
-], on:function(v){
+], plain:'Three ways of running this. Paper-heavy means lots of manual checking and lots of questions. Risk-based means you only check carefully where it actually matters — far fewer queries, much faster lock.',
+   on:function(v){
   var sl=ctrls.querySelectorAll('input[type=range]');
   sl[0].value=v[0]; sl[0].dispatchEvent(new Event('input'));
   sl[1].value=v[1]; sl[1].dispatchEvent(new Event('input'));
 }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Open queries', id:'oq', accent:true},
-  {k:'Query burden', id:'qb'},
-  {k:'Raised', id:'rz'},
-  {k:'Resolved', id:'rv'},
-  {k:'Locked items', id:'lk'},
-  {k:'Est. lock lag', id:'lag'}
+  {k:'Open queries', id:'oq', accent:true, plain:'Questions currently sitting unanswered. Each one is a piece of data nobody is allowed to use yet.'},
+  {k:'Query burden', id:'qb', plain:'The share of all data stuck in the question loop right now. The bulge in the middle of the pipe is exactly this.'},
+  {k:'Raised', id:'rz', plain:'How many questions have been asked in total since the trial started.'},
+  {k:'Resolved', id:'rv', plain:'How many have been answered and let back into the flow.'},
+  {k:'Locked items', id:'lk', plain:'Data that has made it all the way to the end: checked, corrected, frozen, and ready to be analysed.'},
+  {k:'Est. lock lag', id:'lag', plain:'Roughly how many extra days all this checking adds before you can finally look at your results. Drag the resolution speed and watch this move — those are real days of a drug not reaching patients.'}
 ]);
 
 var stagesEl=document.getElementById('stages');

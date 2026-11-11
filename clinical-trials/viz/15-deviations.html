@@ -40,10 +40,14 @@ var sites = LM.study.sites, N = sites.length, MONTHS = LM.study.months;
 
 /* ---------- generate monthly quality signals per site ---------- */
 var METRICS = [
-  {k:'dev',   n:'Protocol deviations', unit:'dev',  c:LM.C.accent, hi:'Major deviations per month'},
-  {k:'query', n:'Open data queries',   unit:'qry',  c:LM.C.violet, hi:'Queries raised per month'},
-  {k:'miss',  n:'Missing data points', unit:'pts',  c:LM.C.amber,  hi:'Required fields left blank'},
-  {k:'late',  n:'Late data entry',     unit:'days', c:LM.C.teal,   hi:'Mean days source-to-EDC'}
+  {k:'dev',   n:'Protocol deviations', unit:'dev',  c:LM.C.accent, hi:'Major deviations per month',
+   eli5:'Times the hospital did not follow the rulebook — a visit outside its allowed window, a missed test, a dose given wrong. Some are trivial; some invalidate a patient’s whole data.'},
+  {k:'query', n:'Open data queries',   unit:'qry',  c:LM.C.violet, hi:'Queries raised per month',
+   eli5:'Questions sent back to the hospital because something looked wrong or contradictory in what they typed in. Each one is a person having to go back to the paper records and check.'},
+  {k:'miss',  n:'Missing data points', unit:'pts',  c:LM.C.amber,  hi:'Required fields left blank',
+   eli5:'Boxes that were simply left empty. Missing data is worse than it sounds: you often cannot tell whether the test was normal, or never done at all.'},
+  {k:'late',  n:'Late data entry',     unit:'days', c:LM.C.teal,   hi:'Mean days source-to-EDC',
+   eli5:'How many days the hospital takes to type up what happened after seeing the patient. Weeks of delay means nobody can spot a safety problem until long after it happened.'}
 ];
 var data = {};
 (function(){
@@ -136,26 +140,30 @@ recompute();
 var ctrls=document.getElementById('ctrls');
 LM.ui.seg(ctrls,{label:'Metric', index:0, options:METRICS.map(function(M,i){
   return {label:M.n.split(' ')[0], value:M.k};
-}), on:function(v){ metric=v; recompute(); refresh(); }});
+}), plain:'Which kind of mistake you are looking at. Each one tells you something different about how carefully a hospital is working.',
+   on:function(v){ metric=v; recompute(); refresh(); }});
 
 LM.ui.seg(ctrls,{label:'Sort sites by', index:0, options:[
   {label:'Worst first', value:'total'},
   {label:'Region', value:'region'},
   {label:'Activation', value:'activation'}
-], on:function(v){ sortMode=v; recompute(); refresh(); }});
+], plain:'How the hospitals are ordered left to right. "Worst first" puts the problem sites at the front; grouping by region shows whether a whole country has a problem.',
+   on:function(v){ sortMode=v; recompute(); refresh(); }});
 
 LM.ui.slider(ctrls,{label:'Alert threshold', min:0.1, max:1, step:0.01, value:0.65,
+  plain:'How bad a month has to be before it turns orange or red and someone gets a phone call.',
   fmt:function(v){return (v*100).toFixed(0)+'% of peak';}, on:function(v){ threshold=v; recompute(); refresh(); }});
 LM.ui.slider(ctrls,{label:'Height scale', min:0.2, max:4, step:0.05, value:1,
+  plain:'Stretches the blocks taller so the spikes are easier to spot. Does not change the data.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){ scale=v; }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Total', id:'tot', accent:true},
-  {k:'Per site-month', id:'per'},
-  {k:'Sites alerting', id:'alert'},
-  {k:'Peak', id:'peak'},
-  {k:'Worst site', id:'ws'},
-  {k:'Metric', id:'m'}
+  {k:'Total', id:'tot', accent:true, plain:'Every mistake of this kind, across all 84 hospitals and all 30 months, added together.'},
+  {k:'Per site-month', id:'per', plain:'The average for one hospital in one month. This is the number you compare a suspect site against.'},
+  {k:'Sites alerting', id:'alert', plain:'How many hospitals crossed the alert line at some point. These are the ones worth visiting.'},
+  {k:'Peak', id:'peak', plain:'The worst single hospital-month anywhere in the trial. Usually one site having one very bad quarter.'},
+  {k:'Worst site', id:'ws', plain:'The hospital with the most problems overall. Hover the tall spikes to find out who it is.'},
+  {k:'Metric', id:'m', plain:'What is being counted in the blocks right now.'}
 ]);
 
 var worstEl=document.getElementById('worst');
@@ -236,7 +244,9 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+s.name+'</span>'+
       '<span class="m">'+s.country+' &middot; '+s.id+' &middot; month '+m+'</span>'+
       '<div style="margin-top:5px">'+M.n.replace(/&amp;/g,'&')+': <b>'+v.toFixed(1)+'</b> '+M.unit+
-      '<br>Site total '+Math.round(rec.total)+' &middot; quality index '+(s.quality*100).toFixed(0)+'</div>');
+      '<br>Site total '+Math.round(rec.total)+' &middot; quality index '+(s.quality*100).toFixed(0)+'</div>'+
+      LM.plainNote('One hospital, in one month. '+M.eli5+' This site had '+v.toFixed(0)+
+        ' that month, against a trial average of '+(stats.grand/Math.max(1,stats.totals.length*MONTHS)).toFixed(1)+'.'));
   } else LM.tip.hide();
 });
 })();

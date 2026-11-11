@@ -75,6 +75,7 @@ var GATES = [
   {name:'Preclinical → IND', short:'IND',  p:0.100, y: 5.0, col:LM.C.slate,
    note:'Tox, CMC, IND-enabling',
    asks:'Is it safe enough, and can we even make it?',
+   eli5:'Before any person is allowed to take it, it has to survive animal and lab safety testing, and you have to be able to actually manufacture the stuff. Nine out of ten die right here.',
    why:[
     ['Organ toxicity in GLP studies','liver, kidney or cardiac findings in 28- and 90-day tox'],
     ['No therapeutic window','the NOAEL sits too close to the efficacious dose'],
@@ -88,6 +89,7 @@ var GATES = [
   {name:'Phase I → II',      short:'PH I', p:0.520, y: 2.5, col:LM.C.teal,
    note:'Safety, PK, dose finding',
    asks:'Can a human tolerate a dose that could plausibly work?',
+   eli5:'The first time people take it, usually healthy volunteers or very sick patients. You are not asking whether it works yet — only whether a person can take enough of it without being harmed. About half fail.',
    why:[
     ['Dose-limiting toxicity too early','DLTs arrive before the predicted efficacious exposure'],
     ['PK does not translate','human exposure is lower or far more variable than the animal data promised'],
@@ -101,6 +103,7 @@ var GATES = [
   {name:'Phase II → III',    short:'PH II',p:0.289, y: 0.0, col:LM.C.violet,
    note:'Proof of concept — the killing field',
    asks:'Does it actually work, in the right people, at the right dose?',
+   eli5:'The first real test of whether the drug does anything. This is where most drugs die, and the reason is almost always the simplest one: it does not work. Only about three in ten get through.',
    why:[
     ['Lack of efficacy','roughly half of all Phase II failures. The drug simply does not work.', true],
     ['Effect too small','real but not worth the price of a Phase III'],
@@ -115,6 +118,7 @@ var GATES = [
   {name:'Phase III → NDA',   short:'PH III',p:0.578,y:-2.5, col:LM.C.amber,
    note:'Confirmatory, pivotal',
    asks:'Does the effect replicate at scale, and is it safe at scale?',
+   eli5:'The big, hugely expensive trial that has to prove it works on thousands of people. Four in ten still fail here, usually because the promising earlier result just does not happen again.',
    why:[
     ['Primary endpoint missed','the Phase II effect fails to replicate — small, unblinded or single-arm Phase IIs regress hard', true],
     ['Significant but not meaningful','a p-value nobody can turn into a clinical claim'],
@@ -128,6 +132,7 @@ var GATES = [
   {name:'NDA/BLA → Approval',short:'NDA',  p:0.906, y:-5.0, col:LM.C.accent,
    note:'Regulatory review',
    asks:'Will a regulator put their name on it?',
+   eli5:'The government reads everything you did and decides whether people are allowed to buy it. Most get through at this point, and the ones that do not usually have a problem with how it is manufactured, not with the drug itself.',
    why:[
     ['Manufacturing CRL','facility inspection, process validation or stability — the most common reason at this stage', true],
     ['Benefit–risk judged unfavourable','the advisory committee votes no'],
@@ -340,10 +345,12 @@ GATES.forEach(function(G,i){
   LM.ui.slider(ctrls,{
     label:G.name, min:0.01, max:1, step:0.001, value:G.p,
     fmt:function(v){return (v*100).toFixed(1)+'%';},
+    plain:'Of every 100 candidates that reach this stage, this many survive it. Drag it and watch the number at the bottom — the whole outcome is extremely sensitive to each single step.',
     on:function(v){ G.p=v; uSurv.value[i]=v; refresh(); }
   });
 });
 LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:3, step:0.05, value:1,
+  plain:'Only changes how fast the animation plays. None of the numbers change.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
 LM.ui.button(ctrls,{label:'Reset to industry rates', on:function(){
   var def=[0.100,0.520,0.289,0.578,0.906];
@@ -352,10 +359,14 @@ LM.ui.button(ctrls,{label:'Reset to industry rates', on:function(){
 }});
 
 var setStat = LM.ui.stats(document.getElementById('stats'), [
-  {k:'Enter Phase I', id:'in'},
-  {k:'Reach approval', id:'out', accent:true},
-  {k:'Cumulative odds', id:'odds'},
-  {k:'Needed for 1', id:'need'}
+  {k:'Enter Phase I', id:'in',
+   plain:'Of the 1,000 candidates we started with, this many ever get tested in a living human being. The rest die in the lab.'},
+  {k:'Reach approval', id:'out', accent:true,
+   plain:'How many of the original 1,000 end up as a medicine a doctor could actually prescribe you.'},
+  {k:'Cumulative odds', id:'odds',
+   plain:'If a drug has already made it as far as being tested in people, this is its chance of eventually being approved. The real-world figure is about 8%.'},
+  {k:'Needed for 1', id:'need',
+   plain:'How many candidates you have to put into human testing to get one approved medicine out the other end. This is why drugs are expensive.'}
 ]);
 
 var funnel = document.getElementById('funnel');
@@ -435,7 +446,8 @@ function cardFor(i){
       G.why.map(function(w){
         return '<li'+(w[2]?' class="lead"':'')+'><b>'+w[0]+'</b> &mdash; '+w[1]+'</li>';
       }).join('')+
-    '</ul>';
+    '</ul>'+
+    LM.plainNote(G.eli5);
 }
 
 refresh();
@@ -448,6 +460,7 @@ ctx.renderer.domElement.addEventListener('pointermove', function(e){
 });
 
 var lastShown = -99;
+LM.layman.onChange(function(){ lastShown = -99; });   // rebuild the card with/without the plain line
 ctx.onFrame(function(dt,t){
   gpu.step(Math.min(dt,0.033), t);
   mat.uniforms.uPos.value = gpu.texture;

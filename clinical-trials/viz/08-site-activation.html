@@ -112,32 +112,45 @@ ctx.add(rings);
 var ctrls=document.getElementById('ctrls');
 var day=0, playing=true, speed=28, pinScale=1.0;
 var daySlider=LM.ui.slider(ctrls,{label:'Day', min:0, max:MAXD, step:1, value:0,
+  plain:'Days since the first hospital was ready. Drag it to watch hospitals switch on across the world.',
   fmt:function(v){return 'D'+Math.round(v);}, on:function(v){day=v;}});
 LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
   {label:'Play',value:'p'},{label:'Pause',value:'s'},{label:'Restart',value:'r'}
-], on:function(v){
+], plain:'Runs the nine-month opening period forward automatically.',
+   on:function(v){
   if(v==='p')playing=true; if(v==='s')playing=false;
   if(v==='r'){day=0;daySlider.set(0);playing=true;}
 }});
 LM.ui.slider(ctrls,{label:'Speed', min:4, max:90, step:1, value:28,
+  plain:'How many days of the trial pass per second of real time.',
   fmt:function(v){return v+' d/s';}, on:function(v){speed=v;}});
 LM.ui.slider(ctrls,{label:'Pin height', min:0.2, max:3, step:0.05, value:1,
+  plain:'Makes the pins taller or shorter. A taller pin just means that hospital is aiming to enrol more patients.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){pinScale=v;}});
 var showRipple=true;
-LM.ui.check(ctrls,{label:'Show activation ripple', value:true, on:function(v){showRipple=v;}});
+LM.ui.check(ctrls,{label:'Show activation ripple', value:true,
+  plain:'The expanding ring that fires when a hospital opens. Purely so you can spot the moment it happens.',
+  on:function(v){showRipple=v;}});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Activated', id:'act', accent:true},
-  {k:'Remaining', id:'rem'},
-  {k:'Countries live', id:'ctry'},
-  {k:'Day', id:'d'},
-  {k:'Rate', id:'rate'},
-  {k:'Median open', id:'med'}
+  {k:'Activated', id:'act', accent:true, plain:'How many hospitals are open and allowed to enrol patients at this point in time.'},
+  {k:'Remaining', id:'rem', plain:'Hospitals still stuck in paperwork, not yet able to take a single patient.'},
+  {k:'Countries live', id:'ctry', plain:'How many countries have at least one open hospital.'},
+  {k:'Day', id:'d', plain:'Days since the very first hospital opened.'},
+  {k:'Rate', id:'rate', plain:'How many hospitals opened in the last month. This peaks in the middle and tails off — the classic S-shaped startup curve.'},
+  {k:'Median open', id:'med', plain:'The day the typical hospital opened. Half were open before this day, half after.'}
 ]);
 
+var REGION_PLAIN = {
+  NA:'The United States and Canada. Usually first to open, because their approval process is the most predictable.',
+  LATAM:'Latin America. Opens later — Brazil in particular has one of the slowest approval routes in the world.',
+  EU:'Europe. Steady, but each country runs its own process, so they trickle in rather than arriving together.',
+  EMEA:'The Middle East and Africa. Few sites, and the most variation in how long things take.',
+  APAC:'Asia and the Pacific. Opens late but matters enormously, because this is where most of the eligible patients are.'
+};
 LM.ui.legend(document.getElementById('legend'),
   Object.keys(LM.REGIONS).map(function(k){
-    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true};
+    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true, plain:REGION_PLAIN[k]};
   })
 );
 
@@ -234,7 +247,10 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+s.name+'</span>'+
       '<span class="m">'+s.country+' &middot; '+s.id+'</span>'+
       '<div style="margin-top:5px">Activated day <b>'+s.activation+'</b><br>'+
-      'Target '+s.target+' patients &middot; '+(day>=s.activation?'open '+Math.round(day-s.activation)+'d':'not yet open')+'</div>');
+      'Target '+s.target+' patients &middot; '+(day>=s.activation?'open '+Math.round(day-s.activation)+'d':'not yet open')+'</div>'+
+      LM.plainNote('One hospital. It '+(day>=s.activation
+        ? 'opened on day '+s.activation+' and has been enrolling for '+Math.round(day-s.activation)+' days.'
+        : 'is still waiting on approvals and opens on day '+s.activation+'.')));
   } else LM.tip.hide();
 });
 })();

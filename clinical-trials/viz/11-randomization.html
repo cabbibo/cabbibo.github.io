@@ -250,27 +250,35 @@ LM.ui.seg(ctrls,{label:'Allocation ratio', index:0, options:[
   {label:'1:1:1', value:[1/3,1/3,1/3]},
   {label:'2:1',   value:[0.667,0.0001,0.333]},
   {label:'3:1',   value:[0.75,0.0001,0.25]}
-], on:function(v){ alloc=v.slice(); buildSeq(); resetCounts(); refresh(); }});
+], plain:'How many patients go into each group. "2:1" means twice as many get the real drug as the dummy — better for recruitment, because people are likelier to join if their odds of getting the drug are good, but you need more patients overall to prove the same thing.',
+   on:function(v){ alloc=v.slice(); buildSeq(); resetCounts(); refresh(); }});
 
-LM.ui.check(ctrls,{label:'Permuted blocks (size 6)', value:true, on:function(v){
+LM.ui.check(ctrls,{label:'Permuted blocks (size 6)', value:true,
+  plain:'Instead of flipping a coin each time, you shuffle small batches of six that already contain the right mix. That stops you accidentally ending up with 30 people in one group and 10 in another. Untick it and watch the groups drift apart.',
+  on:function(v){
   blocked=v; buildSeq(); resetCounts(); refresh();
 }});
-LM.ui.check(ctrls,{label:'Stratify by ECOG &amp; prior therapy', value:true, on:function(v){
+LM.ui.check(ctrls,{label:'Stratify by ECOG &amp; prior therapy', value:true,
+  plain:'Run a separate shuffle for each type of patient — sicker versus healthier, treated before versus not. This stops all the healthiest people landing in one group by chance and making the drug look better than it is.',
+  on:function(v){
   useStrata=v; refresh();
 }});
-LM.ui.check(ctrls,{label:'Maintain the blind', value:true, on:function(v){
+LM.ui.check(ctrls,{label:'Maintain the blind', value:true,
+  plain:'Nobody — not the patient, not the doctor — is told which group a patient is in. Untick it to reveal the colours. In a real trial this is kept secret for years, because knowing changes how people report how they feel.',
+  on:function(v){
   uBlind.value = v?1:0;
 }});
 LM.ui.slider(ctrls,{label:'Flow speed', min:0.1, max:4, step:0.05, value:1,
+  plain:'How fast patients flow through. Does not change the allocation.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uSpeed.value=v;}});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Randomised', id:'n', accent:true},
-  {k:'Max imbalance', id:'imb'},
-  {k:'Worst stratum', id:'ws'},
-  {k:'Block size', id:'bs'},
-  {k:'Strata', id:'st'},
-  {k:'Blind', id:'bl'}
+  {k:'Randomised', id:'n', accent:true, plain:'How many patients have been assigned to a group so far.'},
+  {k:'Max imbalance', id:'imb', plain:'How far the biggest group has drifted from where it should be. Small is good. Turn off permuted blocks and watch this grow.'},
+  {k:'Worst stratum', id:'ws', plain:'The same thing, but within a single type of patient. You can look balanced overall and still be badly lopsided inside one subgroup — which is exactly what ruins a result.'},
+  {k:'Block size', id:'bs', plain:'How many patients are in each pre-mixed shuffled batch. Six means after every six patients the groups are exactly even again.'},
+  {k:'Strata', id:'st', plain:'How many separate patient types get their own independent shuffle.'},
+  {k:'Blind', id:'bl', plain:'Whether the treatment assignments are currently hidden. In a real trial this stays ON until the very end.'}
 ]);
 
 var armsEl=document.getElementById('arms');

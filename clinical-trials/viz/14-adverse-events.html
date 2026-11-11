@@ -174,26 +174,33 @@ var pThresh=0.05, minN=8, grade3=false, fdr=false, socFilter=-1;
 
 LM.ui.seg(ctrls,{label:'Severity', index:0, options:[
   {label:'All grades', value:false},{label:'Grade ≥3', value:true}
-], on:function(v){ grade3=v; analyse(v); refresh(); }});
+], plain:'Side effects are graded 1 to 5. Grade 1 is a mild nuisance; grade 3 and above means hospital, permanent harm, or death. Switch to grade 3+ to see only the ones that genuinely matter.',
+   on:function(v){ grade3=v; analyse(v); refresh(); }});
 
 LM.ui.slider(ctrls,{label:'Significance threshold', min:0.001, max:0.25, step:0.001, value:0.05,
+  plain:'How suspicious something has to look before you call it real. Loosen it and you catch more genuine problems — but you also start flagging pure coincidences.',
   fmt:function(v){return 'p < '+v.toFixed(3);}, on:function(v){ pThresh=v; refresh(); }});
 LM.ui.slider(ctrls,{label:'Minimum events', min:1, max:60, step:1, value:8,
+  plain:'Ignore anything that happened to fewer than this many people. Two cases of something out of 2,400 patients is almost always noise, however dramatic it looks.',
   fmt:function(v){return v+' events';}, on:function(v){ minN=v; refresh(); }});
-LM.ui.check(ctrls,{label:'Benjamini-Hochberg correction', value:false, on:function(v){ fdr=v; refresh(); }});
+LM.ui.check(ctrls,{label:'Benjamini-Hochberg correction', value:false,
+  plain:'If you test 75 different side effects at once, a few will look significant by pure luck. This tightens the bar to account for that. Tick it and watch the weakest "signals" vanish — they were never real.',
+  on:function(v){ fdr=v; refresh(); }});
 
 var socOpts = [{label:'All SOCs', value:-1}].concat(SOC.slice(0,3).map(function(S,i){
   return {label:S.n.replace(/&amp;/g,'&').split(' ')[0], value:i};
 }));
-LM.ui.seg(ctrls,{label:'Focus', index:0, options:socOpts, on:function(v){ socFilter=v; refresh(); }});
+LM.ui.seg(ctrls,{label:'Focus', index:0, options:socOpts,
+  plain:'Narrows the view to one part of the body. Side effects are filed by which organ system they affect.',
+  on:function(v){ socFilter=v; refresh(); }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Signals', id:'sig', accent:true},
-  {k:'Terms coded', id:'pts'},
-  {k:'Total events', id:'ev'},
-  {k:'Threshold', id:'th'},
-  {k:'Strongest RR', id:'rr'},
-  {k:'Events / patient', id:'rate'}
+  {k:'Signals', id:'sig', accent:true, plain:'How many side effects happen clearly more often on the drug than on the dummy pill. These are the ones that end up printed on the label.'},
+  {k:'Terms coded', id:'pts', plain:'How many distinct kinds of side effect were recorded. Everything gets filed under a standard worldwide dictionary so trials can be compared.'},
+  {k:'Total events', id:'ev', plain:'Every individual bad thing that happened to anyone, added up. Most of it is headaches and tiredness.'},
+  {k:'Threshold', id:'th', plain:'The current bar for calling something a real signal rather than coincidence.'},
+  {k:'Strongest RR', id:'rr', plain:'The worst offender. "5.6x" means it happens five and a half times as often on the drug as on the dummy pill.'},
+  {k:'Events / patient', id:'rate', plain:'On average, how many separate side effects each patient reported. More than one is completely normal.'}
 ]);
 
 var topEl=document.getElementById('top');
@@ -273,7 +280,11 @@ ctx.onFrame(function(dt,t){
       '<span class="m">'+e.socName.replace(/&amp;/g,'&')+(e.sig?' &middot; <b>SIGNAL</b>':'')+'</span>'+
       '<div style="margin-top:5px">Drug <b>'+(grade3?e.g3T:e.aT)+'</b>/'+N_TRT+' ('+LM.pct(e.incT,1)+')<br>'+
       'Placebo <b>'+(grade3?e.g3P:e.aP)+'</b>/'+N_PBO+' ('+LM.pct(e.incP,1)+')<br>'+
-      'RR '+e.rr.toFixed(2)+' &middot; p '+(e.p<0.0001?'<0.0001':e.p.toFixed(4))+'</div>');
+      'RR '+e.rr.toFixed(2)+' &middot; p '+(e.p<0.0001?'<0.0001':e.p.toFixed(4))+'</div>'+
+      LM.plainNote('"'+e.pt+'" happened to '+LM.pct(e.incT,1)+' of people on the drug and '+
+        LM.pct(e.incP,1)+' of people on the dummy pill — about '+e.rr.toFixed(1)+' times as often. '+
+        (e.sig ? 'That gap is too big to be luck, so this is a real side effect of the drug.'
+               : 'That gap is small enough to be coincidence, so it is probably not caused by the drug.')));
   } else LM.tip.hide();
 });
 })();

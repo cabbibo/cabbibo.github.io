@@ -162,33 +162,42 @@ ctx.add(new THREE.Points(LM.indexGeometry(PW,PH),pMat));
 var ctrls=document.getElementById('ctrls');
 var playing=true, utc=9.0, speed=1.0;
 var utcSlider=LM.ui.slider(ctrls,{label:'UTC hour', min:0, max:24, step:0.05, value:9,
+  plain:'The time in Greenwich, which the whole world measures itself against. Drag it to spin the day around the planet and see who is awake.',
   fmt:function(v){var h=Math.floor(v),m=Math.floor((v-h)*60);return String(h%24).padStart(2,'0')+':'+String(m).padStart(2,'0');},
   on:function(v){utc=v;}});
 LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
   {label:'Play',value:'p'},{label:'Pause',value:'s'}
-], on:function(v){playing=(v==='p');}});
+], plain:'Runs the clock forward automatically so you can watch daylight sweep around.',
+   on:function(v){playing=(v==='p');}});
 LM.ui.slider(ctrls,{label:'Clock speed', min:0.1, max:6, step:0.1, value:1.4,
+  plain:'How many hours of the day pass per second of real time.',
   fmt:function(v){return v.toFixed(1)+' h/s';}, on:function(v){speed=v;}});
 LM.ui.slider(ctrls,{label:'Data capture rate', min:0, max:3, step:0.05, value:1,
+  plain:'How busy the open hospitals are. Each rising dot is a piece of information about a patient being recorded and sent to the central database.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){gpu.uniforms.uRate.value=v;}});
 LM.ui.slider(ctrls,{label:'Working day start', min:5, max:10, step:0.5, value:8,
+  plain:'What time the clinics open locally. Shifting it changes how much of the planet is working at once — and how long the handover gaps are.',
   fmt:function(v){return v.toFixed(1)+':00';}, on:function(v){dayStart=v;}});
 var dayStart=8;
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Sites open', id:'open', accent:true},
-  {k:'In working hrs', id:'wh'},
-  {k:'Asleep', id:'sleep'},
-  {k:'Coverage', id:'cov'},
-  {k:'UTC', id:'utc'},
-  {k:'Busiest region', id:'reg'}
+  {k:'Sites open', id:'open', accent:true, plain:'How many hospitals are in their working day at this exact moment and could be seeing trial patients.'},
+  {k:'In working hrs', id:'wh', plain:'That same number as a share of all 84 hospitals. It never reaches 100% — the planet is too big.'},
+  {k:'Asleep', id:'sleep', plain:'Hospitals where it is the middle of the night. If something goes wrong with a patient here, nobody picks up until morning.'},
+  {k:'Coverage', id:'cov', plain:'The share of hospitals that are open or just opening/closing. This is the number that tells you whether a problem can be dealt with right now.'},
+  {k:'UTC', id:'utc', plain:'The current time in Greenwich. Every site’s local time is worked out from this.'},
+  {k:'Busiest region', id:'reg', plain:'Whichever part of the world has the most hospitals working at this moment. It changes as the day moves.'}
 ]);
 
 LM.ui.legend(document.getElementById('legend'),[
-  {color:'#d82591', label:'Open — working hours', sub:'Dosing, visits, data entry', round:true},
-  {color:'#ed9e2f', label:'Opening / closing', sub:'Shoulder hours', round:true},
-  {color:'#698cb5', label:'On call only', sub:'SAE reporting still live', round:true},
-  {color:'#d5dbe3', label:'Closed', sub:'Local night', round:true}
+  {color:'#d82591', label:'Open — working hours', sub:'Dosing, visits, data entry', round:true,
+   plain:'Normal clinic hours. Patients can be seen, given the drug, and have their results typed in.'},
+  {color:'#ed9e2f', label:'Opening / closing', sub:'Shoulder hours', round:true,
+   plain:'Early morning or evening. A few staff around, but you cannot start anything that needs a full team.'},
+  {color:'#698cb5', label:'On call only', sub:'SAE reporting still live', round:true,
+   plain:'The clinic is shut but someone is reachable by phone. If a patient is seriously harmed, that has to be reported within 24 hours no matter the hour.'},
+  {color:'#d5dbe3', label:'Closed', sub:'Local night', round:true,
+   plain:'The middle of the night locally. Nothing happens here until morning.'}
 ]);
 
 var handoff=document.getElementById('handoff');

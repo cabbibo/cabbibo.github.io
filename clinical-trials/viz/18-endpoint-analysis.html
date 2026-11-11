@@ -185,25 +185,29 @@ build();
 /* ---------- UI ---------- */
 var ctrls=document.getElementById('ctrls');
 LM.ui.slider(ctrls,{label:'True hazard ratio', min:0.4, max:1.2, step:0.01, value:0.68,
+  plain:'How well the drug really works — which in real life nobody knows. 0.68 means it cuts the risk by about a third. 1.00 means it does nothing. This is the cheat code: set the truth, then see whether the trial finds it.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){ trueHR=v; rerun(); }});
 LM.ui.slider(ctrls,{label:'Sample size', min:200, max:6000, step:50, value:2400,
+  plain:'How many patients are in the trial. Drag it down and watch every horizontal line stretch out — that widening is uncertainty, and it is what an underpowered trial buys you.',
   fmt:function(v){return LM.fmt(v)+' pts';}, on:function(v){ Ntot=v; rerun(); }});
 LM.ui.slider(ctrls,{label:'Event rate at analysis', min:0.15, max:0.95, step:0.01, value:0.62,
+  plain:'How many patients have had something happen by the time you stop and analyse. Survival trials run on events, not people — wait longer, get more events, get a sharper answer.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){ eventFrac=v; rerun(); }});
 LM.ui.seg(ctrls,{label:'Two-sided alpha', index:1, options:[
   {label:'0.01',value:0.01},{label:'0.05',value:0.05},{label:'0.10',value:0.10}
-], on:function(v){ alpha=v; rerun(); }});
+], plain:'How willing you are to be fooled by chance. 0.05 means you accept a 1-in-20 risk of calling a useless drug effective. It is a convention, not a law of nature.',
+   on:function(v){ alpha=v; rerun(); }});
 LM.ui.button(ctrls,{label:'Re-run the trial', solid:true, on:function(){
   seed = Math.floor(Math.random()*100000); rerun();
 }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Hazard ratio', id:'hr', accent:true},
-  {k:'95% CI', id:'ci'},
-  {k:'p value', id:'p'},
-  {k:'Events', id:'ev'},
-  {k:'Power', id:'pw'},
-  {k:'Verdict', id:'vd'}
+  {k:'Hazard ratio', id:'hr', accent:true, plain:'The answer. How much the drug cuts the risk at any moment. 0.64 means roughly a 36% reduction. Below 1 is good, above 1 means the drug made things worse.'},
+  {k:'95% CI', id:'ci', plain:'The range the true answer is probably in. If this range includes 1.00, you cannot rule out that the drug does nothing — and the trial has failed, whatever the headline number says.'},
+  {k:'p value', id:'p', plain:'The chance of seeing a result this good if the drug were useless. Small means the result is hard to explain away as luck.'},
+  {k:'Events', id:'ev', plain:'How many patients actually got worse. This, not the patient count, is what determines how sharp your answer is.'},
+  {k:'Power', id:'pw', plain:'Before running it: the chance this trial would detect the drug’s real effect if it has one. Below about 80% you are gambling with patients’ time.'},
+  {k:'Verdict', id:'vd', plain:'Whether the trial hit its target. MET means the drug can go to regulators; MISSED means years of work and a lot of money produce nothing.'}
 ]);
 
 var postEl=document.getElementById('post');
@@ -264,7 +268,11 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+r.S.n+'</span>'+
       '<span class="m">'+LM.fmt(r.n)+' patients &middot; '+LM.fmt(r.events)+' events</span>'+
       '<div style="margin-top:5px">HR <b>'+r.hr.toFixed(3)+'</b> (95% CI '+r.lo.toFixed(2)+'–'+r.hi.toFixed(2)+')<br>'+
-      'p = '+(r.p<0.0001?'<0.0001':r.p.toFixed(4))+(r.sig?' &middot; <b>significant</b>':'')+'</div>');
+      'p = '+(r.p<0.0001?'<0.0001':r.p.toFixed(4))+(r.sig?' &middot; <b>significant</b>':'')+'</div>'+
+      LM.plainNote(r.S.primary
+        ? 'This is the headline result for everyone in the trial. The diamond is the best estimate; the bar through it is how uncertain that estimate is.'
+        : 'This is one slice of the patients. Slices look exciting, but with '+(results.length-1)+
+          ' of them a couple will look significant by pure chance. Treat these as questions for the next trial, never as answers.'));
   } else LM.tip.hide();
 });
 })();

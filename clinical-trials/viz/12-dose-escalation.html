@@ -182,13 +182,17 @@ var ctrls=document.getElementById('ctrls');
 LM.ui.seg(ctrls,{label:'Design', index:0, options:[
   {label:'3 + 3', value:'3+3'},
   {label:'Accel. titration', value:'accel'}
-], on:function(v){ design=v; runSim(); refresh(); }});
+], plain:'Two ways of climbing. "3+3" always gives each dose to three people first. "Accelerated" gives the very low doses to just one person at a time, so you waste fewer patients on doses that were never going to do anything.',
+   on:function(v){ design=v; runSim(); refresh(); }});
 
 LM.ui.slider(ctrls,{label:'True MTD (toxicity ED50)', min:40, max:440, step:5, value:210,
+  plain:'The dose that is genuinely the right answer — which in real life nobody knows. This is the cheat code: set the truth, then see whether the 3+3 method actually finds it.',
   fmt:function(v){return Math.round(v)+' mg';}, on:function(v){ ed50=v; runSim(); refresh(); }});
 LM.ui.slider(ctrls,{label:'Dose-toxicity steepness', min:0.15, max:1.4, step:0.01, value:0.55,
+  plain:'How suddenly the drug turns harmful as you increase the dose. A steep drug is fine and then abruptly dangerous; a shallow one gets gradually worse, which is much harder to pin down.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){ slope=v; runSim(); refresh(); }});
 LM.ui.slider(ctrls,{label:'Dosing speed', min:0.2, max:8, step:0.1, value:1.6,
+  plain:'How fast the animation places each patient. In reality each group takes about a month, because you have to wait to see if anyone gets sick.',
   fmt:function(v){return v.toFixed(1)+'x';}, on:function(v){ speed=v; }});
 var speed=1.6;
 LM.ui.button(ctrls,{label:'Re-run with new randomness', solid:true, on:function(){
@@ -196,12 +200,12 @@ LM.ui.button(ctrls,{label:'Re-run with new randomness', solid:true, on:function(
 }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Declared MTD', id:'mtd', accent:true},
-  {k:'True MTD', id:'tmtd'},
-  {k:'Patients used', id:'np'},
-  {k:'DLTs', id:'ndlt'},
-  {k:'Levels tested', id:'nl'},
-  {k:'Est. duration', id:'dur'}
+  {k:'Declared MTD', id:'mtd', accent:true, plain:'The dose this trial decided was the highest safe one. Everything afterwards gets built on this single number.'},
+  {k:'True MTD', id:'tmtd', plain:'The dose that was actually correct. Press re-run a few times: the 3+3 lands on the wrong one surprisingly often, usually too low.'},
+  {k:'Patients used', id:'np', plain:'How many people had to be dosed to reach that answer. Every one of them is a very sick person who volunteered.'},
+  {k:'DLTs', id:'ndlt', plain:'"Dose-limiting toxicities" — how many people were harmed badly enough to stop their dose. This is the signal the whole method runs on.'},
+  {k:'Levels tested', id:'nl', plain:'How many rungs of the dose ladder were tried before stopping.'},
+  {k:'Est. duration', id:'dur', plain:'Roughly how many weeks this takes in reality, because you have to wait and watch each group before climbing.'}
 ]);
 
 var logEl=document.getElementById('log');
@@ -293,7 +297,11 @@ ctx.onFrame(function(dt,t){
       '<span class="t">Patient '+(hit[0].instanceId+1)+'</span>'+
       '<span class="m">Dose level '+(p.level+1)+' &middot; '+DOSES[p.level]+' mg</span>'+
       '<div style="margin-top:5px">'+(p.dlt?'<b>Dose-limiting toxicity</b>':'No DLT')+
-      '<br>True P(DLT) at this dose: '+(trueP(DOSES[p.level])*100).toFixed(0)+'%</div>');
+      '<br>True P(DLT) at this dose: '+(trueP(DOSES[p.level])*100).toFixed(0)+'%</div>'+
+      LM.plainNote('One person. They were given '+DOSES[p.level]+' mg and '+
+        (p.dlt ? 'were harmed badly enough that the trial had to take notice.'
+               : 'tolerated it, so the next group could try a higher dose.')+
+        ' At this dose about '+(trueP(DOSES[p.level])*100).toFixed(0)+' in 100 people would be harmed.'));
   } else LM.tip.hide();
 });
 })();

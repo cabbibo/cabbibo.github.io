@@ -54,11 +54,16 @@ sites.forEach(function(s,i){
 
 var W = {pool:0.30, perf:0.26, speed:0.18, qual:0.16, cost:0.10};
 var FACTORS = [
-  {k:'pool',  n:'Patient pool access',  c:LM.C.accent, why:'Treatment-naive patients within reach'},
-  {k:'perf',  n:'Past enrolment rate',  c:LM.C.teal,   why:'Patients per site per month, historical'},
-  {k:'speed', n:'Startup speed',        c:LM.C.amber,  why:'Days from selection to first patient'},
-  {k:'qual',  n:'Data quality / GCP',   c:LM.C.slate,  why:'Query rate, deviations, audit history'},
-  {k:'cost',  n:'Cost efficiency',      c:LM.C.violet, why:'Grant per patient vs. regional benchmark'}
+  {k:'pool',  n:'Patient pool access',  c:LM.C.accent, why:'Treatment-naive patients within reach',
+   eli5:'How many suitable patients this hospital can realistically reach. A big hospital in a country where this drug type is not yet common has the most untreated patients available.'},
+  {k:'perf',  n:'Past enrolment rate',  c:LM.C.teal,   why:'Patients per site per month, historical',
+   eli5:'How many patients this hospital actually signed up per month on previous trials. Past performance is the single best predictor of future performance.'},
+  {k:'speed', n:'Startup speed',        c:LM.C.amber,  why:'Days from selection to first patient',
+   eli5:'How quickly this hospital can get through the paperwork and start enrolling. Some take six weeks, some take nine months, and that gap costs real money.'},
+  {k:'qual',  n:'Data quality / GCP',   c:LM.C.slate,  why:'Query rate, deviations, audit history',
+   eli5:'How carefully this hospital does the work: do they fill forms in correctly, follow the protocol, survive inspections? Fast but sloppy sites can sink a trial.'},
+  {k:'cost',  n:'Cost efficiency',      c:LM.C.violet, why:'Grant per patient vs. regional benchmark',
+   eli5:'What this hospital charges per patient. A US site can cost twice what the same work costs elsewhere, which is why trials spread the way they do.'}
 ];
 var TOPN = 30;
 
@@ -115,11 +120,13 @@ FACTORS.forEach(function(F){
   LM.ui.slider(ctrls,{
     label:F.n, min:0, max:1, step:0.01, value:W[F.k],
     fmt:function(v){return (v*100).toFixed(0);},
+    plain:F.eli5+' This slider sets how much that matters compared to the others. Turn it up and the ranking re-sorts immediately.',
     on:function(v){ W[F.k]=v; selected=score(); refresh(); }
   });
 });
 LM.ui.slider(ctrls,{label:'Sites to select', min:5, max:84, step:1, value:30,
   fmt:function(v){return v+' sites';},
+  plain:'How many hospitals you are going to actually use. Fewer sites is cheaper and easier to manage, but takes longer to find enough patients.',
   on:function(v){ TOPN=v; selected=score(); refresh(); }});
 LM.ui.button(ctrls,{label:'Balanced default', on:function(){
   var def=[0.30,0.26,0.18,0.16,0.10];
@@ -128,12 +135,12 @@ LM.ui.button(ctrls,{label:'Balanced default', on:function(){
 }});
 
 var setStat = LM.ui.stats(document.getElementById('stats'),[
-  {k:'Selected', id:'sel', accent:true},
-  {k:'Countries', id:'ctry'},
-  {k:'Proj. rate', id:'rate'},
-  {k:'Months to 2,400', id:'mo'},
-  {k:'Mean quality', id:'q'},
-  {k:'Cost index', id:'cost'}
+  {k:'Selected', id:'sel', accent:true, plain:'How many hospitals you picked, out of the 84 you could have used.'},
+  {k:'Countries', id:'ctry', plain:'How many different countries those hospitals are in. More countries means more separate approval processes and more cost.'},
+  {k:'Proj. rate', id:'rate', plain:'How many patients per month you would expect this set of hospitals to sign up between them.'},
+  {k:'Months to 2,400', id:'mo', plain:'How long it would take to fill the trial at that rate. This is the number everyone in the company actually cares about.'},
+  {k:'Mean quality', id:'q', plain:'The average care-with-paperwork score of the hospitals you picked, out of 100. Picking only for speed drags this down.'},
+  {k:'Cost index', id:'cost', plain:'Roughly what this set of hospitals costs relative to the most expensive region. 1.00 would be an all-US trial.'}
 ]);
 
 var rankEl = document.getElementById('rank');
@@ -206,7 +213,10 @@ ctx.onFrame(function(dt,t){
       '<div style="margin-top:5px">Score <b>'+(e.v*100).toFixed(0)+'</b>'+
       '<br>Pool '+(s.f.pool*100).toFixed(0)+' &middot; Perf '+(s.f.perf*100).toFixed(0)+
       ' &middot; Speed '+(s.f.speed*100).toFixed(0)+
-      '<br>Quality '+(s.f.qual*100).toFixed(0)+' &middot; Cost '+(s.f.cost*100).toFixed(0)+'</div>');
+      '<br>Quality '+(s.f.qual*100).toFixed(0)+' &middot; Cost '+(s.f.cost*100).toFixed(0)+'</div>'+
+      LM.plainNote('This is one hospital. It came out '+(rank[i]+1)+'th best out of 84 under the weights you have set. '+
+        (rank[i] < TOPN ? 'It made the cut, so it would be used in this trial.'
+                        : 'It did not make the cut — change a weight on the right and it might.')));
   } else LM.tip.hide();
 });
 })();

@@ -252,19 +252,25 @@ ctx.add(new THREE.Points(LM.indexGeometry(NW,NH), nMat));
 /* ---------- UI ---------- */
 var ctrls=document.getElementById('ctrls');
 LM.ui.slider(ctrls,{label:'Repulsion', min:0, max:4, step:0.02, value:1.8,
+  plain:'How hard every dot pushes away from every other dot. More push spreads the ball out so you can see inside it.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){uRepel.value=v;}});
 LM.ui.slider(ctrls,{label:'Link strength', min:0, max:3, step:0.02, value:0.85,
+  plain:'How strongly connected things pull towards each other. Turn it up and real research clusters snap into tight clumps.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){uLink.value=v;}});
 LM.ui.slider(ctrls,{label:'Gravity', min:0, max:4, step:0.02, value:0.70,
+  plain:'A gentle pull towards the middle that stops the whole graph drifting off screen.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){uCentre.value=v;}});
 LM.ui.slider(ctrls,{label:'Damping', min:0.70, max:0.99, step:0.005, value:0.88,
+  plain:'How much friction there is. Low numbers settle quickly; high numbers let the graph keep jiggling and find a better arrangement.',
   fmt:function(v){return v.toFixed(3);}, on:function(v){uDamp.value=v;}});
 LM.ui.slider(ctrls,{label:'Edge visibility', min:0, max:0.5, step:0.005, value:0.12,
+  plain:'How visible the connecting lines are. Turn it down to see the clusters, up to see what is actually joined to what.',
   fmt:function(v){return v.toFixed(3);}, on:function(v){eMat.uniforms.uOpacity.value=v;}});
 LM.ui.seg(ctrls,{label:'Highlight entity type', index:0, options:
   [{label:'All', value:-1}].concat(TYPES.map(function(T,i){
     return {label:T.n.split(' ')[0].split('/')[0], value:i};
   })),
+  plain:'Lights up just one kind of thing and dims the rest. Useful for seeing where all the drugs sit, or which papers cluster around one gene.',
   on:function(v){ uFilter.value=v; }});
 LM.ui.button(ctrls,{label:'Re-seed layout', on:function(){ posGPU.reset(); velGPU.reset(); }});
 
@@ -273,16 +279,24 @@ nodes.forEach(function(n){ typeCounts[n.type]++; });
 var meanDeg = (edges.length*2/NN);
 
 LM.ui.stats(document.getElementById('stats'),[
-  {k:'Nodes', id:'n', v:LM.fmt(NN)},
-  {k:'Edges', id:'e', v:LM.fmt(edges.length), accent:true},
-  {k:'Mean degree', id:'d', v:meanDeg.toFixed(1)},
-  {k:'Density', id:'den', v:(edges.length/(NN*(NN-1)/2)*100).toFixed(2)+'%'},
-  {k:'Entity types', id:'t', v:TYPES.length},
-  {k:'Max degree', id:'md', v:Math.max.apply(null,nodes.map(function(n){return n.deg;}))}
+  {k:'Nodes', id:'n', v:LM.fmt(NN), plain:'How many separate things are in the graph — every paper, gene, drug, disease and trial is one dot.'},
+  {k:'Edges', id:'e', v:LM.fmt(edges.length), accent:true, plain:'How many connections between them. A connection means two things were found mentioned together.'},
+  {k:'Mean degree', id:'d', v:meanDeg.toFixed(1), plain:'How many connections the typical dot has. Most have very few; a handful have hundreds.'},
+  {k:'Density', id:'den', v:(edges.length/(NN*(NN-1)/2)*100).toFixed(2)+'%', plain:'What share of all possible connections actually exist. Real knowledge graphs are extremely sparse — under 1% is normal.'},
+  {k:'Entity types', id:'t', v:TYPES.length, plain:'How many different kinds of thing are mixed together here. Getting them all into one graph is the hard part, and it is called entity resolution.'},
+  {k:'Max degree', id:'md', v:Math.max.apply(null,nodes.map(function(n){return n.deg;})), plain:'The most connected thing in the whole graph. These hubs are usually the famous genes or drugs everyone writes about.'}
 ]);
 
+var TYPE_PLAIN = {
+  paper:'A published research paper. The bulk of any literature graph is just papers.',
+  protein:'A protein or gene — a specific piece of biology a drug might act on.',
+  drug:'A compound or medicine, either approved or still being tested.',
+  disease:'A condition being treated. Several different drugs and genes usually point at the same one.',
+  trial:'A registered clinical trial, with its own ID number. These tie the research back to actual patients.'
+};
 LM.ui.legend(document.getElementById('legend'), TYPES.map(function(T,i){
-  return {color:'#'+T.c.toString(16).padStart(6,'0'), label:T.n, sub:LM.fmt(typeCounts[i])+' nodes', round:true};
+  return {color:'#'+T.c.toString(16).padStart(6,'0'), label:T.n, sub:LM.fmt(typeCounts[i])+' nodes', round:true,
+          plain:TYPE_PLAIN[T.k]};
 }));
 
 var hubs = nodes.slice().sort(function(a,b){return b.deg-a.deg;}).slice(0,8);

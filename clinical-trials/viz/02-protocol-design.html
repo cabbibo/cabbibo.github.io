@@ -174,35 +174,51 @@ LM.ui.seg(ctrls, {label:'Highlight', index:0, options:[
   {label:'Invasive', value:'inv'},
   {label:'Imaging', value:'Imaging'},
   {label:'PRO', value:'PRO'}
-], on:function(v){ filterGroup = v; }});
+], plain:'Picks which kind of procedure to light up. "Invasive" means anything that breaks the skin — mostly needles. "PRO" means questionnaires the patient fills in themselves.',
+   on:function(v){ filterGroup = v; }});
 
 LM.ui.slider(ctrls, {label:'Burden scale', min:0.01, max:0.12, step:0.002, value:0.040,
+  plain:'Just stretches the blocks taller so you can see the differences more easily. It does not change how long anything actually takes.',
   fmt:function(v){return (v*1000).toFixed(0);}, on:function(v){ heightScale=v; }});
 
 var armIdx = 0;
 LM.ui.seg(ctrls, {label:'Study arm', index:0, options:[
   {label:'200 mg', value:0},{label:'100 mg', value:1},{label:'Placebo', value:2}
-], on:function(v){ armIdx = v; }});
+], plain:'Which group of patients you are looking at. Some groups get the real drug at different strengths, and one gets a dummy pill. They mostly go through the same schedule.',
+   on:function(v){ armIdx = v; }});
 
 LM.ui.slider(ctrls, {label:'Visit window (± days)', min:0, max:14, step:1, value:3,
+  plain:'How many days early or late a patient is allowed to turn up and still have it count. A tight window is better science but much harder on real people with jobs and families.',
   fmt:function(v){return '±'+v+'d';}, on:function(v){ windowDays=v; refresh(); }});
 var windowDays = 3;
 
-LM.ui.check(ctrls, {label:'Show decentralised swap', value:false, on:function(v){ dct=v; refresh(); }});
+LM.ui.check(ctrls, {label:'Show decentralised swap', value:false,
+  plain:'Tick this to move whatever can be done from home — questionnaires, basic vitals — out of the hospital. Watch the patient’s total hours drop.',
+  on:function(v){ dct=v; refresh(); }});
 var dct = false;
 
 var setStat = LM.ui.stats(document.getElementById('stats'), [
-  {k:'Visits', id:'v'},
-  {k:'Procedures', id:'p'},
-  {k:'Data points', id:'dp', accent:true},
-  {k:'Chair time', id:'hrs'},
-  {k:'Needle sticks', id:'ns'},
-  {k:'Est. dropout', id:'do'}
+  {k:'Visits', id:'v', plain:'How many separate times the patient has to physically come to the hospital over roughly a year and a half.'},
+  {k:'Procedures', id:'p', plain:'How many different kinds of test, scan, sample or questionnaire exist anywhere in this schedule.'},
+  {k:'Data points', id:'dp', accent:true, plain:'Roughly how many individual facts get recorded about one patient. Every one of these has to be typed in, checked and corrected by somebody.'},
+  {k:'Chair time', id:'hrs', plain:'Total hours this patient spends sitting in a clinic being measured. Not counting travel, parking or waiting — which are usually worse.'},
+  {k:'Needle sticks', id:'ns', plain:'How many times the patient gets stuck with a needle across the whole trial. This is the number patients themselves care about most.'},
+  {k:'Est. dropout', id:'do', plain:'An estimate of how many patients will quit before the end. The more you ask of people, the more of them leave — and a patient who leaves takes their data with them.'}
 ]);
 
+var GROUP_PLAIN = {
+  Admin:'Paperwork. Consent forms, checking the patient is eligible, assigning them to a group.',
+  Clinical:'A doctor or nurse physically examining the patient — blood pressure, heart trace, how well they are coping day to day.',
+  Lab:'Blood and urine sent away for testing, to check organs are coping with the drug.',
+  'PK/PD':'Blood taken at set times after a dose to see how fast the body absorbs and clears the drug, and whether it is hitting its target.',
+  Biomarker:'Samples — sometimes a piece of the tumour itself — taken to look at the biology, not just whether the patient feels better.',
+  Imaging:'Scans. CT and MRI, to measure whether a tumour is actually shrinking rather than relying on how the patient feels.',
+  PRO:'Questionnaires the patient fills in themselves about pain, tiredness and quality of life. The only measure that asks the patient directly.',
+  Safety:'Recording side effects, checking what other medicines they are taking, handing over the drug and counting what comes back.'
+};
 LM.ui.legend(document.getElementById('legend'),
   Object.keys(GROUPS).map(function(k){
-    return {color:'#'+GROUPS[k].c.toString(16).padStart(6,'0'), label:GROUPS[k].label};
+    return {color:'#'+GROUPS[k].c.toString(16).padStart(6,'0'), label:GROUPS[k].label, plain:GROUP_PLAIN[k]};
   })
 );
 
@@ -269,7 +285,10 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+c.proc.n+'</span>'+
       '<span class="m">'+GROUPS[c.proc.g].label+' &middot; '+c.visit.n+'</span>'+
       '<div style="margin-top:5px">Burden <b>'+Math.round(c.mEff)+' min</b>'+
-      (c.inv>0?' &middot; invasive':'')+'<br>Day '+c.visit.d+' &plusmn;'+windowDays+'</div>');
+      (c.inv>0?' &middot; invasive':'')+'<br>Day '+c.visit.d+' &plusmn;'+windowDays+'</div>'+
+      LM.plainNote('On this visit the patient spends about '+Math.round(c.mEff)+
+        ' minutes on this one thing'+(c.inv>0?', and it involves a needle':'')+
+        '. '+(GROUP_PLAIN[c.proc.g]||'')));
   } else LM.tip.hide();
 });
 })();

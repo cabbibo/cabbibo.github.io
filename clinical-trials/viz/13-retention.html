@@ -244,23 +244,27 @@ buildTicks();
 var ctrls=document.getElementById('ctrls');
 ARMS.forEach(function(A,i){
   LM.ui.slider(ctrls,{label:A.label+' median', min:3, max:30, step:0.5, value:A.median,
+    plain:'The typical time before this group’s disease gets worse. Half the patients last longer than this, half shorter. Drag the drug groups apart from placebo and watch the result become significant.',
     fmt:function(v){return v.toFixed(1)+' mo';},
     on:function(v){ A.median=v; rebuild(); }});
 });
 LM.ui.slider(ctrls,{label:'Annual dropout', min:0, max:0.5, step:0.01, value:0.10,
+  plain:'How many patients disappear each year — they move, lose interest, or get too unwell to attend. You never find out what happened to them, which is why dropout is so damaging.',
   fmt:function(v){return (v*100).toFixed(0)+'%';}, on:function(v){ dropout=v; rebuild(); }});
 LM.ui.slider(ctrls,{label:'Follow-up cap', min:6, max:36, step:1, value:30,
+  plain:'How long you keep watching before you stop and analyse. Stop too early and you have not seen enough events to tell the groups apart.',
   fmt:function(v){return v+' mo';}, on:function(v){ followUp=v; rebuild(); }});
 LM.ui.slider(ctrls,{label:'Sample size', min:0.15, max:2, step:0.05, value:1,
+  plain:'How many patients are in the trial. Drag it down and watch the lines get jagged and the result stop being convincing — that is what an underpowered trial looks like.',
   fmt:function(v){return Math.round(2400*v)+' pts';}, on:function(v){ nScale=v; rebuild(); }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Hazard ratio', id:'hr', accent:true},
-  {k:'Log-rank p', id:'p'},
-  {k:'Events', id:'ev'},
-  {k:'Median A', id:'ma'},
-  {k:'Median C', id:'mc'},
-  {k:'Censored', id:'cen'}
+  {k:'Hazard ratio', id:'hr', accent:true, plain:'How much the drug reduces the risk at any given moment. 0.56 means roughly a 44% lower chance of getting worse. 1.00 would mean the drug does nothing at all.'},
+  {k:'Log-rank p', id:'p', plain:'The chance you would see a gap this big purely by luck if the drug did nothing. Below 0.05 is the usual bar for calling it real.'},
+  {k:'Events', id:'ev', plain:'How many patients actually got worse. Counter-intuitively, survival trials are powered by events, not patients — no events means no answer.'},
+  {k:'Median A', id:'ma', plain:'The typical time before getting worse on the full-dose drug. "NR" means over half were still fine when the trial stopped, which is a good problem.'},
+  {k:'Median C', id:'mc', plain:'The same figure for the dummy pill. The gap between this and the drug is the entire value of the medicine.'},
+  {k:'Censored', id:'cen', plain:'The share of patients whose final outcome you never saw — they left, or the trial ended while they were still fine. The little ticks on the lines mark them.'}
 ]);
 
 var atRiskEl=document.getElementById('atrisk');

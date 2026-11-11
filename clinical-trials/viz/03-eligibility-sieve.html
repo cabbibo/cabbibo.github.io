@@ -37,14 +37,22 @@
 LM.chrome('03-eligibility-sieve');
 
 var CRIT = [
-  {n:'Age 18–75',                   p:0.82, c:LM.C.slate,  k:'INC', why:'Paediatric and very elderly excluded'},
-  {n:'ECOG performance 0–1',        p:0.71, c:LM.C.teal,   k:'INC', why:'Ambulatory, self-caring patients only'},
-  {n:'Measurable disease (RECIST 1.1)',  p:0.86, c:LM.C.green,  k:'INC', why:'Needs a lesion you can measure'},
-  {n:'Adequate organ function',          p:0.78, c:LM.C.amber,  k:'INC', why:'Renal, hepatic, haematologic thresholds'},
-  {n:'No prior anti-PD-1 / PD-L1',       p:0.55, c:LM.C.accent, k:'EXC', why:'The single biggest exclusion in oncology'},
-  {n:'No untreated CNS metastases',      p:0.83, c:LM.C.violet, k:'EXC', why:'Brain mets must be treated and stable'},
-  {n:'Washout ≥ 28 days',           p:0.74, c:LM.C.red,    k:'EXC', why:'Time since last therapy'},
-  {n:'Able to consent &amp; attend',     p:0.69, c:LM.C.muted,  k:'INC', why:'Travel, language, caregiver, comorbidity'}
+  {n:'Age 18–75',                   p:0.82, c:LM.C.slate,  k:'INC', why:'Paediatric and very elderly excluded',
+   eli5:'Children and the very old are usually kept out, because their bodies handle drugs differently and testing on them needs its own separate trial.'},
+  {n:'ECOG performance 0–1',        p:0.71, c:LM.C.teal,   k:'INC', why:'Ambulatory, self-caring patients only',
+   eli5:'A simple 0-to-5 score for how well someone is coping. 0 means living normally, 1 means tired but up and about. Sicker patients are excluded — which is awkward, because they are often the ones who most need a new option.'},
+  {n:'Measurable disease (RECIST 1.1)',  p:0.86, c:LM.C.green,  k:'INC', why:'Needs a lesion you can measure',
+   eli5:'There has to be a tumour big enough to measure on a scan. If you cannot measure it, you cannot prove it shrank.'},
+  {n:'Adequate organ function',          p:0.78, c:LM.C.amber,  k:'INC', why:'Renal, hepatic, haematologic thresholds',
+   eli5:'Blood tests have to show the kidneys, liver and bone marrow are working well enough to cope with a drug that may be hard on them.'},
+  {n:'No prior anti-PD-1 / PD-L1',       p:0.55, c:LM.C.accent, k:'EXC', why:'The single biggest exclusion in oncology',
+   eli5:'If the patient has already had this popular type of immune-system drug, they are out — you would not be able to tell whose effect you were seeing. This one rule alone removes nearly half of all candidates.'},
+  {n:'No untreated CNS metastases',      p:0.83, c:LM.C.violet, k:'EXC', why:'Brain mets must be treated and stable',
+   eli5:'If the cancer has spread to the brain and has not been treated yet, the patient is excluded, because their situation can change too fast to measure anything reliably.'},
+  {n:'Washout ≥ 28 days',           p:0.74, c:LM.C.red,    k:'EXC', why:'Time since last therapy',
+   eli5:'You have to wait about a month after the patient’s last treatment, so the old drug is out of their system and is not confused with the new one. Sick people often cannot afford to wait a month.'},
+  {n:'Able to consent &amp; attend',     p:0.69, c:LM.C.muted,  k:'INC', why:'Travel, language, caregiver, comorbidity',
+   eli5:'The patient has to understand what they are agreeing to and be able to physically get to the hospital, repeatedly, for a year or more. This quietly excludes the poor, the remote and people who do not speak the language.'}
 ];
 var NC = CRIT.length;
 var TOP = 7.0, SPACING = 1.65;
@@ -217,17 +225,23 @@ CRIT.forEach(function(C,i){
   LM.ui.slider(ctrls,{
     label:C.n.replace(/&amp;/g,'&'), min:0.05, max:1, step:0.005, value:C.p,
     fmt:function(v){return (v*100).toFixed(0)+'%';},
+    plain:C.eli5+' Drag this to loosen or tighten the rule and watch the eligible number move.',
     on:function(v){ C.p=v; uPass.value[i]=v; refresh(); }
   });
 });
 LM.ui.slider(ctrls,{label:'Flow speed',min:0.1,max:3,step:0.05,value:1,
+  plain:'Only changes how fast the animation plays. None of the numbers change.',
   fmt:function(v){return v.toFixed(2)+'x';},on:function(v){uSpeed.value=v;}});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Eligible', id:'elig', accent:true},
-  {k:'Screen failure', id:'sf'},
-  {k:'Pre-screen for 1', id:'per1'},
-  {k:'To randomise 2,400', id:'need'}
+  {k:'Eligible', id:'elig', accent:true,
+   plain:'Out of everyone with the right disease, this is the share who pass every single rule and are actually allowed to join.'},
+  {k:'Screen failure', id:'sf',
+   plain:'The share of people who are checked and then turned away. In cancer trials this is routinely over 80%, and each one still cost staff time to assess.'},
+  {k:'Pre-screen for 1',  id:'per1',
+   plain:'How many patients you have to find and check to get one person into the trial.'},
+  {k:'To randomise 2,400', id:'need',
+   plain:'How many people you would have to assess in total to fill this trial. Loosen one rule and watch this number collapse — that is the whole argument for simpler eligibility criteria.'}
 ]);
 
 var bars=document.getElementById('bars');

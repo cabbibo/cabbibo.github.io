@@ -212,34 +212,42 @@ ctx.add(new THREE.Points(LM.indexGeometry(PW,PH), pMat));
 /* ---------- UI ---------- */
 var ctrls=document.getElementById('ctrls');
 LM.ui.slider(ctrls,{label:'Shipment speed', min:0.1, max:4, step:0.05, value:1,
+  plain:'How fast the boxes travel. Faster delivery means less time for the cold packs to give up, so fewer shipments spoil.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){uSpeed.value=v;}});
 LM.ui.slider(ctrls,{label:'Excursion sensitivity', min:0, max:0.2, step:0.002, value:0.022,
+  plain:'How fragile the drug is once it drifts out of its safe temperature range. Some drugs tolerate a brief wobble; biological ones often do not.',
   fmt:function(v){return (v*100).toFixed(1)+'%';}, on:function(v){uExcursion.value=v;}});
 LM.ui.slider(ctrls,{label:'Ambient temperature', min:-10, max:40, step:1, value:9,
+  plain:'How hot or cold it is outside the box. Push it up to simulate shipping through a hot country in summer and watch the failures climb.',
   fmt:function(v){return v+'°C';}, on:function(v){gpu.uniforms.uAmb.value=v; ambient=v; }});
 var ambient=9;
 LM.ui.seg(ctrls,{label:'Packaging', index:1, options:[
   {label:'Passive', value:0},{label:'Phase-change', value:1},{label:'Active', value:2}
-], on:function(v){
+], plain:'How the box keeps cold. Passive is just insulation and ice packs — cheap and risky. Phase-change uses gels that hold a set temperature. Active is a powered fridge in a crate: expensive, nearly bulletproof.',
+   on:function(v){
   var mult=[2.6,1.0,0.3][v];
   var sl=ctrls.querySelectorAll('input[type=range]')[1];
   sl.value = LM.clamp(0.022*mult,0,0.2); sl.dispatchEvent(new Event('input'));
 }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Shipments', id:'ship', accent:true},
-  {k:'Excursions', id:'exc'},
-  {k:'Compliant', id:'ok'},
-  {k:'Depots', id:'dep'},
-  {k:'Mean temp', id:'temp'},
-  {k:'Lanes', id:'lane'}
+  {k:'Shipments', id:'ship', accent:true, plain:'Boxes of the drug currently in transit somewhere in the world, still good to use.'},
+  {k:'Excursions', id:'exc', plain:'The share of shipments that got too warm or too cold on the way. "Excursion" is the industry word for it. Those boxes cannot be given to patients.'},
+  {k:'Compliant', id:'ok', plain:'The share that stayed in the safe range the whole journey and can actually be used.'},
+  {k:'Depots', id:'dep', plain:'The five big regional warehouses that hold the drug and ship it out to hospitals.'},
+  {k:'Mean temp', id:'temp', plain:'The average temperature inside the boxes right now. It has to stay between 2 and 8 degrees — fridge temperature.'},
+  {k:'Lanes', id:'lane', plain:'How many distinct warehouse-to-hospital routes exist. Each one has to be validated separately before you can use it.'}
 ]);
 
 LM.ui.legend(document.getElementById('legend'),[
-  {color:'#3bb974', label:'In range 2&ndash;8°C', sub:'Nominal cold chain', round:true},
-  {color:'#00a9b1', label:'Below range', sub:'Freeze risk', round:true},
-  {color:'#ed9e2f', label:'Above range', sub:'Approaching excursion', round:true},
-  {color:'#e2503f', label:'Excursion — quarantined', sub:'Resupply required', round:true}
+  {color:'#3bb974', label:'In range 2&ndash;8°C', sub:'Nominal cold chain', round:true,
+   plain:'Fridge temperature. This is where the drug has to stay for the whole journey, from warehouse to patient.'},
+  {color:'#00a9b1', label:'Below range', sub:'Freeze risk', round:true,
+   plain:'Too cold. Freezing can destroy a biological drug just as surely as heat, and dry ice makes this a real risk.'},
+  {color:'#ed9e2f', label:'Above range', sub:'Approaching excursion', round:true,
+   plain:'Getting too warm. Not ruined yet, but the cold packs are losing the fight.'},
+  {color:'#e2503f', label:'Excursion — quarantined', sub:'Resupply required', round:true,
+   plain:'Ruined. The box is locked away, nobody can use it, and the hospital has to wait for a replacement — which may mean a patient misses a dose.'}
 ]);
 
 document.getElementById('depots').innerHTML =

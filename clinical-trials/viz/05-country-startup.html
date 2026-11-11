@@ -69,12 +69,18 @@ var COUNTRIES = [
 ];
 
 var ACTS = [
-  {k:'prep',  n:'Dossier preparation', c:LM.C.slate,  own:'Regulatory affairs'},
-  {k:'reg',   n:'Health authority review', c:LM.C.accent, own:'Competent authority'},
-  {k:'eth',   n:'Ethics / IRB approval', c:LM.C.violet, own:'IEC / IRB'},
-  {k:'ctr',   n:'Contract &amp; budget', c:LM.C.amber,  own:'Site + sponsor legal'},
-  {k:'imp',   n:'IMP release &amp; import', c:LM.C.teal, own:'Supply chain'},
-  {k:'siv',   n:'Site initiation visit', c:LM.C.green,  own:'CRA / monitoring'}
+  {k:'prep',  n:'Dossier preparation', c:LM.C.slate,  own:'Regulatory affairs',
+   eli5:'Writing the enormous application pack: what the drug is, what you did to it in the lab, exactly what you plan to do to patients, translated into the local language.'},
+  {k:'reg',   n:'Health authority review', c:LM.C.accent, own:'Competent authority',
+   eli5:'The country’s medicines regulator reads it all and decides whether you may give this drug to their citizens. This is the step that varies most between countries.'},
+  {k:'eth',   n:'Ethics / IRB approval', c:LM.C.violet, own:'IEC / IRB',
+   eli5:'A separate independent committee, including ordinary members of the public, checks that the trial is fair to patients and that the consent form is honest and understandable.'},
+  {k:'ctr',   n:'Contract &amp; budget', c:LM.C.amber,  own:'Site + sponsor legal',
+   eli5:'Lawyers agreeing who pays for what, who owns the results, and who is liable if a patient is harmed. Unglamorous, and routinely the thing that actually holds everything up.'},
+  {k:'imp',   n:'IMP release &amp; import', c:LM.C.teal, own:'Supply chain',
+   eli5:'Physically getting the drug into the country and through customs, with a qualified person certifying each batch is fit to give to humans.'},
+  {k:'siv',   n:'Site initiation visit', c:LM.C.green,  own:'CRA / monitoring',
+   eli5:'Someone from the sponsor visits the hospital and trains the staff on exactly how to run this specific trial. Until this happens, nobody can enrol.'}
 ];
 
 var LANE = 0.86, LANE_GAP = 0.40, DAY = 0.056;
@@ -198,31 +204,36 @@ ctx.add(sweep);
 var ctrls = document.getElementById('ctrls');
 var cursor = 0, playing = true;
 var cursorSlider = LM.ui.slider(ctrls,{label:'Day', min:0, max:maxDays, step:1, value:0,
+  plain:'Days since the project started. Drag it to move through the startup period and watch countries come online one by one.',
   fmt:function(v){return 'D'+Math.round(v);}, on:function(v){ cursor=v; }});
 LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
   {label:'Play',value:'p'},{label:'Pause',value:'s'},{label:'Restart',value:'r'}
-], on:function(v){
+], plain:'Plays time forward automatically. Pause to look at a particular moment.',
+   on:function(v){
   if(v==='p') playing=true; if(v==='s') playing=false;
   if(v==='r'){ cursor=0; cursorSlider.set(0); playing=true; }
 }});
-LM.ui.check(ctrls,{label:'Ethics in parallel with regulatory', value:true, on:function(v){
+LM.ui.check(ctrls,{label:'Ethics in parallel with regulatory', value:true,
+  plain:'Whether you submit to the ethics committee and the medicines regulator at the same time, or wait for one before starting the other. Doing them together is far faster — untick it and watch every country slide to the right.',
+  on:function(v){
   parallelEthics=v; rebuild();
 }});
 LM.ui.slider(ctrls,{label:'Process acceleration', min:0.4, max:1.4, step:0.02, value:1,
+  plain:'Pretend you got better at all of this — faster writing, faster lawyers, faster responses to questions. Shows what buying speed actually buys you.',
   fmt:function(v){return (1/v).toFixed(2)+'x faster';},
   on:function(v){ accel=v; rebuild(); }});
 
 var setStat = LM.ui.stats(document.getElementById('stats'),[
-  {k:'Median FPI', id:'med', accent:true},
-  {k:'Fastest', id:'fast'},
-  {k:'Slowest', id:'slow'},
-  {k:'Open today', id:'open'},
-  {k:'Sites live', id:'sl'},
-  {k:'Spread', id:'spread'}
+  {k:'Median FPI', id:'med', accent:true, plain:'"First patient in" — the day the first person is actually enrolled. The median is the typical country; half are faster, half slower.'},
+  {k:'Fastest', id:'fast', plain:'The quickest country to open. Usually Australia, which has an unusually streamlined process.'},
+  {k:'Slowest', id:'slow', plain:'The last country to open. Everyone waits on this one if you need its patients.'},
+  {k:'Open today', id:'open', plain:'How many countries are enrolling patients at the moment shown by the slider.'},
+  {k:'Sites live', id:'sl', plain:'How many individual hospitals are open right now across all those countries.'},
+  {k:'Spread', id:'spread', plain:'The gap in days between the first country opening and the last. A big spread means some countries sit idle for months while others race ahead.'}
 ]);
 
 LM.ui.legend(document.getElementById('legend'), ACTS.map(function(A){
-  return {color:'#'+A.c.toString(16).padStart(6,'0'), label:A.n.replace(/&amp;/g,'&'), sub:A.own};
+  return {color:'#'+A.c.toString(16).padStart(6,'0'), label:A.n.replace(/&amp;/g,'&'), sub:A.own, plain:A.eli5};
 }));
 
 function rebuild(){
@@ -303,7 +314,8 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+A.n.replace(/&amp;/g,'&')+'</span>'+
       '<span class="m">'+E.L.name+' &middot; '+A.own+'</span>'+
       '<div style="margin-top:5px">Day <b>'+Math.round(E.b.a)+'</b> &rarr; <b>'+Math.round(E.b.b)+'</b>'+
-      ' ('+Math.round(E.b.b-E.b.a)+'d)<br>Country FPI day '+Math.round(E.L.fpi)+' &middot; '+E.L.sites+' sites</div>');
+      ' ('+Math.round(E.b.b-E.b.a)+'d)<br>Country FPI day '+Math.round(E.L.fpi)+' &middot; '+E.L.sites+' sites</div>'+
+      LM.plainNote(A.eli5+' In '+E.L.name+' this step takes about '+Math.round(E.b.b-E.b.a)+' days.'));
   } else LM.tip.hide();
 });
 })();

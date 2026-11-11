@@ -257,11 +257,16 @@ ctx.add(dataPts);
 
 /* ---------- LAYERS registry ---------- */
 var LAYERS = [
-  {k:'enrol',  n:'Enrolment',     sub:'Column height = patients randomised', c:LM.C.accent, on:true},
-  {k:'risk',   n:'Site risk',     sub:'Pad colour = composite KRI score',     c:LM.C.red,    on:true},
-  {k:'day',    n:'Working day',   sub:'Terminator and local hours',           c:LM.C.ink,    on:true},
-  {k:'data',   n:'Data capture',  sub:'Items flowing site to database',       c:LM.C.accent, on:true},
-  {k:'supply', n:'Drug supply',   sub:'Depot to site shipments',              c:LM.C.teal,   on:true}
+  {k:'enrol',  n:'Enrolment',     sub:'Column height = patients randomised', c:LM.C.accent, on:true,
+   eli5:'The bars growing out of the planet. Each one is a hospital, and the taller it gets the more patients it has signed up.'},
+  {k:'risk',   n:'Site risk',     sub:'Pad colour = composite KRI score',     c:LM.C.red,    on:true,
+   eli5:'The coloured disc under each bar. Blue means the hospital is doing fine; red means it is making mistakes and someone should go and check on it.'},
+  {k:'day',    n:'Working day',   sub:'Terminator and local hours',           c:LM.C.ink,    on:true,
+   eli5:'The shadow of night falling across the planet. Hospitals in the dark are closed, so nothing is happening there right now.'},
+  {k:'data',   n:'Data capture',  sub:'Items flowing site to database',       c:LM.C.accent, on:true,
+   eli5:'The pink specks lifting off the surface. Each one is a measurement about a patient being recorded and sent to the central database.'},
+  {k:'supply', n:'Drug supply',   sub:'Depot to site shipments',              c:LM.C.teal,   on:true,
+   eli5:'The teal dots travelling along curves. Each is a box of the drug flying from one of five warehouses to a hospital that needs it.'}
 ];
 var L = {}; LAYERS.forEach(function(x){ L[x.k]=x.on; });
 
@@ -271,6 +276,7 @@ LAYERS.forEach(function(x){
   el.innerHTML = '<input type="checkbox"'+(x.on?' checked':'')+'>'+
     '<span class="sw" style="background:#'+x.c.toString(16).padStart(6,'0')+'"></span>'+
     '<span>'+x.n+'<span class="sub">'+x.sub+'</span></span>';
+  LM.ui.plain(el, x.eli5+' Untick to hide this layer and see the others more clearly.', x.n);
   el.querySelector('input').addEventListener('change', function(e){
     L[x.k]=e.target.checked; applyLayers();
   });
@@ -291,26 +297,30 @@ applyLayers();
 var ctrls = document.getElementById('ctrls');
 var month = 0, utc = 9, playing = true, monthSpeed = 1.0;
 var monthSlider = LM.ui.slider(ctrls,{label:'Study month', min:0, max:MONTHS-1, step:0.05, value:0,
+  plain:'The one clock everything on this page runs on. Drag it to move the whole trial — patients, daylight, shipments and risk — forwards and backwards together.',
   fmt:function(v){return 'M'+Math.round(v);}, on:function(v){ month=v; }});
 LM.ui.seg(ctrls,{label:'Playback', index:0, options:[
   {label:'Play',value:'p'},{label:'Pause',value:'s'},{label:'Restart',value:'r'}
-], on:function(v){
+], plain:'Runs two and a half years of trial forward automatically.',
+   on:function(v){
   if(v==='p')playing=true; if(v==='s')playing=false;
   if(v==='r'){month=0;monthSlider.set(0);playing=true;}
 }});
 LM.ui.slider(ctrls,{label:'Clock rate', min:0.1, max:4, step:0.05, value:1,
+  plain:'How fast time passes. Slow it down to watch a particular moment unfold.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){ monthSpeed=v; }});
 LM.ui.slider(ctrls,{label:'Column scale', min:0.3, max:3, step:0.05, value:1.1,
+  plain:'Makes the enrolment bars taller or shorter. Does not change any patient numbers.',
   fmt:function(v){return v.toFixed(2)+'x';}, on:function(v){ colScale=v; }});
 var colScale = 1.1;
 
 var setStat = LM.ui.stats(document.getElementById('stats'),[
-  {k:'Randomised', id:'enr', accent:true},
-  {k:'of target', id:'pct'},
-  {k:'Active sites', id:'act'},
-  {k:'Open now', id:'open'},
-  {k:'At-risk sites', id:'risk'},
-  {k:'Study month', id:'mo'}
+  {k:'Randomised', id:'enr', accent:true, plain:'How many real people have joined the trial and been given a treatment group, at this point in time.'},
+  {k:'of target', id:'pct', plain:'How far along you are towards the 2,400 patients the trial needs.'},
+  {k:'Active sites', id:'act', plain:'How many hospitals have enrolled at least one patient so far.'},
+  {k:'Open now', id:'open', plain:'How many of those hospitals are inside their working day at this exact hour. The rest are asleep.'},
+  {k:'At-risk sites', id:'risk', plain:'Hospitals whose quality scores have drifted far enough that someone should go and check on them. These are the red discs.'},
+  {k:'Study month', id:'mo', plain:'How many months in you are. M0 is the day the first hospital opened its doors.'}
 ]);
 
 var regionsEl = document.getElementById('regions');
@@ -401,7 +411,10 @@ ctx.onFrame(function(dt,t){
       '<br>Local time '+String(lh).padStart(2,'0')+':'+String(lm).padStart(2,'0')+
       ' &middot; '+(local>=8&&local<17.5?'<b>open</b>':'closed')+
       '<br>Risk score <b>'+s.risk.toFixed(2)+'</b> &middot; '+s.deviations+' deviations'+
-      '<br>Activated day '+s.activation+'</div>');
+      '<br>Activated day '+s.activation+'</div>'+
+      LM.plainNote('One hospital. It has '+e+' patients in the trial, it is currently '+
+        (local>=8&&local<17.5?'open and working':'closed for the night')+', and its quality score is '+
+        (s.risk>=0.42?'high enough that somebody should go and check on it.':'fine.')));
   } else LM.tip.hide();
 });
 })();

@@ -43,12 +43,18 @@ function mz(lat){ return -lat/180*MD*2; }
 
 /* ---------- KRIs ---------- */
 var KRI = [
-  {k:'enrol', n:'Enrolment anomaly',   c:LM.C.accent, w:0.22, why:'Rate far above or below plan'},
-  {k:'query', n:'Query rate',          c:LM.C.violet, w:0.18, why:'Queries per 100 data points'},
-  {k:'dev',   n:'Deviation rate',      c:LM.C.amber,  w:0.22, why:'Major protocol deviations'},
-  {k:'ae',    n:'AE under-reporting',  c:LM.C.red,    w:0.16, why:'Fewer AEs than peers — a red flag'},
-  {k:'lag',   n:'Data entry lag',      c:LM.C.teal,   w:0.12, why:'Days from visit to EDC'},
-  {k:'sf',    n:'Screen-failure outlier', c:LM.C.slate, w:0.10, why:'Eligibility applied inconsistently'}
+  {k:'enrol', n:'Enrolment anomaly',   c:LM.C.accent, w:0.22, why:'Rate far above or below plan',
+   eli5:'This hospital is signing people up much faster or much slower than everyone else. Too slow is a problem; suspiciously fast can mean they are bending the entry rules.'},
+  {k:'query', n:'Query rate',          c:LM.C.violet, w:0.18, why:'Queries per 100 data points',
+   eli5:'How often their paperwork comes back with questions. A high rate means they are rushing or do not understand the protocol.'},
+  {k:'dev',   n:'Deviation rate',      c:LM.C.amber,  w:0.22, why:'Major protocol deviations',
+   eli5:'How often they break the rulebook — wrong dose, missed test, visit outside its window.'},
+  {k:'ae',    n:'AE under-reporting',  c:LM.C.red,    w:0.16, why:'Fewer AEs than peers — a red flag',
+   eli5:'They are reporting fewer side effects than everyone else. That sounds good and is actually alarming: patients everywhere get side effects, so this site is probably not asking or not recording.'},
+  {k:'lag',   n:'Data entry lag',      c:LM.C.teal,   w:0.12, why:'Days from visit to EDC',
+   eli5:'How long they take to type up a visit. Long delays mean a safety problem could sit undiscovered for weeks.'},
+  {k:'sf',    n:'Screen-failure outlier', c:LM.C.slate, w:0.10, why:'Eligibility applied inconsistently',
+   eli5:'They accept or reject a very different share of candidates than other hospitals, which suggests they are reading the entry rules differently from everyone else.'}
 ];
 
 (function deriveKRIs(){
@@ -189,20 +195,23 @@ var ctrls=document.getElementById('ctrls');
 KRI.forEach(function(K){
   LM.ui.slider(ctrls,{label:K.n, min:0, max:0.5, step:0.01, value:K.w,
     fmt:function(v){return (v*100).toFixed(0);},
+    plain:K.eli5+' This slider sets how heavily that counts towards a hospital’s overall risk score. Change it and the landscape reshapes.',
     on:function(v){ K.w=v; rebuildField(); refresh(); }});
 });
 LM.ui.slider(ctrls,{label:'Monitoring threshold', min:0.1, max:0.7, step:0.005, value:0.40,
+  plain:'The height at which you decide a hospital needs a visit. It is drawn as the dark contour line on the terrain. This is really your travel budget, expressed as a number.',
   fmt:function(v){return v.toFixed(2);}, on:function(v){ uThresh.value=v; refresh(); }});
 LM.ui.slider(ctrls,{label:'Terrain exaggeration', min:1, max:10, step:0.1, value:4.2,
+  plain:'Stretches the hills vertically so differences are easier to see. It does not change any score.',
   fmt:function(v){return v.toFixed(1)+'x';}, on:function(v){ uAmp.value=v; }});
 
 var setStat=LM.ui.stats(document.getElementById('stats'),[
-  {k:'Sites flagged', id:'fl', accent:true},
-  {k:'On-site visits', id:'vis'},
-  {k:'Patients covered', id:'cov'},
-  {k:'Mean risk', id:'mean'},
-  {k:'Peak risk', id:'peak'},
-  {k:'Est. cost', id:'cost'}
+  {k:'Sites flagged', id:'fl', accent:true, plain:'How many hospitals are above your threshold and need someone to go and look.'},
+  {k:'On-site visits', id:'vis', plain:'How many physical visits that adds up to. Riskier sites need more than one.'},
+  {k:'Patients covered', id:'cov', plain:'The share of all patients in the trial who are at a hospital you are actually checking. This is the number that matters — you want to cover patients, not buildings.'},
+  {k:'Mean risk', id:'mean', plain:'The average risk score across all 84 hospitals, from 0 to 1.'},
+  {k:'Peak risk', id:'peak', plain:'The worst hospital’s score. The tallest hill on the map.'},
+  {k:'Est. cost', id:'cost', plain:'Roughly what all those visits cost in travel and staff time. Raise the threshold and watch this fall — along with your coverage.'}
 ]);
 
 var flagEl=document.getElementById('flag');
@@ -280,7 +289,11 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+s.name+'</span>'+
       '<span class="m">'+s.country+' &middot; '+s.id+(v>=uThresh.value?' &middot; <b>FLAGGED</b>':'')+'</span>'+
       '<div style="margin-top:5px">Composite risk <b>'+v.toFixed(2)+'</b><br>'+
-      KRI.map(function(K){return K.n.split(' ')[0]+' '+(s.kri[K.k]*100).toFixed(0);}).join(' &middot; ')+'</div>');
+      KRI.map(function(K){return K.n.split(' ')[0]+' '+(s.kri[K.k]*100).toFixed(0);}).join(' &middot; ')+'</div>'+
+      LM.plainNote('One hospital, scored 0 to 1 on how likely it is to be in trouble. '+
+        (v>=uThresh.value
+          ? 'It is above your line, so somebody should go and visit it.'
+          : 'It is below your line, so you would leave it alone and spend the money elsewhere.')));
   } else LM.tip.hide();
 });
 })();

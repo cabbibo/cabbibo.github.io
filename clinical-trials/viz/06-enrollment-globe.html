@@ -275,24 +275,28 @@ var ctrls = document.getElementById('ctrls');
 var playing = true, month = 0;
 var monthSlider = LM.ui.slider(ctrls, {
   label:'Study month', min:0, max:MONTHS-1, step:0.05, value:0,
+  plain:'How many months into the trial you are looking. Drag it to scrub backwards and forwards through two and a half years of enrolment.',
   fmt:function(v){ return 'M' + Math.round(v); },
   on:function(v){ month = v; }
 });
 LM.ui.seg(ctrls, { label:'Playback', index:0, options:[
   {label:'Play', value:'p'}, {label:'Pause', value:'s'}, {label:'Restart', value:'r'}
-], on:function(v){
+], plain:'Runs time forward automatically. Pause to stop and look at one moment.',
+   on:function(v){
   if (v==='p') playing = true;
   if (v==='s') playing = false;
   if (v==='r'){ month = 0; monthSlider.set(0); playing = true; }
 }});
 LM.ui.slider(ctrls, {
   label:'Column scale', min:0.3, max:3, step:0.05, value:1.15,
+  plain:'Just makes the bars taller or shorter so they are easier to compare. It does not change any patient numbers.',
   fmt:function(v){return v.toFixed(2)+'x';},
   on:function(v){ colScale = v; }
 });
 var colScale = 1.15;
 LM.ui.slider(ctrls, {
   label:'Enrolment flow', min:0, max:3, step:0.05, value:1.0,
+  plain:'How thick the stream of flying dots is. Each dot is one patient being enrolled and travelling to their hospital. Purely decorative — it does not change the counts.',
   fmt:function(v){return v.toFixed(2)+'x';},
   on:function(v){ gpu.uniforms.uSpeed.value = v; }
 });
@@ -301,22 +305,31 @@ var activeRegions = {NA:1,LATAM:1,EU:1,EMEA:1,APAC:1};
 var rbox = LM.ui.el('div','ctrl');
 rbox.appendChild(LM.ui.el('label',null,'<span>Regions</span>'));
 Object.keys(LM.REGIONS).forEach(function(k){
-  LM.ui.check(rbox, {label:LM.REGIONS[k].label, value:true, on:function(v){ activeRegions[k]=v?1:0; }});
+  LM.ui.check(rbox, {label:LM.REGIONS[k].label, value:true,
+    plain:'Untick to pretend this part of the world was never used. Watch how much slower the trial fills without it — that is why trials go global in the first place.',
+    on:function(v){ activeRegions[k]=v?1:0; }});
 });
 ctrls.appendChild(rbox);
 
 var setStat = LM.ui.stats(document.getElementById('stats'), [
-  {k:'Randomised', id:'enr', accent:true},
-  {k:'of target', id:'pct'},
-  {k:'Active sites', id:'act'},
-  {k:'Countries', id:'ctry'},
-  {k:'Study month', id:'mo'},
-  {k:'Run-in rate', id:'rate'}
+  {k:'Randomised', id:'enr', accent:true, plain:'How many real people have joined the trial and been assigned to a treatment group so far.'},
+  {k:'of target', id:'pct', plain:'How far along you are towards the 2,400 patients this trial needs. Below 100% at the end means the trial did not fully enrol.'},
+  {k:'Active sites', id:'act', plain:'How many hospitals have enrolled at least one patient. Sites open gradually over the first year or so.'},
+  {k:'Countries', id:'ctry', plain:'How many countries currently have at least one patient in the trial.'},
+  {k:'Study month', id:'mo', plain:'How many months in you are. M0 is the day the first hospital opened.'},
+  {k:'Run-in rate', id:'rate', plain:'How many patients joined in the last month. This is the number that tells you whether you will finish on time.'}
 ]);
 
+var REGION_PLAIN = {
+  NA:'The United States and Canada. Expensive, fast to start, but patients here have often already had the newest drugs, which disqualifies them.',
+  LATAM:'Latin America. Slower approvals, but large numbers of patients who have not yet had modern treatment, so they qualify more often.',
+  EU:'Europe. Reliable and high quality, but each country has its own approval process and they vary a lot in speed.',
+  EMEA:'The Middle East and Africa. Small numbers of sites here, and the most variable infrastructure.',
+  APAC:'Asia and the Pacific. The biggest pool of eligible patients in the world, which is why modern trials lean on it heavily.'
+};
 LM.ui.legend(document.getElementById('legend'),
   Object.keys(LM.REGIONS).map(function(k){
-    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true};
+    return {color:'#'+LM.REGIONS[k].color.toString(16).padStart(6,'0'), label:LM.REGIONS[k].label, round:true, plain:REGION_PLAIN[k]};
   })
 );
 
@@ -412,7 +425,10 @@ ctx.onFrame(function(dt,t){
       '<span class="t">'+s.name+'</span>'+
       '<span class="m">'+s.country+' · '+LM.REGIONS[s.region].label+' · site '+s.id+'</span>'+
       '<div style="margin-top:5px">Randomised <b>'+e+'</b> of '+s.target+'<br>'+
-      'Activated day <b>'+s.activation+'</b> · screen fail '+LM.pct(s.screenFail,0)+'</div>');
+      'Activated day <b>'+s.activation+'</b> · screen fail '+LM.pct(s.screenFail,0)+'</div>'+
+      LM.plainNote('One hospital. It has signed up '+e+' patients so far and is aiming for '+s.target+
+        '. It opened '+s.activation+' days after the trial began, and turns away about '+
+        LM.pct(s.screenFail,0)+' of the people it checks.'));
   } else LM.tip.hide();
 });
 })();

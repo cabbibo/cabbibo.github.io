@@ -169,6 +169,56 @@ button.btn.solid:hover{background:var(--accent-dk);border-color:var(--accent-dk)
 .nav a:hover{border-color:var(--accent);color:var(--accent);}
 .nav .idx{font-family:var(--mono);font-size:11px;color:var(--faint);padding:0 6px;}
 
+/* ---------- plain-English mode ---------- */
+.nav .plain-toggle{
+  display:flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 10px;
+  border:1px solid var(--line);background:rgba(255,255,255,.9);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-radius:var(--r-sm);color:var(--muted);
+  font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:.15s;
+  margin-right:4px;white-space:nowrap;
+}
+.nav .plain-toggle .pip{
+  width:8px;height:8px;border-radius:50%;flex:none;
+  background:var(--line);box-shadow:inset 0 0 0 1px rgba(13,22,31,.10);transition:.18s;
+}
+.nav .plain-toggle:hover{border-color:var(--accent);color:var(--accent);}
+.nav .plain-toggle.on{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 2px 10px -2px rgba(216,37,145,.5);
+}
+.nav .plain-toggle.on .pip{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.28);}
+
+/* when the mode is on, anything explainable advertises itself on hover */
+body.plain-on [data-plain]{cursor:help;}
+body.plain-on .panel [data-plain]{
+  border-radius:7px;transition:background .14s,box-shadow .14s;
+}
+body.plain-on .panel [data-plain]:hover{
+  background:rgba(216,37,145,.06);
+  box-shadow:0 0 0 4px rgba(216,37,145,.06);
+}
+body.plain-on .title-block:hover h1.viz{text-decoration:underline;text-decoration-color:rgba(216,37,145,.3);text-underline-offset:6px;}
+
+#ptip{
+  position:fixed;z-index:40;pointer-events:none;opacity:0;transition:opacity .12s;
+  max-width:306px;padding:11px 13px 12px;
+  background:#fff;border:1px solid var(--line);border-radius:11px;
+  box-shadow:var(--shadow-lg);
+}
+#ptip .pt{
+  display:block;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px;
+}
+#ptip .pb{font-size:12px;line-height:1.52;color:var(--ink);}
+#ptip .pb b{font-weight:600;}
+
+/* plain-English line appended inside a page's own 3D tooltip */
+#tip .tip-plain{
+  margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.14);
+  font-size:11px;line-height:1.45;color:rgba(255,255,255,.72);
+}
+
 /* ---------- tooltip ---------- */
 #tip{
   position:fixed;z-index:30;pointer-events:none;opacity:0;transition:opacity .12s;
