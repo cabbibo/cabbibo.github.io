@@ -19,20 +19,34 @@ const io = new IntersectionObserver((entries) => {
 }, { rootMargin: '600px 0px' });
 document.querySelectorAll('[data-boot]').forEach((el) => io.observe(el));
 
-// ---- nav + progress
+// ---- tabs: each themed section is its own page, addressed by #id
+const tabs = [...document.querySelectorAll('[data-tab]')];
+const tabLinks = [...document.querySelectorAll('[data-tablink]')];
 const nav = document.querySelector('.bar nav');
-const pairs = [...document.querySelectorAll('.bar nav a')]
-  .map((a) => ({ a, c: document.querySelector(a.getAttribute('href')) })).filter((p) => p.c);
 const prog = document.querySelector('.progress');
-let lastCur = -2;
+tabs.forEach((t, i) => { // a "next" link at the end of each tab
+  const n = tabs[i + 1]; if (!n) return;
+  t.insertAdjacentHTML('beforeend', `<div class="tab-next wrap"><a href="#${n.id}">Next: ${n.dataset.label} →</a></div>`);
+});
+function route() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  let tab = tabs.find((t) => t.id === id);
+  let inner = null;
+  if (!tab && id) { inner = document.getElementById(id); tab = inner && inner.closest('[data-tab]'); }
+  tabs.forEach((t) => { t.hidden = t !== tab; });
+  document.body.classList.toggle('in-tab', !!tab);
+  tabLinks.forEach((a) => a.classList.toggle('on', tab && a.dataset.tablink === tab.id));
+  const on = tabLinks.find((a) => a.classList.contains('on'));
+  if (on && nav) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
+  if (tab) {
+    document.title = `${tab.dataset.label} · Deadlock, Explained`;
+    requestAnimationFrame(() => (inner || document.body).scrollIntoView({ block: 'start' }));
+    if (!inner) scrollTo(0, 0);
+  } else document.title = 'Deadlock, Explained';
+}
+addEventListener('hashchange', route);
+route();
 function onScroll() {
-  let cur = -1;
-  pairs.forEach((p, i) => { if (p.c.getBoundingClientRect().top <= innerHeight * 0.35) cur = i; });
-  if (cur !== lastCur) {
-    lastCur = cur;
-    pairs.forEach((p, i) => p.a.classList.toggle('on', i === cur));
-    if (cur >= 0 && nav) { const a = pairs[cur].a; nav.scrollTo({ left: a.offsetLeft - nav.clientWidth / 2 + a.clientWidth / 2, behavior: 'smooth' }); }
-  }
   const max = document.documentElement.scrollHeight - innerHeight;
   if (prog) prog.style.width = `${(100 * scrollY) / Math.max(1, max)}%`;
 }

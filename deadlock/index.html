@@ -20,21 +20,13 @@
 <div class="bar wrap">
   <div class="bar-in">
     <a class="mark" href="#top">Dead<span>lock</span></a>
-    <nav aria-label="Chapters">
-      <a href="#people">People</a>
-      <a href="#game">I · The game</a>
-      <a href="#lanes">II · Lanes</a>
-      <a href="#souls">III · Souls</a>
-      <a href="#build">IV · Heroes</a>
-      <a href="#movement">V · Movement</a>
-      <a href="#match">VI · A match</a>
-      <a href="#together">VII · Together</a>
-      <a href="#compete">VIII · Competition</a>
-      <a href="#mods">IX · Mods &amp; movies</a>
-      <a href="#family">X · Family tree</a>
-      <a href="#valve">XI · Valve</a>
-      <a href="#city">XII · The city</a>
-      <a href="#words">Words</a>
+    <nav aria-label="Sections">
+      <a href="#mechanics" data-tablink="mechanics">Mechanics</a>
+      <a href="#team" data-tablink="team">Teamplay & competition</a>
+      <a href="#architecture" data-tablink="architecture">Architecture</a>
+      <a href="#mods" data-tablink="mods">Mods & movies</a>
+      <a href="#history" data-tablink="history">History</a>
+      <a href="#words" data-tablink="words">Words</a>
     </nav>
   </div>
   <div class="progress"></div>
@@ -48,89 +40,21 @@
   </div></div>
 </header>
 
-<main>
-<section class="chapter wrap" id="people">
-  <style>
-    #people .subs { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.4rem 1.2rem 1.1rem; background: linear-gradient(to top, rgba(11,13,16,0.92), transparent); pointer-events: none; text-align: center; }
-    #people .subs p { margin: 0.2rem auto; max-width: 40rem; font-size: clamp(1rem, 2.2vw, 1.35rem); line-height: 1.35; text-shadow: 0 2px 10px #000; }
-    #people .subs b { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.4em; font-weight: 700; }
-    #people .subs i { color: var(--dim); }
-    #people .subs.in p { animation: subin 0.6s ease both; }
-    #people .subs.in p:nth-child(2) { animation-delay: 1.1s; }
-    @keyframes subin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    @media (prefers-reduced-motion: reduce) { #people .subs.in p { animation: none; } }
-    #people .story { max-width: var(--wide); margin: 4.5rem auto 0; }
-    #people .story .kicker { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass); display: block; text-align: center; margin-bottom: 0.4rem; }
-    #people .story h3 { text-align: center; font-size: clamp(2rem, 6vw, 3.6rem); margin: 0 auto 1.4rem; max-width: 18ch; }
-    #people .story > p { max-width: 36rem; margin: 0 auto 1rem; text-align: center; color: var(--dim); }
-    #people [data-chart] svg { width: 100%; height: auto; display: block; }
-    #people [data-chart] { padding: 1rem 1rem 0.4rem; }
-    #people .cards { max-width: var(--wide); margin: 1.5rem auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-    #people .cards > div { background: var(--ink); padding: 1.2rem 1.2rem 1.3rem; min-width: 0; }
-    #people .cards svg { width: 100%; height: 110px; display: block; margin-bottom: 0.8rem; }
-    #people .cards h4 { font-family: var(--f-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.25rem; margin: 0 0 0.3rem; }
-    #people .cards p { margin: 0; font-size: 0.95rem; color: var(--dim); }
-    #people .bridge { text-align: center; margin: 5rem auto 0; max-width: 30ch; }
-  </style>
-
-  <div class="story" style="margin-top:0">
-    <span class="kicker">Before the rules</span>
-    <h3>A robot fighting for his mother</h3>
-    <p>In a New York junkyard, a widow named Shelly built herself a son out of scrap and named him after the jazz they played at night. Now she is sick. Bebop fights in Deadlock for money to pay for her medicine, and he hasn't told her.</p>
+<section class="tabindex wrap" id="home-index" aria-label="Choose a section">
+  <div class="in">
+    <a class="tabcard" href="#mechanics"><span class="eyebrow">Mechanics</span><span>How a match works: streets, soldiers, souls, heroes. And a robot fighting for his mother.</span></a>
+    <a class="tabcard" href="#team"><span class="eyebrow">Teamplay & competition</span><span>Playing together, from 1978 terminal rooms to a team that lost on purpose.</span></a>
+    <a class="tabcard" href="#architecture"><span class="eyebrow">Architecture</span><span>The Cursed Apple, and the real New York underneath it.</span></a>
+    <a class="tabcard" href="#mods"><span class="eyebrow">Mods & movies</span><span>Fans who rebuilt games, and made films out of them.</span></a>
+    <a class="tabcard" href="#history"><span class="eyebrow">History</span><span>Where Deadlock comes from, and how Valve works.</span></a>
   </div>
-
-  <figure class="plate" id="shelly" data-boot="people#shelly">
-    <div class="view"><div class="subs" data-sub aria-live="polite"></div></div>
-    <div class="controls"><div class="grp" data-who></div></div>
-    <figcaption class="cap"><span class="fig">Fig. 0.1 · Miss Shelly</span><span>Almost every hero has something to say to Bebop about her. Pick one. Quoted lines are the game's; italics are paraphrased.</span></figcaption>
-  </figure>
-
-  <div class="story">
-    <span class="kicker">May 2026 · a community final</span>
-    <h3>The team that lost on purpose</h3>
-    <p>Melee Creeps bought eggs that grow in value, then let the other team beat them for fifteen minutes. Losing charged the game's comeback prize. At minute fifteen they cracked the eggs, took the prize, and the other team walked out. Valve patched the trick that same day.</p>
-  </div>
-  <figure class="plate" id="gambit" data-boot="people#gambit">
-    <div data-chart></div>
-    <figcaption class="cap"><span class="fig">Fig. 0.2 · The urn gambit</span><span>The shape of the story, not real match data. Melee Creeps were signed by Cloud9 in November 2026.</span></figcaption>
-  </figure>
-
-  <div class="story">
-    <span class="kicker">October 2026 · a vote</span>
-    <h3>22,194 people who believed in a nurse</h3>
-    <p>Players voted on which new hero Valve would release next. Over 110 million votes later, Nurse Harrow came last. When she finally arrived, Valve's patch notes thanked the people who had voted only for her.</p>
-  </div>
-  <figure class="plate" id="votes" data-boot="people#votes">
-    <div class="view short"></div>
-    <div class="controls"><div class="grp" style="flex:1;min-width:14rem"><label for="zoom-r">Zoom</label><input id="zoom-r" type="range" min="0" max="1" step="0.001" value="0" style="flex:1;width:auto"></div><span class="lbl" data-zoomlab></span></div>
-    <figcaption class="cap"><span class="fig">Fig. 0.3 · Every vote is one tiny square</span><span>Areas to scale.</span></figcaption>
-  </figure>
-
-  <div class="cards">
-    <div>
-      <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="20" y="70" width="160" height="6" fill="var(--rule)"/><g fill="var(--amber)"><circle cx="60" cy="40" r="7"/><rect x="53" y="49" width="14" height="20" rx="5"/></g><g fill="var(--sapphire)"><circle cx="140" cy="40" r="7"/><rect x="133" y="49" width="14" height="20" rx="5"/></g><rect x="84" y="22" width="32" height="22" fill="none" stroke="var(--brass)"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">TORONTO · 3 AUG 2025</text></svg>
-      <h4>Deathy's first LAN</h4><p>A Montreal streamer who co-founded Death Slam, which ran Deadlock's first in-person tournament. Before Valve built any stage, players with day jobs built their own.</p>
-    </div>
-    <div>
-      <svg viewBox="0 0 200 110" aria-hidden="true"><path d="M60 80 L100 20 L140 80 Z" fill="none" stroke="var(--amber)" stroke-width="2"/><circle cx="90" cy="55" r="3" fill="var(--blood)"/><circle cx="108" cy="62" r="3" fill="var(--blood)"/><circle cx="100" cy="45" r="3" fill="var(--blood)"/><rect x="40" y="82" width="120" height="8" fill="var(--rule)"/><text x="100" y="104" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">PIZZA WATCH</text></svg>
-      <h4>Pizza at midnight</h4><p>Fans noticed pizza shops near Valve getting busy just before big updates. Valve played along: the night before one, a developer posted a table full of pizza.</p>
-    </div>
-    <div>
-      <svg viewBox="0 0 200 110" aria-hidden="true"><path d="M70 70 q30 -50 60 0" fill="none" stroke="var(--paper)" stroke-width="2"/><path d="M78 40 l8 -14 l8 10 l8 -12 l8 12 l8 -10 l8 14" fill="none" stroke="var(--brass)" stroke-width="2"/><circle cx="92" cy="58" r="2.5" fill="var(--paper)"/><circle cx="108" cy="58" r="2.5" fill="var(--paper)"/><path d="M130 70 q20 10 30 -6" fill="none" stroke="var(--paper)" stroke-width="2"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">FROM A FORUM DRAWING</text></svg>
-      <h4>The Rat King</h4><p>A fan posted a drawing of a rat-king hero on the official forums. It became a running joke, then a real hero, and players voted him in first.</p>
-    </div>
-    <div>
-      <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="40" y="20" width="120" height="58" fill="none" stroke="var(--rule)"/><g fill="var(--brass)"><circle cx="75" cy="62" r="5"/><rect x="70" y="68" width="10" height="16" rx="4"/><circle cx="100" cy="62" r="5"/><rect x="95" y="68" width="10" height="16" rx="4"/><circle cx="125" cy="62" r="5"/><rect x="120" y="68" width="10" height="16" rx="4"/></g><text x="100" y="102" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">BELLEVUE · 28 SEP 2026</text></svg>
-      <h4>Costumes at the door</h4><p>The night before a big update, fans dressed as their heroes performed outside Valve's office, joking that it would make the patch arrive faster.</p>
-    </div>
-  </div>
-
-  <p class="big-line bridge">Twelve people, two gods, one haunted city. <em>Here's how it works.</em></p>
 </section>
 
+<main>
+<div class="tab" id="mechanics" data-tab data-label="Mechanics" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">Mechanics</span><p>How a match works: streets, soldiers, souls, heroes. And a robot fighting for his mother.</p></div></div>
 <section class="chapter wrap" id="game">
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">I</div>
     <div class="eyebrow">The game in one breath</div>
     <h2>Two gods, two teams, three streets</h2>
   </div>
@@ -146,7 +70,7 @@
       <div class="grp"><label for="cam-r">Camera</label><input id="cam-r" type="range" min="0" max="1" step="0.001" value="0"></div>
       <div class="grp"><button data-cam="0" aria-pressed="true">Strategy view</button><button data-cam="1" aria-pressed="false">Shooter view</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 1.1 · Same street, two kinds of game</span><span data-camcap>From above, you point at the ground and your hero walks there. This is how Dota 2 and League of Legends are played.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Same street, two kinds of game</span><span data-camcap>From above, you point at the ground and your hero walks there. This is how Dota 2 and League of Legends are played.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -157,7 +81,6 @@
 
 <section class="chapter wrap" id="lanes">
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">II</div>
     <div class="eyebrow">The map</div>
     <h2>Three streets, three tugs of war</h2>
   </div>
@@ -178,7 +101,7 @@
       <div class="grp"><label for="spd">Speed</label><input id="spd" data-speed type="range" min="1" max="20" step="1" value="6"><span class="lbl" data-speedv>6×</span><button data-restart>Restart</button></div>
       <div class="grp"><span class="lbl">View</span><button data-cam="orbit">Orbit</button><button data-cam="top">Map</button><button data-cam="street">Street</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 2.1 · The Cursed Apple, running on the game's real tower rules</span><span data-log></span><span class="small">Drag to turn the city. Point at a tower to read it.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The Cursed Apple, running on the game's real tower rules</span><span data-log></span><span class="small">Drag to turn the city. Point at a tower to read it.</span></figcaption>
   </figure>
 
   <figure class="pic wide" data-pic="towers"><figcaption>Five layers of defense, broken one at a time. Towers shrug off damage unless your soldiers walk in with you.</figcaption></figure>
@@ -205,7 +128,6 @@
     #orbs .view { cursor: crosshair; }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">III</div>
     <div class="eyebrow">The economy</div>
     <h2>Souls: money you earn by shooting light</h2>
   </div>
@@ -220,7 +142,7 @@
       <div class="grp"><label for="foe-r">Enemy reflexes</label><input id="foe-r" data-foe type="range" min="0" max="1" step="0.01" value="0.55"></div>
       <div class="grp"><button data-slow aria-pressed="false">Slow motion</button><button data-reset>Reset score</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 3.1 · Confirm and deny</span><span>Click a green orb to confirm it, an orange orb to deny it. Clicking a blue trooper shoots it.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Confirm and deny</span><span>Click a green orb to confirm it, an orange orb to deny it. Clicking a blue trooper shoots it.</span></figcaption>
   </figure>
 
   <figure class="pic" data-pic="unlocks"><figcaption>Souls earned unlock your four abilities. Spending them in shops never takes the levels away.</figcaption></figure>
@@ -235,7 +157,7 @@
       <div class="grp"><label for="share">Heroes sharing a trooper's 100 souls</label><input id="share" type="range" min="1" max="6" step="1" value="2"></div>
       <div class="shareout" data-shareout></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 3.2 · The soul ledger</span><span>Ticks are Boons. Early thresholds are the game's; later ones are spaced for display.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The soul ledger</span><span>Ticks are Boons. Early thresholds are the game's; later ones are spaced for display.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -314,7 +236,6 @@
   </style>
 
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">IV</div>
     <div class="eyebrow">Who you play, and what you buy</div>
     <h2>Forty-four heroes, a shop, and a hundred ways to build</h2>
   </div>
@@ -344,7 +265,7 @@
       </div>
     </div>
     <div class="hgrid" data-grid></div>
-    <figcaption class="cap"><span class="fig">Fig. 4.1 · The cast</span><span data-count></span><span class="small">Tags are Valve's own. Descriptions are short summaries; for the original roster they are ours, from general knowledge of the game.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The cast</span><span data-count></span><span class="small">Tags are Valve's own. Descriptions are short summaries; for the original roster they are ours, from general knowledge of the game.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -390,13 +311,42 @@
         <button data-preset="gun">Gunslinger</button><button data-preset="tank">Unkillable</button><button data-preset="caster">Spellcaster</button><button data-preset="mix">Hybrid</button>
       </div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 4.2 · Same hero, three games</span><span class="small" data-msg>Pick an item from any column.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Same hero, three games</span><span class="small" data-msg>Pick an item from any column.</span></figcaption>
   </figure>
 
   <div class="prose">
     <p>Prices and slots are the game's. Most item names are stand-ins for whole tiers.</p>
     <p>A hidden bonus rewards committing to one color, so builds tend to pick a lane: gun, body, or magic.</p>
   </div>
+</section>
+
+<section class="storyset wrap" id="story-shelly">
+  <div class="story">
+    <span class="kicker">A story · Heroes</span>
+    <h3>A robot fighting for his mother</h3>
+    <p>In a New York junkyard, a widow named Shelly built herself a son out of scrap and named him after the jazz they played at night. Now she is sick. Bebop fights in Deadlock for money to pay for her medicine, and he hasn't told her.</p>
+  </div>
+
+  <figure class="plate" id="shelly" data-boot="people#shelly">
+    <div class="view"><div class="subs" data-sub aria-live="polite"></div></div>
+    <div class="controls"><div class="grp" data-who></div></div>
+    <figcaption class="cap"><span class="fig">Miss Shelly</span><span>Almost every hero has something to say to Bebop about her. Pick one. Quoted lines are the game's; italics are paraphrased.</span></figcaption>
+  </figure>
+
+</section>
+
+<section class="storyset wrap" id="story-votes">
+  <div class="story">
+    <span class="kicker">A story · October 2026</span>
+    <h3>22,194 people who believed in a nurse</h3>
+    <p>Players voted on which new hero Valve would release next. Over 110 million votes later, Nurse Harrow came last. When she finally arrived, Valve's patch notes thanked the people who had voted only for her.</p>
+  </div>
+  <figure class="plate" id="votes" data-boot="people#votes">
+    <div class="view short"></div>
+    <div class="controls"><div class="grp" style="flex:1;min-width:14rem"><label for="zoom-r">Zoom</label><input id="zoom-r" type="range" min="0" max="1" step="0.001" value="0" style="flex:1;width:auto"></div><span class="lbl" data-zoomlab></span></div>
+    <figcaption class="cap"><span class="fig">Every vote is one tiny square</span><span>Areas to scale.</span></figcaption>
+  </figure>
+
 </section>
 
 <section class="chapter wrap" id="movement">
@@ -416,7 +366,6 @@
     }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">V</div>
     <div class="eyebrow">Getting around</div>
     <h2>Movement: a city you can climb</h2>
   </div>
@@ -444,7 +393,7 @@
       </div>
       <div class="grp"><button data-demo aria-pressed="false">Watch a route</button><button data-mreset>Reset</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 5.1 · Rooftop route</span><span>Click the scene, then <span class="k">←</span> <span class="k">→</span> move, <span class="k">Space</span> jump, <span class="k">Shift</span> dash, <span class="k">C</span> slide. On a phone, use the buttons.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Rooftop route</span><span>Click the scene, then <span class="k">←</span> <span class="k">→</span> move, <span class="k">Space</span> jump, <span class="k">Shift</span> dash, <span class="k">C</span> slide. On a phone, use the buttons.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -463,7 +412,7 @@
       <div class="grp"><button data-zlane="0" aria-pressed="true">York</button><button data-zlane="1" aria-pressed="false">Broadway</button><button data-zlane="2" aria-pressed="false">Greenwich</button></div>
       <div class="grp"><button data-ride>Ride it</button><button data-boost aria-pressed="false">Speed boost +80%</button><button data-express aria-pressed="false">Enemy Base Guardians down</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 5.2 · Zipline reach</span><span data-zout></span><span class="small">Zipline speeds and the +80% boosts are the game's. The 360 m lane and 7 m/s running speed are our rough assumptions, and the ride plays four times faster than real time. We don't know whether the boost and the Express Line stack, so here they don't.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Zipline reach</span><span data-zout></span><span class="small">Zipline speeds and the +80% boosts are the game's. The 360 m lane and 7 m/s running speed are our rough assumptions, and the ride plays four times faster than real time. We don't know whether the boost and the Express Line stack, so here they don't.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -488,7 +437,6 @@
     @media (max-width: 640px) { #matchplate .view { aspect-ratio: 3 / 4; } }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">VI</div>
     <div class="eyebrow">Thirty-five minutes</div>
     <h2>A match, minute by minute</h2>
   </div>
@@ -505,7 +453,7 @@
       <div class="grp"><button data-play aria-pressed="false">Play the match</button><button data-jump="10">10:00</button><button data-jump="28">28:00</button><button data-jump="37">37:00</button></div>
     </div>
     <div class="mcard" data-card aria-live="polite"></div>
-    <figcaption class="cap"><span class="fig">Fig. 6.1 · The shape of a match</span><span>Red curve: a sketch of how tense a match feels, not measured data. The armor lines are the game's real numbers.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The shape of a match</span><span>Red curve: a sketch of how tense a match feels, not measured data. The armor lines are the game's real numbers.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -516,6 +464,9 @@
   </div>
 </section>
 
+</div>
+<div class="tab" id="team" data-tab data-label="Teamplay & competition" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">Teamplay & competition</span><p>Playing together, from 1978 terminal rooms to a team that lost on purpose.</p></div></div>
 <section class="chapter wrap" id="together">
   <style>
     #rooms .view { cursor: grab; }
@@ -535,7 +486,6 @@
     .talk-strip { max-width: 50rem; margin: 2.4rem auto 0.6rem; }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">VII</div>
     <div class="eyebrow">Playing together</div>
     <h2>Fifty years of finding each other</h2>
   </div>
@@ -552,7 +502,7 @@
       </div>
     </div>
     <div class="era" data-era aria-live="polite"></div>
-    <figcaption class="cap"><span class="fig">Fig. 7.1 · Rooms where people met</span><span class="small">Swipe or use the arrows to walk through time.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Rooms where people met</span><span class="small">Swipe or use the arrows to walk through time.</span></figcaption>
   </figure>
 
   <div class="talk-strip" data-boot="together#talk"><div data-talk></div></div>
@@ -568,7 +518,7 @@
     <div class="view"></div>
     <div class="cap tipline"><span data-tip class="small">Hover or tap a dot. Filled = one match, ring = one server's world, dashed = one event split into small groups.</span></div>
     <details><summary>Show as a table</summary><div class="tbl-wrap" data-table></div></details>
-    <figcaption class="cap"><span class="fig">Fig. 7.2 · How many people share one game</span><span class="small">Log scale: each line is ten times the one below.</span></figcaption>
+    <figcaption class="cap"><span class="fig">How many people share one game</span><span class="small">Log scale: each line is ten times the one below.</span></figcaption>
   </figure>
 
   <p class="big-line">You couldn't buy Deadlock. <em>A friend had to let you in.</em></p>
@@ -579,7 +529,7 @@
       <div class="grp"><button data-seed>Send one invite</button><button data-reset>Clear</button></div>
       <span class="small">Bright dots are streamers: they reach strangers far away.</span>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 7.3 · Friend of a friend of a friend</span><span class="small">An illustration, not real data. The two peaks are Steam's reported records for Deadlock.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Friend of a friend of a friend</span><span class="small">An illustration, not real data. The two peaks are Steam's reported records for Deadlock.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -624,7 +574,6 @@
     }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">VIII</div>
     <div class="eyebrow">Teams, trophies, heartbreak</div>
     <h2>Competition</h2>
   </div>
@@ -636,7 +585,7 @@
     <div class="controls">
       <div class="grp"><button data-arena="ti1" aria-pressed="false">2011</button><button data-arena="ti26" aria-pressed="true">2026</button><button data-arena="dl" aria-pressed="false">Deadlock today</button></div>
     </div>
-    <figcaption class="cap modecap"><span class="fig">Fig. 8.1 · The stage</span><b data-mode-label></b><span data-mode-cap></span></figcaption>
+    <figcaption class="cap modecap"><span class="fig">The stage</span><b data-mode-label></b><span data-mode-cap></span></figcaption>
   </figure>
 
   <div class="prose">
@@ -646,7 +595,7 @@
   <figure class="plate" id="aegisplate" data-boot="compete#aegis">
     <div data-aegis aria-label="Prize pool chart. Use left and right arrow keys to step through years."></div>
     <div class="storycard" data-aegis-card aria-live="polite"></div>
-    <figcaption class="cap"><span class="fig">Fig. 8.2 · The Aegis, year by year</span><span>Prize pool, in millions of dollars. Hover a year for its story. The thin blue sliver on the right is every Deadlock tournament ever, combined.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The Aegis, year by year</span><span>Prize pool, in millions of dollars. Hover a year for its story. The thin blue sliver on the right is every Deadlock tournament ever, combined.</span></figcaption>
   </figure>
 
   <p class="big-line">Then, in 2023, <em>Valve stopped the fan funding</em>. The pool fell from tens of millions to about three.</p>
@@ -662,7 +611,7 @@
       <div class="grp"><button data-prev aria-label="Previous">← Back</button><button data-next aria-label="Next">Next →</button><span class="lbl" data-count></span></div>
     </div>
     <div class="storycard" data-step></div>
-    <figcaption class="cap"><span class="fig">Fig. 8.3 · OG, 2015–2019</span><span>Every team change here happened. Click through.</span></figcaption>
+    <figcaption class="cap"><span class="fig">OG, 2015–2019</span><span>Every team change here happened. Click through.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -679,6 +628,195 @@
   </ul>
 </section>
 
+<section class="storyset wrap" id="story-gambit">
+  <div class="story">
+    <span class="kicker">A story · May 2026 community final</span>
+    <h3>The team that lost on purpose</h3>
+    <p>Melee Creeps bought eggs that grow in value, then let the other team beat them for fifteen minutes. Losing charged the game's comeback prize. At minute fifteen they cracked the eggs, took the prize, and the other team walked out. Valve patched the trick that same day.</p>
+  </div>
+  <figure class="plate" id="gambit" data-boot="people#gambit">
+    <div data-chart></div>
+    <figcaption class="cap"><span class="fig">The urn gambit</span><span>The shape of the story, not real match data. Melee Creeps were signed by Cloud9 in November 2026.</span></figcaption>
+  </figure>
+
+</section>
+
+<section class="storyset wrap"><div class="cards">
+    <div>
+      <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="20" y="70" width="160" height="6" fill="var(--rule)"/><g fill="var(--amber)"><circle cx="60" cy="40" r="7"/><rect x="53" y="49" width="14" height="20" rx="5"/></g><g fill="var(--sapphire)"><circle cx="140" cy="40" r="7"/><rect x="133" y="49" width="14" height="20" rx="5"/></g><rect x="84" y="22" width="32" height="22" fill="none" stroke="var(--brass)"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">TORONTO · 3 AUG 2025</text></svg>
+      <h4>Deathy's first LAN</h4><p>A Montreal streamer who co-founded Death Slam, which ran Deadlock's first in-person tournament. Before Valve built any stage, players with day jobs built their own.</p>
+    </div>
+</div></section>
+</div>
+<div class="tab" id="architecture" data-tab data-label="Architecture" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">Architecture</span><p>The Cursed Apple, and the real New York underneath it.</p></div></div>
+<style>
+  #city .skycard {
+    position: absolute; right: 12px; top: 12px; width: min(19rem, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto;
+    background: color-mix(in srgb, var(--ink) 92%, transparent); border: 1px solid var(--brass-2); padding: 0.85rem 1rem 0.9rem;
+    font-size: 0.92rem; line-height: 1.45; color: var(--paper); z-index: 2;
+  }
+  #city .skycard h4 { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.04em; font-size: 1.35rem; margin: 0.15rem 0 0.1rem; line-height: 1; }
+  #city .skycard .by { font-family: var(--f-mono); font-size: 0.72rem; color: var(--dim); margin: 0 0 0.6rem; letter-spacing: 0.04em; }
+  #city .skycard p { margin: 0 0 0.55rem; }
+  #city .skycard .dl { color: var(--dim); border-top: 1px solid var(--rule); padding-top: 0.5rem; margin: 0; }
+  #city .skycard .dl b { color: var(--soul); font-family: var(--f-mono); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; display: block; }
+  #city .skycard .close { position: absolute; right: 6px; top: 6px; padding: 0.15rem 0.45rem; }
+  #city .hud .big { color: var(--brass); }
+  #city .hud.bl { max-width: min(28rem, calc(100% - 24px)); line-height: 1.4; text-shadow: 0 1px 6px var(--ink); }
+  #city .note .src { color: var(--brass); }
+  #city .note .inf { color: var(--soul); }
+  #city .note-row + .note-row { border-top: 0; }
+  #city .legend-key { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; max-width: var(--wide); margin: 0 auto 0.8rem; font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+</style>
+
+<section class="chapter wrap" id="city">
+  <div class="chap-head">
+    <span class="eyebrow">The setting</span>
+    <h2>The Cursed Apple</h2>
+  </div>
+
+  <div class="prose">
+    <p class="lede">Every match happens in one city: the <strong>Cursed Apple</strong>. New York, with a hex on it.</p>
+    
+    <p>The towers are 1899 to 1932, the clothes look 1930s, the neon looks 1950s. It's a collage of decades, all of them haunted.</p>
+  </div>
+
+  <h3 class="prose">From a street grid to three lanes</h3>
+  <div class="prose">
+    <p><a href="https://en.wikipedia.org/wiki/Commissioners%27_Plan_of_1811">1811</a>: planners laid a grid over Manhattan. <a href="https://en.wikipedia.org/wiki/Broadway_(Manhattan)">Broadway</a> was older and ran diagonally through it anyway.</p>
+    
+    <p>Deadlock needed three long roads between two homes. It borrowed three real street names: York, Broadway, Greenwich.</p>
+  </div>
+
+  <figure class="plate" data-boot="nyc#gridToLanes">
+    <div class="view"></div>
+    <div class="controls">
+      <div class="grp">
+        <button data-stage="0" aria-pressed="true">1811 plan</button>
+        <button data-stage="1" aria-pressed="false">The city grows</button>
+        <button data-stage="2" aria-pressed="false">The Cursed Apple</button>
+      </div>
+      <div class="grp"><label for="era-range">Morph</label><input id="era-range" data-era type="range" min="0" max="2" step="0.01" value="0"><span class="lbl" data-era-label>The 1811 plan</span></div>
+      <div class="grp"><button data-ghost aria-pressed="false">Show the lost fourth lane</button></div>
+    </div>
+    <figcaption><span class="fig">Grid to lanes</span><span>Drag to turn the island. Watch Broadway straighten into the middle lane, and the troopers start to march.</span></figcaption>
+  </figure>
+
+  <div class="prose">
+    
+  </div>
+
+  <h3 class="prose">Why the towers are shaped like wedding cakes</h3>
+  <div class="prose">
+    <p>Those stepped towers aren't a style. They're a law: New York's <a href="https://en.wikipedia.org/wiki/1916_Zoning_Resolution">1916 zoning rule</a>, written so streets would still get sunlight.</p>
+    
+    <p><a href="https://en.wikipedia.org/wiki/Hugh_Ferriss">Hugh Ferriss</a> drew what the law allowed, in four famous charcoal stages. His dark drawings are the ancestor of every noir New York, this one included.</p>
+  </div>
+
+  <figure class="plate" data-boot="nyc#setback">
+    <div class="view"><div class="hud bl" data-readout></div></div>
+    <div class="controls">
+      <div class="grp">
+        <button data-ferriss="0" aria-pressed="true">1 · Envelope</button>
+        <button data-ferriss="1" aria-pressed="false">2 · Carved</button>
+        <button data-ferriss="2" aria-pressed="false">3 · Stepped</button>
+        <button data-ferriss="3" aria-pressed="false">4 · Finished</button>
+      </div>
+      <div class="grp"><span class="lbl">District</span>
+        <button data-k="1" aria-pressed="false">1×</button>
+        <button data-k="1.5" aria-pressed="false">1.5×</button>
+        <button data-k="2" aria-pressed="true">2×</button>
+        <button data-k="2.5" aria-pressed="false">2.5×</button>
+      </div>
+      <div class="grp"><button data-planes aria-pressed="true">Slanted limits</button><button data-occult aria-pressed="false">Curse it</button></div>
+    </div>
+    <figcaption><span class="fig">The 1916 envelope</span><span>One Manhattan block, 400 by 200 feet. The district number multiplies the street width to set the height of the street wall.</span></figcaption>
+  </figure>
+
+  <div class="prose">
+    
+  </div>
+
+  <h3 class="prose">The skyline is a real race</h3>
+  <div class="prose">
+    <p>In 2024 a player named <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">silvershroud</a> matched 30 of Deadlock's skyline buildings to real ones, photo beside screenshot. It is one of the best things the community has made.</p>
+    <p>In date order, they replay the race for the tallest building in the world.</p>
+  </div>
+
+  <figure class="plate" data-boot="nyc#skyline">
+    <div class="view short">
+      <div class="hud tl"><div class="big" data-year>1895</div></div>
+      <div class="hud bl" data-event></div>
+      <div class="skycard" data-card hidden></div>
+    </div>
+    <div class="controls">
+      <div class="grp"><button data-play aria-pressed="false">Play the years</button></div>
+      <div class="grp"><label for="yr-range">Year</label><input id="yr-range" data-yr type="range" min="1895" max="1970" step="0.1" value="1895" style="width:16rem"></div>
+    </div>
+    <figcaption><span class="fig">The height race</span><span>Click a tower to see the real building and where it shows up in Deadlock. Heights to scale.</span></figcaption>
+  </figure>
+
+  <h3 class="prose">Trains in the sky</h3>
+  <div class="prose">
+    <p>From 1868 to the 1950s, New Yorkers rode <a href="https://en.wikipedia.org/wiki/Elevated_railways_in_Manhattan">trains above the avenues</a>. In Deadlock, heroes still do.</p>
+  </div>
+
+  <figure class="plate" data-boot="nyc#elZipline">
+    <div class="view short"></div>
+    <div class="controls">
+      <div class="grp"><button data-zip="0" aria-pressed="true">The El</button><button data-zip="1" aria-pressed="false">The zip-line</button></div>
+      <span class="small" data-zipcap></span>
+    </div>
+    <figcaption><span class="fig">Above the avenue</span><span>Move your pointer to look around the street.</span></figcaption>
+  </figure>
+
+  <h3 class="prose">A field guide to the parallels</h3>
+  <div class="prose">
+    <p>Filled diamonds are documented by players and writers. Hollow ones are our reading.</p>
+  </div>
+  <div class="legend-key"><span class="src">◆ Documented: a source says so</span><span class="inf">◇ Our reading: a reasonable guess</span></div>
+
+  <div class="note-row">
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Baroness Hotel</h4><p>Modelled on the <a href="https://en.wikipedia.org/wiki/Plaza_Hotel">Plaza Hotel</a> (1907, <a href="https://en.wikipedia.org/wiki/Henry_Janeway_Hardenbergh">Henry J. Hardenbergh</a>) and its green mansard roof. The name belongs to a real hotel in Seattle, about eleven miles from Valve's office.</p><p class="src-links"><a href="https://tracklock.gg/articles/deadlock-real-baroness-hotel">Tracklock ↗</a><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">Steam guide ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The New York Oracle</h4><p>The in-game newspaper building echoes the <a href="https://en.wikipedia.org/wiki/One_Times_Square">Times Tower</a> on <a href="https://en.wikipedia.org/wiki/Times_Square">Times Square</a> (1904). The masthead even mimics the <em>Times</em> lettering. Prophecy replaces the news.</p><p class="src-links"><a href="https://deadlock.wiki/The_New_York_Oracle">Deadlock Wiki ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Plaza District</h4><p>A sunken plaza, a skating rink in the voice lines, and an Atlas holding a glowing sphere: <a href="https://en.wikipedia.org/wiki/Rockefeller_Center">Rockefeller Center</a> (1930s), with its <a href="https://en.wikipedia.org/wiki/Atlas_(statue)"><em>Atlas</em> statue</a> (1937), turned demonic.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The bull</h4><p>A bull statue stands near the game's stock exchange. The real <a href="https://en.wikipedia.org/wiki/Charging_Bull"><em>Charging Bull</em></a> arrived in 1989, decades after this city's era. A cheeky anachronism.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
+  </div>
+  <div class="note-row">
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Liberty, twice</h4><p>The <a href="https://en.wikipedia.org/wiki/Statue_of_Liberty">Statue of Liberty</a> stands in the harbour behind the York lane's docks. The Archmother's cracked mask borrows Liberty's face.</p><p class="src-links"><a href="https://deadlock.wiki/The_Archmother">The Archmother ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>"SCBS"</h4><p>A club at the downtown end of Broadway nods to <a href="https://en.wikipedia.org/wiki/CBGB">CBGB</a> on the <a href="https://en.wikipedia.org/wiki/Bowery">Bowery</a> (1973–2006), the birthplace of New York punk.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Under Broadway</h4><p>The mid-map boss lives in a sewer below the Broadway lane. The tiled tunnels borrow from the first subway's <a href="https://en.wikipedia.org/wiki/Times_Square%E2%80%9342nd_Street_station">Times Square station</a> (1904).</p><p class="src-links"><a href="https://deadlock.wiki/Mid_Boss">Mid Boss ↗</a><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">Steam guide ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>A troll from Seattle</h4><p>A troll statue sits under a tree in the green lane. That one is Seattle's <a href="https://en.wikipedia.org/wiki/Fremont_Troll">Fremont Troll</a> (1990), another wink at Valve's home city.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
+  </div>
+  <div class="note-row">
+    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>The Archmother's museum</h4><p>A neoclassical museum on the uptown side suggests the <a href="https://en.wikipedia.org/wiki/Metropolitan_Museum_of_Art">Metropolitan Museum of Art</a> and Fifth Avenue's <a href="https://en.wikipedia.org/wiki/Museum_Mile,_Manhattan">Museum Mile</a>. Marble, culture and old money.</p></div>
+    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>The Hidden King's factory</h4><p>The downtown factory suggests the industrial waterfront, docks and loft workshops of <a href="https://en.wikipedia.org/wiki/Lower_Manhattan">Lower Manhattan</a>.</p></div>
+    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>Umbria University</h4><p>The haunted campus on the Greenwich lane could be <a href="https://en.wikipedia.org/wiki/New_York_University">NYU</a> on <a href="https://en.wikipedia.org/wiki/Washington_Square_Park">Washington Square</a> or <a href="https://en.wikipedia.org/wiki/Columbia_University">Columbia</a> uptown. No source pins it down.</p></div>
+    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>Fire escapes and water tanks</h4><p>Real New York texture that Deadlock turns into routes: heroes climb <a href="https://en.wikipedia.org/wiki/Fire_escape">fire escapes</a> and fight across rooftop <a href="https://en.wikipedia.org/wiki/Water_tower">water towers</a>.</p></div>
+  </div>
+
+  <div class="prose" style="margin-top:2.4rem">
+    <p>Between the lanes: a Theater District with ghost stagehands, Chinatown with a bell tower, a sunken plaza under a demonic Atlas, and an empty lot where barrels bite.</p>
+  </div>
+
+  <div class="sources" style="margin-top:2rem">
+    <p class="eyebrow">Sources for this chapter</p>
+    <ul>
+      <li>silvershroud (with Māuvē), <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">"Real New York buildings in Deadlock, explained."</a>, Steam Community guide, Dec 2024, updated 2026.</li>
+      <li>Moises Taveras, <a href="https://www.gamespot.com/articles/deadlocks-magical-setting-carries-on-a-storied-and-welcome-tradition/1100-6538537/">"Deadlock's Magical Setting Carries On A Storied, And Welcome, Tradition"</a>, GameSpot, Mar 2026.</li>
+      <li>Harvey Randall, <a href="https://www.pcgamer.com/games/moba/deadlocks-city-never-sleeps-update-makes-valves-moba-my-favorite-videogame-setting-in-years/">"Deadlock's City Never Sleeps update makes Valve's MOBA my favorite videogame setting in years"</a>, PC Gamer, Oct 2026.</li>
+      <li>Lincoln Carpenter, <a href="https://www.pcgamer.com/games/moba/deadlocks-occult-new-york-setting-already-has-such-excellent-vibes-that-i-might-become-a-moba-guy-just-to-see-where-valve-takes-it/">"Deadlock's occult New York setting already has such excellent vibes…"</a>, PC Gamer, Aug 2024.</li>
+      <li><a href="https://tracklock.gg/articles/deadlock-real-baroness-hotel">"Players Discovered Deadlock's Baroness Hotel Exists in Real Life"</a>, Tracklock, Oct 2025.</li>
+      <li>Deadlock community wiki: <a href="https://deadlock.wiki/Cursed_Apple">Cursed Apple</a>, <a href="https://deadlock.wiki/The_New_York_Oracle">The New York Oracle</a>, <a href="https://deadlock.wiki/Map_rework">Map rework</a>.</li>
+      <li><a href="https://publicdomainreview.org/essay/modern-babylon-ziggurat-skyscrapers-and-hugh-ferriss-retrofuturism/">"Modern Babylon: Ziggurat Skyscrapers and Hugh Ferriss's Retrofuturism"</a>, The Public Domain Review.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+<div class="tab" id="mods" data-tab data-label="Mods & movies" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">Mods & movies</span><p>Fans who rebuilt games, and made films out of them.</p></div></div>
 <section class="chapter wrap" id="mods">
   <style>
     #modedit .view { aspect-ratio: 16 / 8.5; cursor: default; }
@@ -711,7 +849,6 @@
     #filmset .strip-wrap .lbl { display: block; padding: 0 1rem 0.3rem; font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">IX</div>
     <div class="eyebrow">Made by players</div>
     <h2>Mods &amp; movies</h2>
   </div>
@@ -730,7 +867,7 @@
       <div class="grp"><button data-skin>Hero skin: Plain</button><button data-addlane>Add a street</button><button data-resetmod>Start over</button></div>
       <div class="grp"><button data-share class="amber-b">Share it</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 9.1 · Your mod, passed hand to hand</span><span data-shared>Only you have it so far.</span><span class="small">Drag towers and the dotted circles on each street.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Your mod, passed hand to hand</span><span data-shared>Only you have it so far.</span><span class="small">Drag towers and the dotted circles on each street.</span></figcaption>
   </figure>
 
   <p class="big-line">Some gifts grew into <em>whole genres</em>. Valve hired the people who made several of them.</p>
@@ -739,7 +876,7 @@
     <div class="treebox" data-tree></div>
     <div class="legend" data-legend></div>
     <div class="mcard" data-treecard aria-live="polite"></div>
-    <figcaption class="cap"><span class="fig">Fig. 9.2 · Mods that changed everything</span><span class="small">Point at any mark. Deadlock sits at the end of the longest line.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Mods that changed everything</span><span class="small">Point at any mark. Deadlock sits at the end of the longest line.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -756,7 +893,7 @@
       <div class="grp"><span class="lbl">Lights</span><button data-light="0" aria-pressed="true">Key</button><button data-light="1" aria-pressed="true">Fill</button><button data-light="2" aria-pressed="true">Rim</button></div>
       <div class="grp"><button data-key>Add keyframe here</button><button data-clearkeys>Clear keyframes</button><button data-roll class="amber-b" aria-pressed="false">Roll</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 9.3 · A tiny film set</span><span class="small">Drag the glowing bulbs to relight the actor. Drag elsewhere to walk around, add keyframes from where you stand, then Roll.</span></figcaption>
+    <figcaption class="cap"><span class="fig">A tiny film set</span><span class="small">Drag the glowing bulbs to relight the actor. Drag elsewhere to walk around, add keyframes from where you stand, then Roll.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -771,6 +908,19 @@
   </ul>
 </section>
 
+<section class="storyset wrap"><div class="cards">
+    <div>
+      <svg viewBox="0 0 200 110" aria-hidden="true"><path d="M70 70 q30 -50 60 0" fill="none" stroke="var(--paper)" stroke-width="2"/><path d="M78 40 l8 -14 l8 10 l8 -12 l8 12 l8 -10 l8 14" fill="none" stroke="var(--brass)" stroke-width="2"/><circle cx="92" cy="58" r="2.5" fill="var(--paper)"/><circle cx="108" cy="58" r="2.5" fill="var(--paper)"/><path d="M130 70 q20 10 30 -6" fill="none" stroke="var(--paper)" stroke-width="2"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">FROM A FORUM DRAWING</text></svg>
+      <h4>The Rat King</h4><p>A fan posted a drawing of a rat-king hero on the official forums. It became a running joke, then a real hero, and players voted him in first.</p>
+    </div>
+    <div>
+      <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="40" y="20" width="120" height="58" fill="none" stroke="var(--rule)"/><g fill="var(--brass)"><circle cx="75" cy="62" r="5"/><rect x="70" y="68" width="10" height="16" rx="4"/><circle cx="100" cy="62" r="5"/><rect x="95" y="68" width="10" height="16" rx="4"/><circle cx="125" cy="62" r="5"/><rect x="120" y="68" width="10" height="16" rx="4"/></g><text x="100" y="102" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">BELLEVUE · 28 SEP 2026</text></svg>
+      <h4>Costumes at the door</h4><p>The night before a big update, fans dressed as their heroes performed outside Valve's office, joking that it would make the patch arrive faster.</p>
+    </div>
+</div></section>
+</div>
+<div class="tab" id="history" data-tab data-label="History" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">History</span><p>Where Deadlock comes from, and how Valve works.</p></div></div>
 <section class="chapter wrap" id="family">
 <style>
   #family .fam-card { padding: 1rem 1.1rem 1.1rem; border-top: 1px solid var(--rule); background: var(--ink); min-height: 9.5rem; }
@@ -797,7 +947,6 @@
 </style>
 
 <div class="chap-head">
-  <span class="chap-num" aria-hidden="true">X</span>
   <span class="eyebrow">Where it comes from</span>
   <h2>Three families, one game</h2>
 </div>
@@ -817,7 +966,7 @@
   </div>
   <div class="fam-card" data-card aria-live="polite"></div>
   <figcaption>
-    <span class="fig">Fig. 10.1 · The river of games</span>
+    <span class="fig">The river of games</span>
     <span class="fam-legend">
       <span><i class="solid"></i>Studio game</span>
       <span><i class="ring"></i>Fan-made</span>
@@ -836,7 +985,7 @@
 <figure class="plate" data-boot="family#players">
   <div class="view chart"><div class="fam-tip" data-tip hidden></div></div>
   <figcaption>
-    <span class="fig">Fig. 10.2 · Peak players on Steam</span>
+    <span class="fig">Peak players on Steam</span>
     <span>Most people playing at the same moment, as reported. Each stem is a reported peak on that date, not a continuous count. Deadlock is still invite-only and not for sale.</span>
   </figcaption>
 </figure>
@@ -864,7 +1013,6 @@
 
 <section class="chapter wrap" id="valve">
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">XI</div>
     <div class="eyebrow">The makers</div>
     <h2>Who is Valve, and why do people trust it?</h2>
   </div>
@@ -890,7 +1038,7 @@
       <div class="grp"><label for="ex-r">Shape difference</label><input id="ex-r" type="range" min="0" max="1" step="0.01"><span class="lbl" data-ex>Look-alikes</span></div>
       <div class="grp"><button data-mode="silhouette" aria-pressed="true">Silhouette</button><button data-mode="shaded" aria-pressed="false">Lit &amp; coloured</button><button data-ask>New question</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 11.1 · Silhouette lineup</span><span data-q></span><span class="small" data-score></span></figcaption>
+    <figcaption class="cap"><span class="fig">Silhouette lineup</span><span data-q></span><span class="small" data-score></span></figcaption>
   </figure>
 
   <div class="prose">
@@ -903,7 +1051,7 @@
   <figure class="plate" id="dir" data-boot="valve#director">
     <div class="view"><div class="hud tr" data-readout></div></div>
     <div class="controls"><div class="grp"><button data-dir="random" aria-pressed="false">Random spawner</button><button data-dir="director" aria-pressed="true">AI Director</button><button data-horde>Send a horde now</button></div></div>
-    <figcaption class="cap"><span class="fig">Fig. 11.2 · The Director</span><span>Bands behind the graph: <span class="amber">build</span>, <span style="color:var(--blood)">peak</span>, <span class="soul">relax</span>.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The Director</span><span>Bands behind the graph: <span class="amber">build</span>, <span style="color:var(--blood)">peak</span>, <span class="soul">relax</span>.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -916,7 +1064,7 @@
   <figure class="plate" id="teach" data-boot="valve#teach">
     <div class="view short"></div>
     <div class="controls"><div class="grp"><button data-pad="-1,0" aria-label="Move left">←</button><button data-pad="0,-1" aria-label="Move up">↑</button><button data-pad="0,1" aria-label="Move down">↓</button><button data-pad="1,0" aria-label="Move right">→</button><button data-reset>Reset room</button></div><span class="lbl" data-status></span></div>
-    <figcaption class="cap"><span class="fig">Fig. 11.3 · Three rooms, no words</span><span>When you finish a room, red squares show where you stopped to think.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Three rooms, no words</span><span>When you finish a room, red squares show where you stopped to think.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -936,171 +1084,15 @@
   </div>
 </section>
 
-<style>
-  #city .skycard {
-    position: absolute; right: 12px; top: 12px; width: min(19rem, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto;
-    background: color-mix(in srgb, var(--ink) 92%, transparent); border: 1px solid var(--brass-2); padding: 0.85rem 1rem 0.9rem;
-    font-size: 0.92rem; line-height: 1.45; color: var(--paper); z-index: 2;
-  }
-  #city .skycard h4 { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.04em; font-size: 1.35rem; margin: 0.15rem 0 0.1rem; line-height: 1; }
-  #city .skycard .by { font-family: var(--f-mono); font-size: 0.72rem; color: var(--dim); margin: 0 0 0.6rem; letter-spacing: 0.04em; }
-  #city .skycard p { margin: 0 0 0.55rem; }
-  #city .skycard .dl { color: var(--dim); border-top: 1px solid var(--rule); padding-top: 0.5rem; margin: 0; }
-  #city .skycard .dl b { color: var(--soul); font-family: var(--f-mono); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; display: block; }
-  #city .skycard .close { position: absolute; right: 6px; top: 6px; padding: 0.15rem 0.45rem; }
-  #city .hud .big { color: var(--brass); }
-  #city .hud.bl { max-width: min(28rem, calc(100% - 24px)); line-height: 1.4; text-shadow: 0 1px 6px var(--ink); }
-  #city .note .src { color: var(--brass); }
-  #city .note .inf { color: var(--soul); }
-  #city .note-row + .note-row { border-top: 0; }
-  #city .legend-key { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; max-width: var(--wide); margin: 0 auto 0.8rem; font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
-</style>
-
-<section class="chapter wrap" id="city">
-  <div class="chap-head">
-    <span class="chap-num" aria-hidden="true">XII</span>
-    <span class="eyebrow">The setting</span>
-    <h2>The Cursed Apple</h2>
-  </div>
-
-  <div class="prose">
-    <p class="lede">Every match happens in one city: the <strong>Cursed Apple</strong>. New York, with a hex on it.</p>
-    
-    <p>The towers are 1899 to 1932, the clothes look 1930s, the neon looks 1950s. It's a collage of decades, all of them haunted.</p>
-  </div>
-
-  <h3 class="prose">From a street grid to three lanes</h3>
-  <div class="prose">
-    <p>1811: planners laid a grid over Manhattan. Broadway was older and ran diagonally through it anyway.</p>
-    
-    <p>Deadlock needed three long roads between two homes. It borrowed three real street names: York, Broadway, Greenwich.</p>
-  </div>
-
-  <figure class="plate" data-boot="nyc#gridToLanes">
-    <div class="view"></div>
-    <div class="controls">
-      <div class="grp">
-        <button data-stage="0" aria-pressed="true">1811 plan</button>
-        <button data-stage="1" aria-pressed="false">The city grows</button>
-        <button data-stage="2" aria-pressed="false">The Cursed Apple</button>
-      </div>
-      <div class="grp"><label for="era-range">Morph</label><input id="era-range" data-era type="range" min="0" max="2" step="0.01" value="0"><span class="lbl" data-era-label>The 1811 plan</span></div>
-      <div class="grp"><button data-ghost aria-pressed="false">Show the lost fourth lane</button></div>
+<section class="storyset wrap"><div class="cards">
+    <div>
+      <svg viewBox="0 0 200 110" aria-hidden="true"><path d="M60 80 L100 20 L140 80 Z" fill="none" stroke="var(--amber)" stroke-width="2"/><circle cx="90" cy="55" r="3" fill="var(--blood)"/><circle cx="108" cy="62" r="3" fill="var(--blood)"/><circle cx="100" cy="45" r="3" fill="var(--blood)"/><rect x="40" y="82" width="120" height="8" fill="var(--rule)"/><text x="100" y="104" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">PIZZA WATCH</text></svg>
+      <h4>Pizza at midnight</h4><p>Fans noticed pizza shops near Valve getting busy just before big updates. Valve played along: the night before one, a developer posted a table full of pizza.</p>
     </div>
-    <figcaption><span class="fig">Fig. 12.1 · Grid to lanes</span><span>Drag to turn the island. Watch Broadway straighten into the middle lane, and the troopers start to march.</span></figcaption>
-  </figure>
-
-  <div class="prose">
-    
-  </div>
-
-  <h3 class="prose">Why the towers are shaped like wedding cakes</h3>
-  <div class="prose">
-    <p>Those stepped towers aren't a style. They're a law: New York's 1916 zoning rule, written so streets would still get sunlight.</p>
-    
-    <p>Hugh Ferriss drew what the law allowed, in four famous charcoal stages. His dark drawings are the ancestor of every noir New York, this one included.</p>
-  </div>
-
-  <figure class="plate" data-boot="nyc#setback">
-    <div class="view"><div class="hud bl" data-readout></div></div>
-    <div class="controls">
-      <div class="grp">
-        <button data-ferriss="0" aria-pressed="true">1 · Envelope</button>
-        <button data-ferriss="1" aria-pressed="false">2 · Carved</button>
-        <button data-ferriss="2" aria-pressed="false">3 · Stepped</button>
-        <button data-ferriss="3" aria-pressed="false">4 · Finished</button>
-      </div>
-      <div class="grp"><span class="lbl">District</span>
-        <button data-k="1" aria-pressed="false">1×</button>
-        <button data-k="1.5" aria-pressed="false">1.5×</button>
-        <button data-k="2" aria-pressed="true">2×</button>
-        <button data-k="2.5" aria-pressed="false">2.5×</button>
-      </div>
-      <div class="grp"><button data-planes aria-pressed="true">Slanted limits</button><button data-occult aria-pressed="false">Curse it</button></div>
-    </div>
-    <figcaption><span class="fig">Fig. 12.2 · The 1916 envelope</span><span>One Manhattan block, 400 by 200 feet. The district number multiplies the street width to set the height of the street wall.</span></figcaption>
-  </figure>
-
-  <div class="prose">
-    
-  </div>
-
-  <h3 class="prose">The skyline is a real race</h3>
-  <div class="prose">
-    <p>In 2024 a player named <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">silvershroud</a> matched 30 of Deadlock's skyline buildings to real ones, photo beside screenshot. It is one of the best things the community has made.</p>
-    <p>In date order, they replay the race for the tallest building in the world.</p>
-  </div>
-
-  <figure class="plate" data-boot="nyc#skyline">
-    <div class="view short">
-      <div class="hud tl"><div class="big" data-year>1895</div></div>
-      <div class="hud bl" data-event></div>
-      <div class="skycard" data-card hidden></div>
-    </div>
-    <div class="controls">
-      <div class="grp"><button data-play aria-pressed="false">Play the years</button></div>
-      <div class="grp"><label for="yr-range">Year</label><input id="yr-range" data-yr type="range" min="1895" max="1970" step="0.1" value="1895" style="width:16rem"></div>
-    </div>
-    <figcaption><span class="fig">Fig. 12.3 · The height race</span><span>Click a tower to see the real building and where it shows up in Deadlock. Heights to scale.</span></figcaption>
-  </figure>
-
-  <h3 class="prose">Trains in the sky</h3>
-  <div class="prose">
-    <p>From 1868 to the 1950s, New Yorkers rode trains above the avenues. In Deadlock, heroes still do.</p>
-  </div>
-
-  <figure class="plate" data-boot="nyc#elZipline">
-    <div class="view short"></div>
-    <div class="controls">
-      <div class="grp"><button data-zip="0" aria-pressed="true">The El</button><button data-zip="1" aria-pressed="false">The zip-line</button></div>
-      <span class="small" data-zipcap></span>
-    </div>
-    <figcaption><span class="fig">Fig. 12.4 · Above the avenue</span><span>Move your pointer to look around the street.</span></figcaption>
-  </figure>
-
-  <h3 class="prose">A field guide to the parallels</h3>
-  <div class="prose">
-    <p>Filled diamonds are documented by players and writers. Hollow ones are our reading.</p>
-  </div>
-  <div class="legend-key"><span class="src">◆ Documented: a source says so</span><span class="inf">◇ Our reading: a reasonable guess</span></div>
-
-  <div class="note-row">
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Baroness Hotel</h4><p>Modelled on the Plaza Hotel (1907, Henry J. Hardenbergh) and its green mansard roof. The name belongs to a real hotel in Seattle, about eleven miles from Valve's office.</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The New York Oracle</h4><p>The in-game newspaper building echoes the Times Tower on Times Square (1904). The masthead even mimics the <em>Times</em> lettering. Prophecy replaces the news.</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Plaza District</h4><p>A sunken plaza, a skating rink in the voice lines, and an Atlas holding a glowing sphere: Rockefeller Center (1930s), with its <em>Atlas</em> statue (1937), turned demonic.</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The bull</h4><p>A bull statue stands near the game's stock exchange. The real <em>Charging Bull</em> arrived in 1989, decades after this city's era. A cheeky anachronism.</p></div>
-  </div>
-  <div class="note-row">
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Liberty, twice</h4><p>The Statue of Liberty stands in the harbour behind the York lane's docks. The Archmother's cracked mask borrows Liberty's face.</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>"SCBS"</h4><p>A club at the downtown end of Broadway nods to CBGB on the Bowery (1973–2006), the birthplace of New York punk.</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Under Broadway</h4><p>The mid-map boss lives in a sewer below the Broadway lane. The tiled tunnels borrow from the first subway's Times Square station (1904).</p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>A troll from Seattle</h4><p>A troll statue sits under a tree in the green lane. That one is Seattle's Fremont Troll (1990), another wink at Valve's home city.</p></div>
-  </div>
-  <div class="note-row">
-    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>The Archmother's museum</h4><p>A neoclassical museum on the uptown side suggests the Metropolitan Museum of Art and Fifth Avenue's Museum Mile. Marble, culture and old money.</p></div>
-    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>The Hidden King's factory</h4><p>The downtown factory suggests the industrial waterfront, docks and loft workshops of Lower Manhattan.</p></div>
-    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>Umbria University</h4><p>The haunted campus on the Greenwich lane could be NYU on Washington Square or Columbia uptown. No source pins it down.</p></div>
-    <div class="note"><span class="eyebrow inf">◇ Our reading</span><h4>Fire escapes and water tanks</h4><p>Real New York texture that Deadlock turns into routes: heroes climb, jump and fight across the rooftops.</p></div>
-  </div>
-
-  <div class="prose" style="margin-top:2.4rem">
-    <p>Between the lanes: a Theater District with ghost stagehands, Chinatown with a bell tower, a sunken plaza under a demonic Atlas, and an empty lot where barrels bite.</p>
-  </div>
-
-  <div class="sources" style="margin-top:2rem">
-    <p class="eyebrow">Sources for this chapter</p>
-    <ul>
-      <li>silvershroud (with Māuvē), <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">"Real New York buildings in Deadlock, explained."</a>, Steam Community guide, Dec 2024, updated 2026.</li>
-      <li>Moises Taveras, <a href="https://www.gamespot.com/articles/deadlocks-magical-setting-carries-on-a-storied-and-welcome-tradition/1100-6538537/">"Deadlock's Magical Setting Carries On A Storied, And Welcome, Tradition"</a>, GameSpot, Mar 2026.</li>
-      <li>Harvey Randall, <a href="https://www.pcgamer.com/games/moba/deadlocks-city-never-sleeps-update-makes-valves-moba-my-favorite-videogame-setting-in-years/">"Deadlock's City Never Sleeps update makes Valve's MOBA my favorite videogame setting in years"</a>, PC Gamer, Oct 2026.</li>
-      <li>Lincoln Carpenter, <a href="https://www.pcgamer.com/games/moba/deadlocks-occult-new-york-setting-already-has-such-excellent-vibes-that-i-might-become-a-moba-guy-just-to-see-where-valve-takes-it/">"Deadlock's occult New York setting already has such excellent vibes…"</a>, PC Gamer, Aug 2024.</li>
-      <li><a href="https://tracklock.gg/articles/deadlock-real-baroness-hotel">"Players Discovered Deadlock's Baroness Hotel Exists in Real Life"</a>, Tracklock, Oct 2025.</li>
-      <li>Deadlock community wiki: <a href="https://deadlock.wiki/Cursed_Apple">Cursed Apple</a>, <a href="https://deadlock.wiki/The_New_York_Oracle">The New York Oracle</a>, <a href="https://deadlock.wiki/Map_rework">Map rework</a>.</li>
-      <li><a href="https://publicdomainreview.org/essay/modern-babylon-ziggurat-skyscrapers-and-hugh-ferriss-retrofuturism/">"Modern Babylon: Ziggurat Skyscrapers and Hugh Ferriss's Retrofuturism"</a>, The Public Domain Review.</li>
-    </ul>
-  </div>
-</section>
-
+</div></section>
+</div>
+<div class="tab" id="words" data-tab data-label="Words" hidden>
+<div class="tab-head wrap"><div class="in"><span class="eyebrow">Words</span><p>Every term in this guide, in plain language.</p></div></div>
 <section class="chapter wrap" id="words">
   <style>
     #words dl { max-width: var(--wide); margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
@@ -1109,7 +1101,6 @@
     #words dd { margin: 0.2rem 0 0; font-size: 0.96rem; color: var(--dim); line-height: 1.5; }
   </style>
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">✦</div>
     <div class="eyebrow">Reference</div>
     <h2>The words, in one place</h2>
   </div>
@@ -1135,6 +1126,9 @@
   </ul>
 </section>
 
+
+</div>
+</main>
 <footer class="wrap">
   <div class="prose small">
     <p>An unofficial, fan-made explainer. Deadlock, Dota, Team Fortress, Half-Life, Portal, Left 4 Dead and Steam are trademarks of Valve Corporation. Every scene here is drawn from simple shapes in code; no game art is used. Built November 2026.</p>
@@ -1147,7 +1141,6 @@
     .map(([t, d]) => `<div><dt>${t}</dt><dd>${d}</dd></div>`).join('');
 </script>
 
-</main>
 
 <script type="module">
 import { hero } from './js/hero.js';
