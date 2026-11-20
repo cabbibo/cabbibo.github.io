@@ -21,15 +21,19 @@
   <div class="bar-in">
     <a class="mark" href="#top">Dead<span>lock</span></a>
     <nav aria-label="Chapters">
+      <a href="#people">People</a>
       <a href="#game">I · The game</a>
       <a href="#lanes">II · Lanes</a>
       <a href="#souls">III · Souls</a>
-      <a href="#build">IV · Heroes &amp; items</a>
+      <a href="#build">IV · Heroes</a>
       <a href="#movement">V · Movement</a>
       <a href="#match">VI · A match</a>
-      <a href="#family">VII · Family tree</a>
-      <a href="#valve">VIII · Valve</a>
-      <a href="#city">IX · The city</a>
+      <a href="#together">VII · Together</a>
+      <a href="#compete">VIII · Competition</a>
+      <a href="#mods">IX · Mods &amp; movies</a>
+      <a href="#family">X · Family tree</a>
+      <a href="#valve">XI · Valve</a>
+      <a href="#city">XII · The city</a>
       <a href="#words">Words</a>
     </nav>
   </div>
@@ -45,6 +49,8 @@
 </header>
 
 <main>
+<!-- missing fragment: people -->
+
 <section class="chapter wrap" id="game">
   <div class="chap-head">
     <div class="chap-num" aria-hidden="true">I</div>
@@ -127,15 +133,9 @@
     <h2>Souls: money you earn by shooting light</h2>
   </div>
 
-  <div class="prose">
-    <p class="lede">Deadlock has one currency, <span class="term" data-t="souls">souls</span>, and it does two jobs at once. Every soul you earn makes your hero permanently stronger, and the souls you haven't spent yet buy items in shops. Whoever collects more souls usually wins.</p>
-    <p>You get souls from almost everything: killing troopers, killing enemy heroes, clearing the monsters that live between the lanes, smashing crates, knocking down towers. Even cockroaches in the subway tunnels are worth one soul each. But the steadiest income, especially early, is the troopers in your lane. Each one is worth about 100 souls, a little more every minute.</p>
-
-    <h3>The orb</h3>
-    <p>Here is Deadlock's signature twist. In older games of this kind you got paid only if <em>your</em> attack landed the killing blow on a soldier, the <span class="term" data-t="lasthit">last hit</span>. In Deadlock, when a trooper dies its bounty splits in two. Half drops to the ground for the team that killed it. The other half pops out of the body as a glowing <span class="term" data-t="orb">soul orb</span> that floats up for about a second.</p>
-    <p>Anyone can shoot that orb. Shoot your own team's orb and you <strong>confirm</strong> it, locking in the souls. Shoot the enemy's orb before they do and you <strong>deny</strong> it: you steal those souls for yourself. If nobody touches it, it pops and goes to its owner.</p>
-    <p>So during the first ten minutes of every match, twelve people are shooting at tiny lights above dead soldiers. Try it. Green orbs are yours; orange orbs belong to the enemy hero down the street, who is also trying to shoot both.</p>
-  </div>
+  <p class="big-line">One currency, <em>souls</em>: it is your money and your level at once.</p>
+  <figure class="pic" data-pic="orb"><figcaption>The signature twist: when a soldier dies, half its souls float up as an orb. Shoot yours to keep it. Shoot theirs to steal it.</figcaption></figure>
+  <p class="big-line" style="font-size:1.3rem">Try it. <em>Green</em> is yours, <em>orange</em> is theirs, and the enemy down the street is shooting too.</p>
 
   <figure class="plate" id="orbs" data-boot="souls#orbs">
     <div class="view"><div class="hud tl" data-score></div><div class="flash" data-flash></div></div>
@@ -146,12 +146,7 @@
     <figcaption class="cap"><span class="fig">Fig. 3.1 · Confirm and deny</span><span>Click a green orb to confirm it, an orange orb to deny it. Clicking a blue trooper shoots it.</span></figcaption>
   </figure>
 
-  <div class="prose">
-    <p>Even at slow speed it's hard to catch everything, and that's the point. Laning in Deadlock is a constant, small contest of aim and attention: shoot troopers, watch for orbs, keep an eye on the enemy hero who is shooting at you while you shoot at lights. A good player quietly out-earns a careless one by thousands of souls in ten minutes, without ever winning a fight.</p>
-
-    <h3>What souls buy you</h3>
-    <p>Your total souls earned works like a level. Every few hundred souls you reach a new <span class="term" data-t="boon">Boon</span>, which raises your health and damage. At 600, 1,100 and 2,000 souls you unlock your three regular abilities, and at 3,800 your ultimate, the strongest one. The ladder ends at Boon 35, around 49,200 souls. Spending souls on items never lowers your level; the two run in parallel.</p>
-  </div>
+  <figure class="pic" data-pic="unlocks"><figcaption>Souls earned unlock your four abilities. Spending them in shops never takes the levels away.</figcaption></figure>
 
   <figure class="plate" id="ledger" data-boot="souls#ledger">
     <div class="boonbar" data-boonbar aria-hidden="true"></div>
@@ -167,8 +162,7 @@
   </figure>
 
   <div class="prose">
-    <p>The second slider shows a small kindness in the rules. When several teammates stand near a trooper that dies, its souls are shared, but the shares add up to more than the original. Two heroes in a lane each get 54 instead of 50. Sharing a lane costs a little, not half.</p>
-    <p>Deadlock also leans hard against runaway leads, a problem other games call <span class="term" data-t="snowball">snowballing</span>. Defeating an enemy who is far richer than their teammates pays a large bonus. Teams that fall behind earn up to 30% more from troopers and monsters. Souls from the monsters between lanes are "haunted" and can be lost if you die carrying them. Valve keeps adjusting these <span class="term" data-t="comeback">comeback</span> rules; it weakened some in September 2026 and strengthened others a month later.</p>
+    <p class="small">Sharing is generous: two heroes beside a dying trooper each get 54%, not 50%. And the game leans against runaway leads. Defeating someone much richer than their teammates pays a big bonus, and teams that fall behind earn more from everything.</p>
   </div>
 </section>
 
@@ -249,9 +243,9 @@
   </div>
 
   <div class="prose">
-    <p class="lede">Before a match starts, each of the twelve players picks a hero. In November 2026 there are 44 of them, and they are a strange crowd: a gargoyle, a jetpack salesman, a vampire who wants to run New York, a man and his giant armadillo, a chess master from Central Park.</p>
-    <p>Every hero has a gun with its own feel, a quick and a heavy melee attack, and four <span class="term" data-t="ability">abilities</span>: three regular ones and an <em>ultimate</em>, the big one. You don't start with them. They unlock as you collect souls, at 600, 1,100 and 2,000 for the regular three and 3,800 for the ultimate. Each ability can then be upgraded three times, and the upgrades often change what it does rather than just making it bigger.</p>
-    <p>Many team games assign fixed jobs: a tank, a healer, a damage dealer. Deadlock doesn't. Valve gives each hero three short descriptive tags instead, some practical ("Initiator," "Area Denial") and some just jokes ("Frogs," "zZzzZ"). Use them below to sort the cast. Tap or point at any hero to read who they are.</p>
+    <p class="lede">Twelve players, 44 heroes to choose from. Hover a card to meet them.</p>
+    <p>Each hero has a gun, a punch, and four powers. The fourth, the ultimate, unlocks last and changes fights.</p>
+    <p>There are no fixed jobs like tank or healer. Valve gives each hero three words instead, and players invent the rest.</p>
   </div>
 
   <figure class="plate" id="roster" data-boot="build#roster">
@@ -277,10 +271,9 @@
   </figure>
 
   <div class="prose">
-    <p>The dates tell their own story. Since 2025 heroes have arrived in batches of six with each big update, and players vote on the order they're released. One of the newest, the Rat King, started as a joke on the game's forums. Before that, Valve tested raw ideas in a separate mode called Hero Labs, where new heroes appeared with placeholder models and names so Valve could judge how they played before spending months on how they looked. A few never made it out.</p>
 
     <h3>The shop</h3>
-    <p>Souls you haven't spent can be traded for <span class="term" data-t="item">items</span> at shops around the map: one in each base, one beside each lane's first Guardian (it closes when that Guardian falls), and two hidden underground that both teams can use. There are about 156 items, sorted into three colored trees:</p>
+    <p>Unspent souls buy items, in three colors.</p>
   </div>
 
   <div class="note-row">
@@ -290,9 +283,11 @@
   </div>
 
   <div class="prose" style="margin-top:2.4rem">
-    <p>Every item has one of four prices: <strong>800, 1,600, 3,200 or 6,400</strong> souls. You have nine slots to fill. Three more open up during the match, one for your whole team each time you destroy an enemy Walker. That's the toy below.</p>
-    <p>The same hero can be built into three very different players. Pour souls into orange and your hero becomes a gunslinger who wins by aiming. Pour them into green and they become very hard to kill. Pour them into purple and their abilities take over. Buy a few items and watch the dot move across the triangle; the dotted line is the path your choices took.</p>
+    
+    <p>Same hero, three different players. Buy items and watch the point move.</p>
   </div>
+
+  <figure class="pic" data-pic="items"><figcaption>Orange for your gun, green for your body, purple for your powers. Four prices each.</figcaption></figure>
 
   <figure class="plate" id="shop" data-boot="build#shop">
     <div class="shopgrid">
@@ -322,8 +317,8 @@
   </figure>
 
   <div class="prose">
-    <p>Prices and slot counts are the game's. Most item names here are placeholders for whole tiers; the named ones (Extended Magazine, Stalker, Headhunter, Extra Health, Extra Spirit, Refresher) are real. Two real rules are built in. Sell something while you're still standing in the shop and you get every soul back, which forgives a misclick. Walk away first and you get half.</p>
-    <p>A hidden rule pushes players toward committing. Souls spent in one color also add a bonus to that color's core stat; the community wiki reports that 4,800 souls of Weapon items adds about 46% to weapon damage. Hybrids are allowed, but specialists get a discount on power. That tension, between what your hero is good at and what your team needs this particular match, is most of what experienced players mean when they talk about a "build."</p>
+    <p>Prices and slots are the game's. Most item names are stand-ins for whole tiers.</p>
+    <p>A hidden bonus rewards committing to one color, so builds tend to pick a lane: gun, body, or magic.</p>
   </div>
 </section>
 
@@ -350,21 +345,14 @@
   </div>
 
   <div class="prose">
-    <p class="lede">In older games of this kind, the map is flat. You see it from above and your hero walks across it like a chess piece. Deadlock's city has rooftops, fire escapes, alleys, sewers and subway tunnels, and getting through it quickly is a skill of its own.</p>
-    <p>Every hero can run, jump, dash, slide and kick off walls. The fancy moves draw from a small budget called <span class="term" data-t="stamina">stamina</span>. Most heroes have three bars of it, and one bar refills about every four and a half seconds. Spend it all and you're stuck walking until it comes back.</p>
+    <p class="lede">Classic strategy maps are flat. The Cursed Apple has roofs, fire escapes, sewers and subways, and every hero can climb all of it.</p>
+    <p>The fancy moves spend <strong>stamina</strong>: usually three bars, one refilling every few seconds.</p>
   </div>
 
-  <div class="note-row">
-    <div class="note"><span class="eyebrow">Free</span><h4>Jump</h4><p>A plain jump from the ground costs nothing.</p></div>
-    <div class="note"><span class="eyebrow">1 stamina</span><h4>Double jump</h4><p>One extra jump in mid-air, for a little more height.</p></div>
-    <div class="note"><span class="eyebrow">1 stamina</span><h4>Dash</h4><p>A burst of about 10 meters on the ground, about 8 in the air. One air dash per jump.</p></div>
-    <div class="note"><span class="eyebrow">2 stamina</span><h4>Dash-jump</h4><p>Jump during a dash and you launch into a long, fast leap. This is the move good players use constantly.</p></div>
-    <div class="note"><span class="eyebrow">Free, then ½</span><h4>Wall jump</h4><p>Kick off a wall while in the air. The first one is free; each one after costs half a bar and goes a little less high.</p></div>
-    <div class="note"><span class="eyebrow">Free</span><h4>Slide</h4><p>Crouch while moving fast, or on a slope, and you slide, keeping your speed low to the ground.</p></div>
-  </div>
+  <figure class="pic" data-pic="moves"><figcaption>What each move costs from the stamina bar.</figcaption></figure>
 
   <div class="prose" style="margin-top:2.4rem">
-    <p>Below is a slice of the Cursed Apple: a brownstone stoop, two fire escapes, a gap between rooftops, and a tall building with a water tower on top. Get to the water tower. There is more than one way up. If you'd rather watch first, press <em>Watch a route</em> and the little figure in the fedora will show you one.</p>
+    <p>Get to the water tower. Stuck? Press <em>Watch a route</em>.</p>
   </div>
 
   <figure class="plate" id="move" data-boot="movement#playground">
@@ -383,12 +371,10 @@
   </figure>
 
   <div class="prose">
-    <p>A few things in that little scene are true to the game. The pips over your head are the whole budget: every double jump or dash takes one, and you can watch them refill. The gap between the rooftops is too wide for a plain jump, even with a double jump, but a dash-jump clears it easily. The tall building needs wall jumps, and the free first one is a gift you'll want to save for exactly that moment. If you fall, nothing happens. Deadlock has no fall damage, so a drop from a roof is just a shortcut to the street.</p>
-    <p>Run without stopping for five seconds and your hero breaks into a sprint. In a real match, sprinting only happens when you haven't been in a fight recently, so it's how you cross the city between battles.</p>
 
     <h3>Ziplines: the lanes are also railways</h3>
-    <p>Above each lane hangs a glowing rail in that lane's color: yellow for York, blue for Broadway, green for Greenwich. Heroes leave their base by riding it, hanging from a hook, at about 18 meters per second on Broadway and 21 on the side lanes, far faster than anyone can run.</p>
-    <p>Here is the clever part. <span class="term" data-t="zipline">Your zipline only reaches as far as your troopers have pushed.</span> Win the tug of war from Chapter II and your rail stretches deeper into the enemy's half of the city, so your team gets back to the fight sooner after every trip to the shop or every death. Lose it and you walk.</p>
+    <p>A glowing rail runs above each lane, in its color. Hook on and it carries you out to the fight.</p>
+    <p>It only reaches as far as your soldiers have pushed. <em>Winning a lane makes you faster.</em></p>
   </div>
 
   <figure class="plate" id="zip" data-boot="movement#zipline">
@@ -404,14 +390,14 @@
   </figure>
 
   <div class="prose">
-    <p>Two upgrades make the rail even faster. Once a match reaches six minutes, each hero can trigger a speed boost of 80% for 32 seconds, usable once every six minutes. And when your team destroys the enemy's Base Guardians in a lane, your rail there becomes a permanent <em>Express Line</em>, also 80% faster. The slider has to reach the enemy base before that second button unlocks.</p>
-    <p>A zipline is not a safe place, though. If an enemy hero shoots you while you're riding, you're knocked off, take damage and land stunned, unless you've already been on the rail for three seconds.</p>
+    
+    <p>Get shot while riding and you fall, stunned.</p>
   </div>
 
   <div class="note-row">
-    <div class="note"><span class="eyebrow">Underground</span><h4>Teleporters</h4><p>Two linked pairs of booths sit in the subway tunnels beside the secret shops. Step in, wait four seconds, and you come out on the other side of the map.</p></div>
+    <div class="note"><span class="eyebrow">Underground</span><h4>Teleporters</h4></div>
     <div class="note"><span class="eyebrow">Hero powers</span><h4>Moves of their own</h4><p>Many heroes bend these rules. Lash swings on a grapple, Ivy carries a teammate through the air, Mirage teleports across the city, and Mo &amp; Krill burrow underground.</p></div>
-    <div class="note"><span class="eyebrow">Up and down</span><h4>Fights on many floors</h4><p>A fight can start on a rooftop, spill down a fire escape and end in a sewer. Top-down games can't do that; in Deadlock, where you stand vertically matters as much as where you stand on the map.</p></div>
+    <div class="note"><span class="eyebrow">Up and down</span><h4>Fights on many floors</h4><p>A fight can start on a rooftop and end in a sewer. That's the shooter half of Deadlock.</p></div>
   </div>
 </section>
 
@@ -431,8 +417,8 @@
   </div>
 
   <div class="prose">
-    <p class="lede">Now you know the pieces: lanes, troopers, towers, souls, heroes, items. A match is those pieces switched on in a set order. The city wakes up on a schedule, and every few minutes something new appears that is worth fighting over.</p>
-    <p>Drag along the timeline, or press play. The minimap on the left shows the city with the Hidden King at the bottom and the Archmother at the top; filled shapes are standing towers. The times when things appear and when towers lose their armor come from the game's rules. Which towers fall, and when, is one made-up but typical match.</p>
+    <p class="lede">The city wakes up on a schedule. Every few minutes, something new appears worth fighting over.</p>
+    <p>Drag the timeline or press play. Unlock times are the game's; which towers fall when is one made-up match.</p>
   </div>
 
   <figure class="plate" id="matchplate" data-boot="match#timeline">
@@ -446,12 +432,88 @@
   </figure>
 
   <div class="prose">
-    <p>The middle rows hold the quiet machinery that makes matches end. The first towers start with heavy armor so nobody can rush them, and lose it on a fixed clock. By minute twelve they take <em>extra</em> damage; by eighteen, so do the Walkers. Waves come faster after twenty minutes and faster again after thirty-five. If you remember the AI Director from Valve's <em>Left 4 Dead</em> (Chapter VIII), this is the same idea built into a map: calm stretches, rising pressure, set-piece peaks.</p>
-    <p>Notice too how many objectives sit <em>between</em> the lanes. The Urn, the Rift, the monster camps and the Mid Boss all pull heroes away from their troopers. Every minute spent chasing one is a minute your lane is left to the stalemate you saw in Chapter II. That trade, between the lane and everything else, is most of what Deadlock players argue about.</p>
-    <h3>What a newcomer actually sees</h3>
-    <p>For the first ten minutes: two people on each team shooting soldiers, glowing orbs, and each other on a single street. Then, gradually, everyone starts moving: across rooftops, through sewers, along ziplines, converging on whatever just appeared. The last ten minutes are big twelve-person fights that end with one team walking into the other's base. An average match lasts about thirty-five minutes; long ones pass forty-five.</p>
+    <p>The towers lose their armor on a clock, and soldiers come faster as time goes on, so every match has to end.</p>
+    <p>Every prize between the lanes pulls heroes away from their soldiers. That trade is most of what players argue about.</p>
+    
+    <p>First ten minutes: two-on-two duels on single streets. Last ten: twelve people in one fight that decides everything.</p>
   </div>
 </section>
+
+<section class="chapter wrap" id="together">
+  <style>
+    #rooms .view { cursor: grab; }
+    #rooms .era { padding: 1rem 1.2rem 1.2rem; border-top: 1px solid var(--rule); min-height: 8.5rem; }
+    #rooms .era h4 { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 1.6rem; margin: 0.3rem 0 0.25rem; line-height: 1; }
+    #rooms .era p { margin: 0; color: var(--dim); max-width: 44rem; }
+    #rooms .years button { min-width: 3.6rem; }
+    #crowd .view { aspect-ratio: auto; max-height: none; padding: 0.8rem 0.6rem 0.2rem; overflow-x: auto; }
+    #crowd .view svg { min-width: 560px; }
+    #crowd .cm { cursor: pointer; outline: none; }
+    #crowd .cm:focus-visible circle:first-child { stroke: var(--soul); }
+    #crowd .tipline { min-height: 2.6em; }
+    #crowd details { padding: 0 1rem 0.8rem; }
+    #crowd summary { cursor: pointer; font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); padding: 0.4rem 0; }
+    #crowd details .tbl-wrap { margin: 0.4rem 0 0; max-width: none; }
+    #spreadplate .view { cursor: pointer; }
+    .talk-strip { max-width: 50rem; margin: 2.4rem auto 0.6rem; }
+  </style>
+  <div class="chap-head">
+    <div class="chap-num" aria-hidden="true">VII</div>
+    <div class="eyebrow">Playing together</div>
+    <h2>Fifty years of finding each other</h2>
+  </div>
+
+  <p class="big-line">Every time computers learned to talk to each other, <em>people used it to play together</em>, usually within a year.</p>
+
+  <figure class="plate" id="rooms" data-boot="together#rooms">
+    <div class="view" tabindex="0" aria-label="A diorama of rooms where people played together, from 1978 to 2026. Use the year buttons or the left and right arrow keys."></div>
+    <div class="controls">
+      <div class="grp"><button data-prev aria-label="Earlier">←</button><button data-next aria-label="Later">→</button></div>
+      <div class="grp years">
+        <button data-room="0">1978</button><button data-room="1">1994</button><button data-room="2">1999</button>
+        <button data-room="3">2002</button><button data-room="4">2020</button><button data-room="5">2026</button>
+      </div>
+    </div>
+    <div class="era" data-era aria-live="polite"></div>
+    <figcaption class="cap"><span class="fig">Fig. 7.1 · Rooms where people met</span><span class="small">Swipe or use the arrows to walk through time.</span></figcaption>
+  </figure>
+
+  <div class="talk-strip" data-boot="together#talk"><div data-talk></div></div>
+  <p class="big-line" style="text-align:center;font-size:1.25rem">First we typed. Then we talked. <em>Now the voice channel is the clubhouse.</em></p>
+
+  <div class="prose" style="margin-top:3rem">
+    <p>Sociologists call places like cafés and barbershops <strong>third places</strong>: not home, not work, somewhere you see the regulars. A 2006 study argued online games had become one. For a lot of players a Deadlock evening is closer to pickup basketball at the same court every night than to a board game.</p>
+  </div>
+
+  <p class="big-line">Bigger was never the point. <em>Team games stayed the size of a team.</em></p>
+
+  <figure class="plate" id="crowd" data-boot="together#crowd">
+    <div class="view"></div>
+    <div class="cap tipline"><span data-tip class="small">Hover or tap a dot. Filled = one match, ring = one server's world, dashed = one event split into small groups.</span></div>
+    <details><summary>Show as a table</summary><div class="tbl-wrap" data-table></div></details>
+    <figcaption class="cap"><span class="fig">Fig. 7.2 · How many people share one game</span><span class="small">Log scale: each line is ten times the one below.</span></figcaption>
+  </figure>
+
+  <p class="big-line">You couldn't buy Deadlock. <em>A friend had to let you in.</em></p>
+
+  <figure class="plate" id="spreadplate" data-boot="together#spread">
+    <div class="view"><div class="hud bl" data-spread></div></div>
+    <div class="controls">
+      <div class="grp"><button data-seed>Send one invite</button><button data-reset>Clear</button></div>
+      <span class="small">Bright dots are streamers: they reach strangers far away.</span>
+    </div>
+    <figcaption class="cap"><span class="fig">Fig. 7.3 · Friend of a friend of a friend</span><span class="small">An illustration, not real data. The two peaks are Steam's reported records for Deadlock.</span></figcaption>
+  </figure>
+
+  <div class="prose">
+    <p class="small">Valve shipped no ads. It grew through Steam friends lists, Discord servers and streamers, the same way Gmail's invites spread in 2004. Then players got a say: in October 2026 they voted in every pre-match lobby on which new hero would arrive next.</p>
+    <p class="small">The same closeness has a cost. Long team games under pressure produce a lot of blame and abuse in chat, and every online game, Deadlock included, has to keep building ways to report and mute it.</p>
+  </div>
+</section>
+
+<!-- missing fragment: compete -->
+
+<!-- missing fragment: mods -->
 
 <section class="chapter wrap" id="family">
 <style>
@@ -468,8 +530,8 @@
   #family .fam-legend .ring { border: 2px solid var(--paper); }
   #family .fam-legend .tick { width: 2px; border-radius: 0; height: 11px; background: var(--paper); }
   #family .fam-legend .valve { width: 6px; height: 6px; background: var(--brass); }
-  #family .plate .view.river { aspect-ratio: 2 / 1; }
-  @media (max-width: 640px) { #family .plate .view.river { aspect-ratio: auto; height: 150vh; max-height: none; } }
+  #family .plate .view.river { aspect-ratio: 16 / 9; }
+  @media (max-width: 640px) { #family .plate .view.river { aspect-ratio: auto; height: 190vh; max-height: none; } }
   #family .plate .view.chart { aspect-ratio: 5 / 2; }
   @media (max-width: 640px) { #family .plate .view.chart { aspect-ratio: 4 / 3; } }
   #family .fam-tip { position: absolute; pointer-events: none; background: var(--ink-3); border: 1px solid var(--brass-2); padding: 0.45rem 0.6rem; font-size: 0.85rem; line-height: 1.35; max-width: 16rem; }
@@ -479,18 +541,12 @@
 </style>
 
 <div class="chap-head">
-  <span class="chap-num" aria-hidden="true">VII</span>
+  <span class="chap-num" aria-hidden="true">X</span>
   <span class="eyebrow">Where it comes from</span>
-  <h2>A family tree written by fans</h2>
+  <h2>Three families, one game</h2>
 </div>
 
-<div class="prose">
-  <p class="lede">Deadlock looks new, but almost every idea in it has a parent, and many of those parents were made for free by hobbyists in their bedrooms.</p>
-  <p>Two families of games meet in Deadlock. The first is the <strong>strategy game</strong>, where you look down on a battlefield and command an army. The second is the <strong>team shooter</strong>, where you see the world through the eyes of one person holding a gun, and your team wins by working together. For about twenty-five years these families mostly lived apart. Deadlock is the moment they finally merge.</p>
-  <p>The strategy side changed shape because players kept modifying the games they loved. Blizzard's <em>StarCraft</em> (1998) came with a map editor, a tool that let anyone build new scenarios. Some fan, often credited as "Aeon64" (the author and date are still argued over), built a map called <em>Aeon of Strife</em> where each player controlled one strong hero instead of a whole army, and computer soldiers marched down three roads toward the enemy base. That small change is the seed of the whole genre.</p>
-  <p>Four years later, <em>Warcraft III</em> shipped with an even better editor, and a modder called Eul rebuilt the idea as <em>Defense of the Ancients</em>, or <strong>DotA</strong>. Others took it over and kept improving it, until an anonymous designer known only as <strong>IceFrog</strong> spent years tuning it. DotA spread through internet cafés across Asia and Europe. Companies noticed. Riot Games made <em>League of Legends</em>, and Valve hired IceFrog himself to make <em>Dota 2</em>.</p>
-  <p>Trace any line below and you can see this pattern repeat. Hollow rings are games made by fans. The small brass dots mark people Valve later hired.</p>
-</div>
+<p class="big-line">Deadlock has three parents: <em>strategy games</em>, <em>team shooters</em> and <em>first-person shooters</em>. Many of their ancestors were made for free, by fans.</p>
 
 <figure class="plate" data-boot="family#river" style="margin-block: 2.6rem 2.8rem">
   <div class="view river"></div>
@@ -505,34 +561,32 @@
   </div>
   <div class="fam-card" data-card aria-live="polite"></div>
   <figcaption>
-    <span class="fig">Fig. 7.1 · The river of games</span>
+    <span class="fig">Fig. 10.1 · The river of games</span>
     <span class="fam-legend">
       <span><i class="solid"></i>Studio game</span>
       <span><i class="ring"></i>Fan-made</span>
       <span><i class="valve"></i>Creators hired by Valve</span>
       <span><i class="tick"></i>Shut down</span>
+      <span><i style="background:rgb(236,116,100)"></i>First-person shooters</span>
     </span>
-    <span>Hover or tap any dot to see its story and light up its ancestors. Arrow keys step through time.</span>
+    <span>Tap a dot to light up its ancestors. Years before 1989 are squeezed.</span>
   </figcaption>
 </figure>
 
 <div class="prose">
-  <h3>The attempts to merge</h3>
-  <p>People tried to blend the two families many times. <em>Monday Night Combat</em> (2010) had lanes, marching robots and turrets, played as a shooter. <em>Smite</em> (2014) moved the camera down behind your hero and made you aim. Epic's <em>Paragon</em> (2016) looked spectacular. <em>Battleborn</em> and <em>Gigantic</em> arrived soon after. Most of them closed within a few years. Follow those branches above and you'll see them end in a small tick mark.</p>
-  <p>Valve had something none of them did: the people behind both parents. The <em>Team Fortress</em> designers it hired in 1998 and the DotA designer it hired in 2009 were already under one roof. Deadlock grew quietly inside Valve from around 2018, under codenames like "Citadel" and "Neon Prime", before it was revealed in August 2024.</p>
-  <p>It is still officially a playtest. You can only play if a friend invites you, and Valve has never sold a copy. Even so, more people have played it at the same moment than ever played <em>Team Fortress 2</em> at once.</p>
+  <p class="small">Hollow rings are fan-made. Brass dots mark people Valve hired. Ticks are games that shut down; many tried to merge these families before Deadlock, and most of them ended there.</p>
 </div>
 
 <figure class="plate" data-boot="family#players">
   <div class="view chart"><div class="fam-tip" data-tip hidden></div></div>
   <figcaption>
-    <span class="fig">Fig. 7.2 · Peak players on Steam</span>
+    <span class="fig">Fig. 10.2 · Peak players on Steam</span>
     <span>Most people playing at the same moment, as reported. Each stem is a reported peak on that date, not a continuous count. Deadlock is still invite-only and not for sale.</span>
   </figcaption>
 </figure>
 
 <div class="prose">
-  <p class="small">Counting players is messy. Steam publishes how many people are playing at one moment; League of Legends and the phone MOBAs report monthly or daily players instead. Those numbers can't be put on the same chart, which is why League (over 100 million monthly players in 2016) and <em>Honor of Kings</em> (over 100 million <em>daily</em> players in 2020) appear here only in words.</p>
+  <p class="small">An invite-only playtest, never sold, and more people at once than Team Fortress 2 ever had.</p>
 </div>
 
 <div class="prose">
@@ -544,6 +598,7 @@
     <li>Threading the needle: the making of Quake Team Fortress. <a href="https://www.shacknews.com/article/103827/threading-the-needle-the-making-of-quake-team-fortress">Shacknews</a></li>
     <li>DotA's lead developer joins Valve (2009). <a href="https://www.gamedeveloper.com/pc/-i-defense-of-the-ancients-i-lead-developer-joins-valve">Game Developer</a></li>
     <li>Smite, Paragon, Battleborn, Super Monday Night Combat release and shutdown dates. <a href="https://en.wikipedia.org/wiki/Smite_(video_game)">Smite</a>, <a href="https://en.wikipedia.org/wiki/Paragon_(video_game)">Paragon</a>, <a href="https://gameinformer.com/2021/02/01/battleborn-shuts-down-for-good">Battleborn</a>, <a href="https://www.pcgamer.com/moba-super-monday-night-combat-to-shut-down-because-of-new-eu-privacy-laws">Super MNC</a></li>
+    <li>First-person shooters: <a href="https://en.wikipedia.org/wiki/Maze_(1973_video_game)">Maze War</a>, <a href="https://en.wikipedia.org/wiki/Doom_(1993_video_game)">Doom</a>, <a href="https://en.wikipedia.org/wiki/Quake_(video_game)">Quake</a>, <a href="https://en.wikipedia.org/wiki/Team_Fortress_(video_game)">Team Fortress (Quake mod)</a>, <a href="https://en.wikipedia.org/wiki/Counter-Strike_(video_game)">Counter-Strike</a>, <a href="https://en.wikipedia.org/wiki/Halo_2">Halo 2</a>, <a href="https://en.wikipedia.org/wiki/Gears_of_War_(video_game)">Gears of War</a>, <a href="https://en.wikipedia.org/wiki/DayZ_(mod)">DayZ</a>, <a href="https://en.wikipedia.org/wiki/PUBG:_Battlegrounds">PUBG</a>, <a href="https://en.wikipedia.org/wiki/Valorant">Valorant</a></li>
     <li>Deadlock development timeline. <a href="https://en.wikipedia.org/wiki/Deadlock_(video_game)">Wikipedia</a>, <a href="https://deadlock.wiki/Development">deadlock.wiki</a></li>
     <li>Player peaks: <a href="https://shacknews.com/article/141288/deadlock-playtest-concurrent-players">Shacknews (171,490)</a>, <a href="https://www.notebookcheck.net/Invite-only-Valve-shooter-Deadlock-hits-125-000-concurrent-players-after-Old-Gods-New-Blood-update.1235444.0.html">Notebookcheck (125k)</a>, <a href="https://www.gamesradar.com/games/third-person-shooter/deadlock-smashes-steam-record-following-new-update-that-brings-in-over-228-000-concurrent-players-but-valve-isnt-done-there-was-still-a-good-amount-of-work-we-wanted-to-do-on-the-core-game/">GamesRadar (228,086)</a>, <a href="https://www.keengamer.com/articles/news/deadlock-hits-303347-concurrent-players-on-steam-while-still-invite-only/">KeenGamer (262,145 and 303,347)</a>, <a href="https://www.gamedeveloper.com/game-platforms/-i-team-fortress-2-i-hits-new-all-time-concurrent-player-count">Game Developer (TF2, 253,997)</a></li>
     <li>League of Legends 100 million monthly players. <a href="https://fortune.com/2016/09/14/league-of-legends-100-million/">Fortune</a>; Honor of Kings 100 million daily. <a href="https://techcrunch.com/2020/11/01/tencent-claims-record-100m-daily-users-on-mobile-game-honor-of-kings">TechCrunch</a></li>
@@ -553,42 +608,24 @@
 
 <section class="chapter wrap" id="valve">
   <div class="chap-head">
-    <div class="chap-num" aria-hidden="true">VIII</div>
+    <div class="chap-num" aria-hidden="true">XI</div>
     <div class="eyebrow">The makers</div>
     <h2>Who is Valve, and why do people trust it?</h2>
   </div>
 
   <div class="prose">
-    <p class="lede">Valve is a small private company in Bellevue, Washington, a few hundred people who make games and run Steam, the biggest store for PC games. Deadlock is their newest game. To understand why players pay such close attention to it, it helps to know how Valve works.</p>
-    <p>Gabe Newell and Mike Harrington left Microsoft and founded Valve in 1996. Their first game, <em>Half-Life</em> (1998), told its whole story while you played. The camera never cut away to a movie. A scientist got dragged into a vent in front of you; a guard opened a door for you. It felt like being inside a story rather than watching one.</p>
-    <p>In 2003 Valve launched <strong>Steam</strong>, first just to update its own games. <em>Half-Life 2</em> required it, which put it on millions of computers, and other companies' games followed. Today Steam is the App Store of PC games, and it pays Valve's bills. That changes how Valve makes games: nothing has to ship on a deadline to keep the lights on. Estimates put Valve at roughly 350 to 385 employees in 2025–26. A single blockbuster game elsewhere can involve more than a thousand people.</p>
+    <p class="lede">A few hundred people near Seattle who make games and run Steam, the biggest PC game store. Steam pays the bills, so their games never have to rush.</p>
+
   </div>
 
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr><th>Year</th><th>Game</th><th>Why it mattered</th></tr></thead>
-      <tbody>
-        <tr><td class="num">1998</td><td>Half-Life</td><td>A story told entirely through play, with no cutscenes.</td></tr>
-        <tr><td class="num">1999–2000</td><td>Team Fortress Classic, Counter-Strike</td><td>Both began as free fan-made mods. Valve hired the people who made them.</td></tr>
-        <tr><td class="num">2004</td><td>Half-Life 2</td><td>Physics as play: the Gravity Gun turns any object into a tool.</td></tr>
-        <tr><td class="num">2007</td><td>Portal</td><td>A student project Valve hired whole. Each room teaches one idea with no instructions.</td></tr>
-        <tr><td class="num">2007</td><td>Team Fortress 2</td><td>Nine characters you can identify by shape alone, from across the map.</td></tr>
-        <tr><td class="num">2008</td><td>Left 4 Dead</td><td>An "AI Director" that watches the players and paces the scares.</td></tr>
-        <tr><td class="num">2011</td><td>Portal 2</td><td>Often listed among the best games ever made.</td></tr>
-        <tr><td class="num">2013</td><td>Dota 2</td><td>Valve's remake of DotA, a fan map. Its designer, IceFrog, joined Valve in 2009.</td></tr>
-        <tr><td class="num">2018</td><td>Artifact</td><td>A card game that failed fast. Players fell from about 46,000 to under 1,000 within months.</td></tr>
-        <tr><td class="num">2020</td><td>Half-Life: Alyx</td><td>A full Half-Life built for virtual reality, where your hands are the controller.</td></tr>
-        <tr><td class="num">2024–</td><td>Deadlock</td><td>Still an invite-only "playtest" in November 2026, and already Valve's busiest new game in years.</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <figure class="pic wide" data-pic="valve"><figcaption>Many of Valve’s hits started as free fan projects. Valve hired the people who made them.</figcaption></figure>
 
   <div class="prose">
-    <p>A pattern runs through that list. Valve doesn't have a house genre. What it has is a set of habits, and three of them show up in every game they make. You can try each one below.</p>
+    <p>Three habits run through everything they make. Try each one.</p>
 
     <h3>Habit one: make things readable at a glance</h3>
-    <p>In a team game you have a fraction of a second to decide whether the figure across the street is a threat. <em>Team Fortress 2</em> solved this with shape. Valve's 2007 paper on the game's art, "Illustrative Rendering in Team Fortress 2," describes reading order: first team (colour), then character (silhouette), then weapon (detail). The art borrowed from early-20th-century illustrators like J.C. Leyendecker and Norman Rockwell. It was a style chosen because it carries information.</p>
-    <p>Deadlock inherits this. Its heroes are a cast of strong, strange outlines: a gargoyle, a gangster with a tommy gun, a grandmother who travels with pigeons. Try it yourself. Start with the slider on the left, where all six figures are nearly the same soldier, and answer a few questions. Then drag the slider right.</p>
+    <p>In a team fight you have a split second to know who's who. Valve's answer, from <em>Team Fortress 2</em> (2007): shape first, then color, then detail.</p>
+    <p>Answer a few questions with the slider on the left, where everyone is the same soldier. Then drag it right.</p>
   </div>
 
   <figure class="plate" id="sil" data-boot="valve#silhouettes">
@@ -597,44 +634,40 @@
       <div class="grp"><label for="ex-r">Shape difference</label><input id="ex-r" type="range" min="0" max="1" step="0.01"><span class="lbl" data-ex>Look-alikes</span></div>
       <div class="grp"><button data-mode="silhouette" aria-pressed="true">Silhouette</button><button data-mode="shaded" aria-pressed="false">Lit &amp; coloured</button><button data-ask>New question</button></div>
     </div>
-    <figcaption class="cap"><span class="fig">Fig. 8.1 · Silhouette lineup</span><span data-q></span><span class="small" data-score></span></figcaption>
+    <figcaption class="cap"><span class="fig">Fig. 11.1 · Silhouette lineup</span><span data-q></span><span class="small" data-score></span></figcaption>
   </figure>
 
   <div class="prose">
-    <p>When the shapes are alike you're guessing. When they differ, you know the healer by her lantern and coat before you can see a face. Nothing about the figures changed except their outline.</p>
 
     <h3>Habit two: design feelings over time</h3>
-    <p><em>Left 4 Dead</em> (2008) is a game about four survivors crossing a city full of zombies. Instead of placing every monster by hand, Valve built the <strong>AI Director</strong>, a system that estimates how stressed the players are and decides when to send a horde, when to back off, and when to let them breathe. Its designer, Michael Booth, described the goal as "structured unpredictability." The rhythm is <em>build up, peak, relax</em>, the same shape a horror film editor cuts toward.</p>
-    <p>Below, four survivors (white) hold a street. Compare a spawner that sends enemies at random with one that watches the stress line and paces itself. Watch the readout: random spawning leaves players either bored or swamped. You can also overrule both with a horde of your own.</p>
+    <p><em>Left 4 Dead</em> (2008) had an <strong>AI Director</strong> that watched how stressed players were and paced the zombies: build up, peak, breathe.</p>
+    <p>Compare it with a spawner that sends enemies at random.</p>
   </div>
 
   <figure class="plate" id="dir" data-boot="valve#director">
     <div class="view"><div class="hud tr" data-readout></div></div>
     <div class="controls"><div class="grp"><button data-dir="random" aria-pressed="false">Random spawner</button><button data-dir="director" aria-pressed="true">AI Director</button><button data-horde>Send a horde now</button></div></div>
-    <figcaption class="cap"><span class="fig">Fig. 8.2 · The Director</span><span>Bands behind the graph: <span class="amber">build</span>, <span style="color:var(--blood)">peak</span>, <span class="soul">relax</span>.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Fig. 11.2 · The Director</span><span>Bands behind the graph: <span class="amber">build</span>, <span style="color:var(--blood)">peak</span>, <span class="soul">relax</span>.</span></figcaption>
   </figure>
 
   <div class="prose">
-    <p>Deadlock has its own version of this rhythm built into the map. Waves of soldiers arrive on a timer, big rewards appear at set minutes, and quiet stretches of farming alternate with sudden fights. You'll see the whole match laid out in Chapter VI.</p>
 
     <h3>Habit three: teach by letting people discover</h3>
-    <p>Valve's games rarely explain themselves with text. <em>Portal</em> is built from "test chambers," and each one introduces exactly one idea, lets you try it safely, then combines it with ideas you already know. When playtesters got stuck, the team split the puzzle into smaller steps instead of adding instructions. <em>Half-Life 2</em> hands you the Gravity Gun in a quiet yard; one chapter later you're in a town full of saw blades and you figure out the rest yourself.</p>
-    <p>Here are three tiny rooms with no words in them. Move with the arrow keys, or the buttons, or by tapping beside the white figure. Get to the door on the right.</p>
+    <p>Valve rarely explains with text. <em>Portal</em> teaches one idea per room and lets you find it.</p>
+    <p>Three rooms, no words. Reach the door on the right.</p>
   </div>
 
   <figure class="plate" id="teach" data-boot="valve#teach">
     <div class="view short"></div>
     <div class="controls"><div class="grp"><button data-pad="-1,0" aria-label="Move left">←</button><button data-pad="0,-1" aria-label="Move up">↑</button><button data-pad="0,1" aria-label="Move down">↓</button><button data-pad="1,0" aria-label="Move right">→</button><button data-reset>Reset room</button></div><span class="lbl" data-status></span></div>
-    <figcaption class="cap"><span class="fig">Fig. 8.3 · Three rooms, no words</span><span>When you finish a room, red squares show where you stopped to think.</span></figcaption>
+    <figcaption class="cap"><span class="fig">Fig. 11.3 · Three rooms, no words</span><span>When you finish a room, red squares show where you stopped to think.</span></figcaption>
   </figure>
 
   <div class="prose">
-    <p>Room one teaches that a button opens a door. Room two breaks that rule (this button only works while something sits on it) and offers the fix. Room three asks you to use both ideas twice. The red squares are a tiny version of what Valve's playtest team does at scale: watch where people hesitate, then change the room, not the person.</p>
 
     <h3>The habit behind the habits: watch people play</h3>
-    <p>Valve's playtesting lead, the experimental psychologist Mike Ambinder, summed up the method in a 2009 talk:</p>
+    <p>Behind all three: watching strangers play, silently, over and over.</p>
     <blockquote>"Game designs are hypotheses. Playtests are experiments."<cite>Mike Ambinder, Valve, GDC 2009</cite></blockquote>
-    <p>Valve brings in outsiders, watches silently, and measures what they do rather than what they say. It has used heatmaps of where players die, and even sweat and eye-tracking sensors. The same spirit explains its hiring: Team Fortress, Counter-Strike, Portal, Left 4 Dead and Dota 2 all began with outsiders who made something brilliant, and Valve hired them.</p>
 
     <h3>How Deadlock carries all of this</h3>
     <ul>
@@ -643,7 +676,7 @@
       <li><strong>Constant tuning.</strong> Patch notes are long, dry lists of small number changes across many heroes at once, in the style IceFrog used for Dota. In 2025 Valve switched from updates every two weeks to fewer, larger ones.</li>
       <li><strong>"Valve time."</strong> Development reportedly began around 2018 under the codename <em>Citadel</em>. Valve still calls the game unfinished.</li>
     </ul>
-    <p>Valve's habits don't guarantee a hit. <em>Artifact</em> launched with a price tag, heavy hype and little public testing, and it collapsed within months. Deadlock is the opposite experiment: years in public, shaped by the people playing it.</p>
+    <p>It doesn't always work. <em>Artifact</em> (2018) skipped the long public testing and collapsed in months. Deadlock is the opposite experiment.</p>
   </div>
 </section>
 
@@ -669,22 +702,22 @@
 
 <section class="chapter wrap" id="city">
   <div class="chap-head">
-    <span class="chap-num" aria-hidden="true">IX</span>
+    <span class="chap-num" aria-hidden="true">XII</span>
     <span class="eyebrow">The setting</span>
     <h2>The Cursed Apple</h2>
   </div>
 
   <div class="prose">
-    <p class="lede">Every Deadlock match happens in the same city. Its name is the Cursed Apple, a play on New York's old nickname, the Big Apple. The game's own files call the map <span class="k">dl_midtown</span>.</p>
-    <p>It is New York with a hex on it. The skyline is real Manhattan, building for building in places. The streets are named after real streets. Then the occult arrives: ritual circles painted on rooftops, a newspaper that prints prophecy, a statue of Atlas holding a glowing orb in a fog-filled plaza, a boss monster living in the sewer under Broadway.</p>
-    <p>People argue about which decade it is. The towers belong to 1899 through 1932. The clothes look like the 1930s. After a big update in September 2026, the middle of the map turned into a neon Times Square that one critic called 1950s. The fair answer is that it is a collage of several decades of New York, all standing at once. This chapter takes the city apart and puts real New York next to each piece.</p>
+    <p class="lede">Every match happens in one city: the <strong>Cursed Apple</strong>. New York, with a hex on it.</p>
+    
+    <p>The towers are 1899 to 1932, the clothes look 1930s, the neon looks 1950s. It's a collage of decades, all of them haunted.</p>
   </div>
 
   <h3 class="prose">From a street grid to three lanes</h3>
   <div class="prose">
-    <p>In 1811, New York's planners drew a grid over the whole island of Manhattan: twelve numbered avenues running up its length, and 155 cross streets. The grid is tilted about 29 degrees east of true north, because it follows the island instead of the compass. Below Houston Street the old town was already built, so its crooked streets survived.</p>
-    <p>One road ignored the grid. Broadway was there first, and it cuts diagonally across the avenues. Everywhere it crosses one, the city got a square: Union Square, Madison Square (home of the triangular Flatiron Building), Herald Square, Times Square.</p>
-    <p>A Deadlock map needs <span class="term" data-t="lane">lanes</span>: long roads from one team's home to the other's, where the computer-controlled soldiers march. Valve built them out of Manhattan's long streets. The three lanes are named <strong style="color:#f2cf4a">York</strong>, <strong style="color:#5fa8ff">Broadway</strong> and <strong style="color:#6fd07a">Greenwich</strong>, after York Avenue, Broadway and Greenwich Street. Until February 25, 2025 there was a fourth lane, named Park, after Park Avenue. Valve removed it to make the map tighter.</p>
+    <p>1811: planners laid a grid over Manhattan. Broadway was older and ran diagonally through it anyway.</p>
+    
+    <p>Deadlock needed three long roads between two homes. It borrowed three real street names: York, Broadway, Greenwich.</p>
   </div>
 
   <figure class="plate" data-boot="nyc#gridToLanes">
@@ -698,18 +731,18 @@
       <div class="grp"><label for="era-range">Morph</label><input id="era-range" data-era type="range" min="0" max="2" step="0.01" value="0"><span class="lbl" data-era-label>The 1811 plan</span></div>
       <div class="grp"><button data-ghost aria-pressed="false">Show the lost fourth lane</button></div>
     </div>
-    <figcaption><span class="fig">Fig. 9.1 · Grid to lanes</span><span>Drag to turn the island. Watch Broadway straighten into the middle lane, and the troopers start to march.</span></figcaption>
+    <figcaption><span class="fig">Fig. 12.1 · Grid to lanes</span><span>Drag to turn the island. Watch Broadway straighten into the middle lane, and the troopers start to march.</span></figcaption>
   </figure>
 
   <div class="prose">
-    <p>The two teams live at opposite ends, like the two ends of the island. Each team is backed by an occult patron. The <span class="amber">Hidden King</span> lives downtown in a run-down factory full of speakers. The <span class="sapphire">Archmother</span> lives uptown in a marble museum, and she wears a cracked mask that looks a lot like the Statue of Liberty's face. Uptown money against downtown labour is a very New York argument. Early in development, the two bases were named after the city's two great rival railroad stations, Grand Central and Penn Station.</p>
+    
   </div>
 
   <h3 class="prose">Why the towers are shaped like wedding cakes</h3>
   <div class="prose">
-    <p>Look at the skyline in Deadlock and you'll see towers that narrow in steps as they rise. That shape is a law. In 1915 the Equitable Building went up on Broadway as one enormous block, and it threw its neighbours into shadow. The next year, New York passed the first comprehensive zoning code in the United States.</p>
-    <p>The 1916 rule worked like this. A building could rise straight up from the sidewalk to a height set by the width of the street. Above that, it had to stay under a slanted line drawn up from the middle of the street, so light could still reach the pavement. A tower covering no more than a quarter of the lot could rise as high as its owner liked.</p>
-    <p>An architectural illustrator named Hugh Ferriss drew what this law allowed, in four famous stages, in 1922. His moody charcoal skylines, collected in <em>The Metropolis of Tomorrow</em> (1929), are the look of every noir and occult New York since, Deadlock's included. Try the four stages yourself.</p>
+    <p>Those stepped towers aren't a style. They're a law: New York's 1916 zoning rule, written so streets would still get sunlight.</p>
+    
+    <p>Hugh Ferriss drew what the law allowed, in four famous charcoal stages. His dark drawings are the ancestor of every noir New York, this one included.</p>
   </div>
 
   <figure class="plate" data-boot="nyc#setback">
@@ -729,17 +762,17 @@
       </div>
       <div class="grp"><button data-planes aria-pressed="true">Slanted limits</button><button data-occult aria-pressed="false">Curse it</button></div>
     </div>
-    <figcaption><span class="fig">Fig. 9.2 · The 1916 envelope</span><span>One Manhattan block, 400 by 200 feet. The district number multiplies the street width to set the height of the street wall.</span></figcaption>
+    <figcaption><span class="fig">Fig. 12.2 · The 1916 envelope</span><span>One Manhattan block, 400 by 200 feet. The district number multiplies the street width to set the height of the street wall.</span></figcaption>
   </figure>
 
   <div class="prose">
-    <p class="small">A note on roofs. A 2026 GameSpot essay credits the 1916 law for the city's copper mansard roofs, the steep French-style roofs on hotels like the Plaza. Those roofs are older. They come from the Second Empire and Beaux-Arts styles of roughly 1865 to 1910. The 1916 law gave New York its setbacks.</p>
+    
   </div>
 
   <h3 class="prose">The skyline is a real race</h3>
   <div class="prose">
-    <p>In December 2024, a Steam user named silvershroud published a guide called <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">"Real New York buildings in Deadlock, explained."</a> It puts thirty real buildings and street details beside screenshots from the game, in date order from St. Paul's Chapel (1766) to the Cities Service Building (1932), each with its architect, year and style. Most of the matches are towers on the horizon: you see them from rooftops, but you can't walk into them.</p>
-    <p>Put those towers in date order and they tell the story of the great height race. Between 1899 and 1931, the title of world's tallest building changed hands again and again in Lower Manhattan and Midtown. Below, the four elevated railways that once ran above the avenues come down one by one.</p>
+    <p>In 2024 a player named <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">silvershroud</a> matched 30 of Deadlock's skyline buildings to real ones, photo beside screenshot. It is one of the best things the community has made.</p>
+    <p>In date order, they replay the race for the tallest building in the world.</p>
   </div>
 
   <figure class="plate" data-boot="nyc#skyline">
@@ -752,12 +785,12 @@
       <div class="grp"><button data-play aria-pressed="false">Play the years</button></div>
       <div class="grp"><label for="yr-range">Year</label><input id="yr-range" data-yr type="range" min="1895" max="1970" step="0.1" value="1895" style="width:16rem"></div>
     </div>
-    <figcaption><span class="fig">Fig. 9.3 · The height race</span><span>Click a tower to see the real building and where it shows up in Deadlock. Heights to scale.</span></figcaption>
+    <figcaption><span class="fig">Fig. 12.3 · The height race</span><span>Click a tower to see the real building and where it shows up in Deadlock. Heights to scale.</span></figcaption>
   </figure>
 
   <h3 class="prose">Trains in the sky</h3>
   <div class="prose">
-    <p>From 1868, New Yorkers rode steel elevated railways above the avenues: the Ninth, Sixth, Third and Second Avenue lines. The city tore them down between 1938 and the mid-1950s. Deadlock has its own rails over the streets. Every lane has a zip-line strung above it, and a player can hook on and ride toward the fighting. A GameSpot writer described the game's "floating railways" cutting through the sky. Reading the zip-lines as the El's ghost is our own interpretation, but it fits.</p>
+    <p>From 1868 to the 1950s, New Yorkers rode trains above the avenues. In Deadlock, heroes still do.</p>
   </div>
 
   <figure class="plate" data-boot="nyc#elZipline">
@@ -766,12 +799,12 @@
       <div class="grp"><button data-zip="0" aria-pressed="true">The El</button><button data-zip="1" aria-pressed="false">The zip-line</button></div>
       <span class="small" data-zipcap></span>
     </div>
-    <figcaption><span class="fig">Fig. 9.4 · Above the avenue</span><span>Move your pointer to look around the street.</span></figcaption>
+    <figcaption><span class="fig">Fig. 12.4 · Above the avenue</span><span>Move your pointer to look around the street.</span></figcaption>
   </figure>
 
   <h3 class="prose">A field guide to the parallels</h3>
   <div class="prose">
-    <p>Some of these matches are documented by players and writers. Others are our own reading of the map. Each card says which.</p>
+    <p>Filled diamonds are documented by players and writers. Hollow ones are our reading.</p>
   </div>
   <div class="legend-key"><span class="src">◆ Documented: a source says so</span><span class="inf">◇ Our reading: a reasonable guess</span></div>
 
@@ -795,7 +828,7 @@
   </div>
 
   <div class="prose" style="margin-top:2.4rem">
-    <p>Between the lanes sit whole districts with their own stories. There is a Theater District where ghostly stagehands run puppets, a Chinatown with a bell tower, and a Haunted Lot with a basketball court and things growing in it. In the game's story, the curse first broke through in Central Park. Valve has published no statement about the city's art direction, so everything above comes from the map itself and from the players who studied it.</p>
+    <p>Between the lanes: a Theater District with ghost stagehands, Chinatown with a bell tower, a sunken plaza under a demonic Atlas, and an empty lot where barrels bite.</p>
   </div>
 
   <div class="sources" style="margin-top:2rem">

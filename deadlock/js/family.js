@@ -4,97 +4,146 @@
 import { clamp, lerp, smooth, rng, reduceMotion } from './lib.js';
 
 // ------------------------------------------------------------------ data
-// Lateral position y ∈ [-1, 1]. Streams: strategy/MOBA above (warm), team shooters below (cool).
-const T0 = 1988.4, T1 = 2027.2;
-const Y = { rts: -0.84, moba: -0.4, shoot: 0.52, dl: 0.04 };
+// Lateral position y ∈ [-1, 1]. Strategy/MOBA above (warm), team shooters and
+// first-person shooters below (cool / coral). Time before 1988.5 is compressed.
+const T0 = 1971.8, TB = 1988.5, T1 = 2027.2;
+const Y = { rts: -0.84, moba: -0.4, dl: 0.0, shoot: 0.3, fps: 0.71 };
 const COL = {
   rts: [200, 163, 90],     // brass
   moba: [240, 164, 58],    // amber
   shoot: [107, 151, 255],  // sapphire
+  fps: [236, 116, 100],    // coral: first-person shooters
   hybrid: [190, 170, 220],
   dl: [127, 240, 224],     // soul
 };
 
 // kind: mod (fan-made) | studio | event. dead: year it shut down. faded: drifts out (no shutdown date).
 const NODES = [
+  // ---- strategy → MOBA
   { id: 'herzog', lab: 'b', name: 'Herzog Zwei', year: 1989, y: -0.62, s: 'rts', kind: 'studio', maker: 'Technosoft (Sega Mega Drive)',
-    text: 'You fly one powerful transforming robot while also ordering troops around. Often named as an ancestor of both strategy games and MOBAs.', key: 1 },
+    text: 'One robot you fly yourself, plus troops you order around: an early sketch of both strategy games and MOBAs.', key: 1 },
   { id: 'dune', lab: 'a', name: 'Dune II', year: 1992, y: Y.rts, s: 'rts', kind: 'studio', maker: 'Westwood Studios',
-    text: 'Set the template for real-time strategy: gather resources, build a base, command an army with the mouse, all from above.', key: 1 },
+    text: 'The strategy-game template: gather, build, command an army from above.', key: 1 },
   { id: 'wc1', lab: 'b', name: 'Warcraft', year: 1994, y: Y.rts, s: 'rts', kind: 'studio', maker: 'Blizzard',
-    text: 'Blizzard\'s first strategy game, and the start of the series whose third game would host DotA.' },
+    text: 'Blizzard\'s first strategy game.' },
   { id: 'wc2', lab: 'a', name: 'Warcraft II', year: 1995.9, y: Y.rts, s: 'rts', kind: 'studio', maker: 'Blizzard',
-    text: 'Released December 1995. Hugely popular for playing against friends over a network.' },
+    text: 'A huge hit for playing against friends over a network.' },
   { id: 'sc', lab: 'b', name: 'StarCraft', year: 1998.25, y: Y.rts, s: 'rts', kind: 'studio', maker: 'Blizzard',
-    text: 'Shipped with a map editor. Fans used it to build their own games inside StarCraft, which is where the MOBA was born.', key: 1 },
+    text: 'It shipped with a map editor, and fans used it to invent new games inside it.', key: 1 },
   { id: 'futurecop', lab: 'b', name: 'Future Cop: LAPD', year: 1998.6, y: -0.6, s: 'rts', kind: 'studio', maker: 'Electronic Arts',
-    text: 'Its "Precinct Assault" mode had you fight in one vehicle while robot tanks drove toward the enemy base. By some definitions, the first MOBA-style match.', faded: 2001 },
-  { id: 'aos', lab: 'b', name: 'Aeon of Strife', year: 2000, y: Y.moba, s: 'moba', kind: 'mod', fuzzy: [1998, 2002], maker: 'A StarCraft fan map, often credited to "Aeon64"',
-    text: 'The core shape appears: each player controls one hero instead of an army, while computer soldiers march down three lanes guarded by towers. Its author and date are disputed (somewhere around 1998–2002).', key: 1, parents: ['sc'] },
+    text: 'A mode where robot tanks drove at the enemy base while you fought beside them.', faded: 2001 },
+  { id: 'aos', lab: 'b', name: 'Aeon of Strife', year: 2000, y: Y.moba, s: 'moba', kind: 'mod', fuzzy: [1998, 2002], maker: 'A StarCraft fan map, often credited to "Aeon64" (disputed)',
+    text: 'One hero instead of an army, soldiers marching down three lanes: the seed of the whole genre.', key: 1, parents: ['sc'] },
   { id: 'wc3', lab: 'a', name: 'Warcraft III', year: 2002.5, y: Y.rts, s: 'rts', kind: 'studio', maker: 'Blizzard',
-    text: 'Its World Editor was far more powerful, and it already had "hero" units that level up and carry items. Everything DotA needed.', key: 1 },
+    text: 'A better editor, and heroes that level up and carry items.', key: 1 },
   { id: 'dota', lab: 'a', name: 'DotA', year: 2003.2, y: Y.moba, s: 'moba', kind: 'mod', maker: 'Eul, a Warcraft III fan mapmaker',
-    text: 'Defense of the Ancients rebuilt the Aeon of Strife idea in Warcraft III. Eul released the map\'s code openly, and dozens of variants bloomed.', key: 1, parents: ['aos', 'wc3'] },
+    text: 'Defense of the Ancients: a fan map, shared openly, copied and improved by everyone.', key: 1, parents: ['aos', 'wc3'] },
   { id: 'allstars', lab: 'b', name: 'DotA Allstars', year: 2004.2, y: Y.moba, s: 'moba', kind: 'mod', maker: 'Meian & Ragn0r, then Steve "Guinsoo" Feak',
-    text: 'Collected the best heroes into one map. Guinsoo added recipe items (cheap items combine into strong ones) and Roshan, a boss that takes a whole team to kill.', parents: ['dota'] },
+    text: 'The best heroes in one map, plus items you combine and a boss it takes a team to kill.', parents: ['dota'] },
   { id: 'icefrog', lab: 'ar', name: 'IceFrog takes over', year: 2005.4, y: Y.moba, s: 'moba', kind: 'mod', maker: 'IceFrog, an anonymous designer',
-    text: 'One steady designer patching the map hundreds of times. DotA became a global phenomenon, especially in internet cafés across Asia and Europe.', key: 1, parents: ['allstars'],
-    valve: 'Valve hired IceFrog in 2009 to make Dota 2. He is widely reported to work on Deadlock too.' },
+    text: 'One patient, anonymous designer tuned it for years until internet cafés worldwide were full of it.', key: 1, parents: ['allstars'],
+    valve: 'Hired by Valve in 2009 to make Dota 2.' },
   { id: 'demigod', lab: 'ar', name: 'Demigod', year: 2009.3, y: -0.98, s: 'moba', kind: 'studio', maker: 'Gas Powered Games',
-    text: 'The first standalone, store-bought game in the genre.', faded: 2012.5 },
+    text: 'The first store-bought game in the genre.', faded: 2012.5 },
   { id: 'lol', lab: 'ar', name: 'League of Legends', year: 2009.8, y: -0.66, s: 'moba', kind: 'studio', maker: 'Riot Games',
-    text: 'A friendlier, free-to-play take on DotA, with DotA veterans on the team. Riot coined the word "MOBA". By 2016 it had over 100 million monthly players.', key: 1, parents: ['allstars'] },
+    text: 'A free, friendlier DotA that grew past 100 million monthly players.', key: 1, parents: ['allstars'] },
   { id: 'hon', lab: 'ar', name: 'Heroes of Newerth', year: 2010.4, y: -0.52, s: 'moba', kind: 'studio', maker: 'S2 Games',
-    text: 'A close copy of DotA\'s rules and once League\'s biggest rival.', dead: 2022.5 },
+    text: 'A close copy of DotA, once League\'s biggest rival.', dead: 2022.5 },
   { id: 'dota2', lab: 'a', name: 'Dota 2', year: 2013.5, y: Y.moba, s: 'moba', kind: 'studio', maker: 'Valve',
-    text: 'Valve\'s full remake of DotA. Every hero is free; money comes from cosmetics. Its championship, The International, paid out a record $40 million in 2021.', key: 1, parents: ['icefrog'],
-    valve: 'A fan-made map became a Valve game because Valve hired the fan who was running it.' },
-  { id: 'smite', lab: 'b', name: 'Smite', year: 2014.2, y: -0.18, s: 'moba', kind: 'studio', maker: 'Hi-Rez Studios',
-    text: 'Moved the camera down behind your character\'s shoulder and made you aim your attacks. A key step toward Deadlock\'s point of view.', key: 1, parents: ['lol'] },
+    text: 'Valve\'s remake of the fan map; its championship once paid out $40 million.', key: 1, parents: ['icefrog'],
+    valve: 'A fan map became a Valve game because Valve hired the fan.' },
+  { id: 'smite', lab: 'b', name: 'Smite', year: 2014.2, y: -0.2, s: 'moba', kind: 'studio', maker: 'Hi-Rez Studios',
+    text: 'A MOBA seen from behind your hero\'s shoulder, where you aim.', key: 1, parents: ['lol'] },
   { id: 'hots', lab: 'ar', name: 'Heroes of the Storm', year: 2015.4, y: -1.0, s: 'moba', kind: 'studio', maker: 'Blizzard',
-    text: 'Blizzard\'s "hero brawler": shared team levels and no shop. Put into maintenance mode in 2022.', dead: 2022.5, deadLabel: 'maintenance' },
+    text: 'Blizzard\'s shop-free take, now in maintenance mode.', dead: 2022.5, deadLabel: 'maintenance' },
   { id: 'hok', lab: 'ar', name: 'Honor of Kings', year: 2015.9, y: -0.81, s: 'moba', kind: 'studio', maker: 'TiMi Studio Group (Tencent)',
-    text: 'A phone MOBA, and the most played game of its kind on Earth: over 100 million people a day in 2020.', key: 1 },
-  { id: 'paragon', lab: 'ar', name: 'Paragon', year: 2016.2, y: -0.06, s: 'moba', kind: 'studio', maker: 'Epic Games',
-    text: 'A gorgeous third-person MOBA. Epic moved its staff to Fortnite and shut Paragon down in April 2018, then gave its art away for free.', dead: 2018.3, parents: ['smite'] },
+    text: 'A phone MOBA played by 100 million people a day.', key: 1 },
+  { id: 'paragon', lab: 'ar', name: 'Paragon', year: 2016.2, y: -0.1, s: 'moba', kind: 'studio', maker: 'Epic Games',
+    text: 'A gorgeous third-person MOBA, shut down when Epic bet on Fortnite.', dead: 2018.3, parents: ['smite'] },
   { id: 'mlbb', lab: 'ar', name: 'Mobile Legends', year: 2016.55, y: -0.9, s: 'moba', kind: 'studio', maker: 'Moonton',
-    text: 'The phone MOBA that dominates Southeast Asia.' },
+    text: 'The phone MOBA of Southeast Asia.' },
   { id: 'wildrift', lab: 'ar', name: 'Wild Rift', year: 2020.8, y: -0.585, s: 'moba', kind: 'studio', maker: 'Riot Games',
-    text: 'League of Legends rebuilt for phones, with shorter matches.', parents: ['lol'] },
+    text: 'League rebuilt for phones.', parents: ['lol'] },
   { id: 'unite', lab: 'ar', name: 'Pokémon Unite', year: 2021.5, y: -0.73, s: 'moba', kind: 'studio', maker: 'TiMi / The Pokémon Company',
-    text: 'A MOBA about scoring goals, and for many children their first one.', parents: ['hok'] },
-  { id: 'predecessor', lab: 'ar', name: 'Predecessor', year: 2024.1, y: -0.06, s: 'moba', kind: 'studio', maker: 'Omeda Studios',
-    text: 'Built by fans from Paragon\'s free art after Epic gave it away. A dead game revived.', parents: ['paragon'] },
-  { id: 'smite2', lab: 'ar', name: 'Smite 2', year: 2025.05, y: -0.27, s: 'moba', kind: 'studio', maker: 'Hi-Rez Studios',
-    text: 'The sequel, free to play from January 2025.', parents: ['smite'] },
+    text: 'For many children, their first MOBA.', parents: ['hok'] },
+  { id: 'predecessor', lab: 'ar', name: 'Predecessor', year: 2024.1, y: -0.1, s: 'moba', kind: 'studio', maker: 'Omeda Studios',
+    text: 'Fans rebuilt Paragon from the art Epic gave away.', parents: ['paragon'] },
+  { id: 'smite2', lab: 'ar', name: 'Smite 2', year: 2025.05, y: -0.28, s: 'moba', kind: 'studio', maker: 'Hi-Rez Studios',
+    text: 'The sequel, free from January 2025.', parents: ['smite'] },
 
-  { id: 'tf', lab: 'b', name: 'Team Fortress', year: 1996.65, y: Y.shoot, s: 'shoot', kind: 'mod', maker: 'Robin Walker, John Cook & Ian Caughley (a Quake mod)',
-    text: 'Teams of players each pick a class with a job: medic, sniper, engineer. The idea of "roles" starts here on the shooter side.', key: 1,
-    valve: 'Valve hired its creators in 1998. Robin Walker is reported to be a key Deadlock developer.' },
+  // ---- first-person shooters
+  { id: 'mazewar', lab: 'a', name: 'Maze War', year: 1973.3, y: Y.fps, s: 'fps', kind: 'studio', maker: 'Steve Colley, Greg Thompson & Howard Palmer (NASA Ames)',
+    text: 'For the first time you could see another person in a 3D maze, drawn as a floating eyeball, and shoot them.', key: 1 },
+  { id: 'spasim', lab: 'b', name: 'Spasim', year: 1974.2, y: 1.0, s: 'fps', kind: 'studio', maker: 'Jim Bowery (PLATO network)',
+    text: 'Up to 32 people flying wireframe spaceships on one campus network.', faded: 1980 },
+  { id: 'wolf3d', lab: 'a', name: 'Wolfenstein 3D', year: 1992.35, y: Y.fps, s: 'fps', kind: 'studio', maker: 'id Software',
+    text: 'Fast 3D corridors on an ordinary PC, passed around for free as shareware.', key: 1 },
+  { id: 'doom', lab: 'b', name: 'Doom', year: 1993.95, y: Y.fps, s: 'fps', kind: 'studio', maker: 'id Software',
+    text: 'Four friends on one office network, and fans could build their own levels.', key: 1 },
+  { id: 'quake', lab: 'a', name: 'Quake', year: 1996.5, y: Y.fps, s: 'fps', kind: 'studio', maker: 'id Software',
+    text: 'Real 3D, played over the internet, with rules fans could rewrite.', key: 1 },
+  { id: 'goldeneye', lab: 'b', name: 'GoldenEye 007', year: 1997.65, y: 1.0, s: 'fps', kind: 'studio', maker: 'Rare (Nintendo 64)',
+    text: 'Four people on one couch, one TV split in four.', parents: ['doom'], faded: 2002 },
+  { id: 'halflife', lab: 'a', name: 'Half-Life', year: 1998.9, y: 0.56, s: 'fps', kind: 'studio', maker: 'Valve',
+    text: 'Valve\'s first game, built on Quake\'s engine, and a playground for modders.', key: 1, parents: ['quake'] },
+  { id: 'cs', lab: 'br', name: 'Counter-Strike', year: 1999.6, y: 0.56, s: 'fps', kind: 'mod', maker: 'Minh "Gooseman" Le & Jess Cliffe (a Half-Life mod)',
+    text: 'One life per round, so your team has to plan together.', key: 1, parents: ['halflife'],
+    valve: 'Valve bought it and hired its two creators in 2000.' },
+  { id: 'ut', lab: 'br', name: 'Quake III & Unreal T.', year: 1999.9, y: 0.93, s: 'fps', kind: 'studio', maker: 'id Software / Epic Games',
+    text: 'Shooters built only for playing against people, with bots to fill the gaps.', parents: ['quake'], faded: 2012 },
+  { id: 'bf', lab: 'br', name: 'Battlefield 1942', year: 2002.7, y: 0.79, s: 'fps', kind: 'studio', maker: 'DICE',
+    text: '64 players at once, on foot, in tanks and in planes.', parents: ['quake'] },
+  { id: 'halo2', lab: 'b', name: 'Halo 2', year: 2004.85, y: 1.0, s: 'fps', kind: 'studio', maker: 'Bungie (Xbox)',
+    text: 'Press one button and the game finds fair opponents and keeps your friends together.', key: 1, parents: ['goldeneye'], dead: 2010.3 },
+  { id: 'gears', lab: 'a', name: 'Gears of War', year: 2006.85, y: 0.63, s: 'fps', kind: 'studio', maker: 'Epic Games (Xbox 360)',
+    text: 'The camera moves behind your character\'s shoulder: Deadlock\'s point of view starts here.', key: 1, parents: ['ut'] },
+  { id: 'cod4', lab: 'br', name: 'Call of Duty 4', year: 2007.85, y: 0.86, s: 'fps', kind: 'studio', maker: 'Infinity Ward',
+    text: 'Every match earns you something permanent, so you keep coming back.', parents: ['ut'] },
+  { id: 'dayz', lab: 'b', name: 'DayZ', year: 2012.4, y: 1.0, s: 'fps', kind: 'mod', maker: 'Dean Hall (an ARMA 2 mod)',
+    text: 'A fan mod: strangers surviving in one open world, helping or betraying each other.' },
+  { id: 'csgo', lab: 'b', name: 'CS:GO', year: 2012.65, y: 0.56, s: 'fps', kind: 'studio', maker: 'Valve & Hidden Path',
+    text: 'Counter-Strike rebuilt, with an esports scene and a market for weapon skins.', parents: ['cs'], dead: 2023.7, deadLabel: '→ CS2' },
+  { id: 'pubg', lab: 'b', name: 'PUBG', year: 2017.25, y: 1.0, s: 'fps', kind: 'studio', maker: 'PUBG Corp (Brendan Greene)',
+    text: '100 people drop onto an island; the last one standing wins.', key: 1, parents: ['dayz'] },
+  { id: 'fortnite', lab: 'a', name: 'Fortnite', year: 2017.75, y: 0.93, s: 'fps', kind: 'studio', maker: 'Epic Games',
+    text: 'Free, cartoonish, and for many young people the place they hang out with friends.', key: 1, parents: ['pubg', 'gears'] },
+  { id: 'apex', lab: 'br', name: 'Apex Legends', year: 2019.1, y: 0.86, s: 'fps', kind: 'studio', maker: 'Respawn Entertainment',
+    text: 'Heroes with powers in a battle royale, and a "ping" to talk without speaking.', parents: ['cod4', 'pubg'] },
+  { id: 'valorant', lab: 'a', name: 'Valorant', year: 2020.45, y: 0.56, s: 'fps', kind: 'studio', maker: 'Riot Games',
+    text: 'Counter-Strike\'s tense rounds, plus superpowers.', parents: ['csgo', 'overwatch'] },
+  { id: 'cs2', lab: 'b', name: 'Counter-Strike 2', year: 2023.73, y: 0.56, s: 'fps', kind: 'studio', maker: 'Valve',
+    text: 'Counter-Strike on Source 2, the same engine Deadlock runs on.', parents: ['csgo'] },
+
+  // ---- team shooters (classes → heroes)
+  { id: 'tf', lab: 'b', name: 'Team Fortress', year: 1996.9, y: Y.shoot, s: 'shoot', kind: 'mod', maker: 'Robin Walker, John Cook & Ian Caughley (a Quake mod)',
+    text: 'Pick a job, medic, sniper or builder, and win as a team.', key: 1, parents: ['quake'],
+    valve: 'Valve hired its creators in 1998.' },
   { id: 'tfc', lab: 'a', name: 'Team Fortress Classic', year: 1999.3, y: Y.shoot, s: 'shoot', kind: 'studio', maker: 'Valve',
-    text: 'Valve\'s remake of the mod, made by the people who built it.', parents: ['tf'] },
+    text: 'Valve\'s remake, by the people who made the mod.', parents: ['tf'] },
   { id: 'tf2', lab: 'b', name: 'Team Fortress 2', year: 2007.8, y: Y.shoot, s: 'shoot', kind: 'studio', maker: 'Valve',
-    text: 'Nine cartoon characters you can recognise from across a map by shape alone. The template for every "hero shooter" since.', key: 1, parents: ['tfc'] },
-  { id: 'mnc', lab: 'a', name: 'Monday Night Combat', year: 2010.5, y: 0.3, s: 'hybrid', kind: 'studio', maker: 'Uber Entertainment',
-    text: 'A third-person class shooter with lanes, marching robot soldiers, turrets and money for upgrades. The closest thing to Deadlock before Deadlock.', key: 1, parents: ['tf2', 'allstars'] },
-  { id: 'smnc', lab: 'b', name: 'Super MNC', year: 2012.3, y: 0.3, s: 'hybrid', kind: 'studio', maker: 'Uber Entertainment',
-    text: 'Made the MOBA parts explicit: heroes, items, lanes. Its servers shut in May 2018.', dead: 2018.4, parents: ['mnc'] },
-  { id: 'battleborn', lab: 'l', name: 'Battleborn', year: 2016.35, y: 0.22, s: 'hybrid', kind: 'studio', maker: 'Gearbox',
-    text: 'A first-person hero shooter with a lane-pushing mode. Released three weeks before Overwatch and overshadowed. Unplayable since January 2021.', dead: 2021.1, parents: ['tf2', 'lol'] },
-  { id: 'overwatch', lab: 'br', name: 'Overwatch', year: 2016.4, y: 0.73, s: 'shoot', kind: 'studio', maker: 'Blizzard',
-    text: 'Made "hero shooter" a household term: each character has a distinct look, weapon and set of powers.', key: 1, parents: ['tf2'] },
-  { id: 'gigantic', lab: 'l', name: 'Gigantic', year: 2017.55, y: 0.14, s: 'hybrid', kind: 'studio', maker: 'Motiga',
-    text: 'Third-person teams defending giant guardian beasts. Shut down July 2018, revived as Rampage Edition in 2024.', dead: 2018.6, revive: 2024.3, parents: ['tf2', 'lol'] },
-  { id: 'rivals', lab: 'br', name: 'Marvel Rivals', year: 2024.95, y: 0.88, s: 'shoot', kind: 'studio', maker: 'NetEase',
-    text: 'A third-person hero shooter that drew 644,269 players at once on Steam in January 2025. Proof of how big the audience for this style is.', parents: ['overwatch'] },
+    text: 'Nine characters you can recognise by shape alone: the first hero shooter.', key: 1, parents: ['tfc'] },
+  { id: 'mnc', lab: 'l', name: 'Monday Night Combat', year: 2010.5, y: 0.2, s: 'hybrid', kind: 'studio', maker: 'Uber Entertainment',
+    text: 'A shooter with lanes, marching robots and upgrades: Deadlock before Deadlock.', key: 1, parents: ['tf2', 'allstars'] },
+  { id: 'smnc', lab: 'b', name: 'Super MNC', year: 2012.3, y: 0.2, s: 'hybrid', kind: 'studio', maker: 'Uber Entertainment',
+    text: 'Made the MOBA parts explicit; switched off in 2018.', dead: 2018.4, parents: ['mnc'] },
+  { id: 'battleborn', lab: 'l', name: 'Battleborn', year: 2016.35, y: 0.14, s: 'hybrid', kind: 'studio', maker: 'Gearbox',
+    text: 'A hero shooter with lanes, buried by Overwatch three weeks later.', dead: 2021.1, parents: ['tf2', 'lol'] },
+  { id: 'overwatch', lab: 'br', name: 'Overwatch', year: 2016.4, y: 0.4, s: 'shoot', kind: 'studio', maker: 'Blizzard',
+    text: 'Made "hero shooter" a household phrase.', key: 1, parents: ['tf2'] },
+  { id: 'gigantic', lab: 'l', name: 'Gigantic', year: 2017.55, y: 0.08, s: 'hybrid', kind: 'studio', maker: 'Motiga',
+    text: 'Teams defending giant beasts; shut in 2018, revived in 2024.', dead: 2018.6, revive: 2024.3, parents: ['tf2', 'lol'] },
+  { id: 'rivals', lab: 'br', name: 'Marvel Rivals', year: 2024.95, y: 0.46, s: 'shoot', kind: 'studio', maker: 'NetEase',
+    text: 'A third-person hero shooter with 644,269 players at once on Steam.', parents: ['overwatch'] },
 
+  // ---- Deadlock
   { id: 'citadel', lab: 'br', name: 'Citadel', year: 2018.5, y: Y.dl, s: 'dl', kind: 'event', maker: 'Valve, in secret',
-    text: 'Development reportedly begins around 2018. The codename "Citadel" turns up in Dota 2\'s files in 2019; "Neon Prime" is trademarked in 2022.', parents: ['dota2', 'tf2'] },
+    text: 'Work reportedly begins in secret around 2018.', parents: ['dota2', 'tf2', 'gears'] },
   { id: 'deadlock', lab: 'l', name: 'Deadlock', year: 2024.65, y: Y.dl, s: 'dl', kind: 'studio', maker: 'Valve',
-    text: 'Revealed August 2024. Dota\'s lanes, shops and souls, played as a third-person shooter by teams of six. Still invite-only, still "unfinished", and it hit 303,347 players at once in October 2026.', key: 1,
-    parents: ['citadel', 'dota2', 'tf2', 'smite', 'mnc'] },
+    text: 'Dota\'s map, Team Fortress\'s cast, a shooter\'s aim and movement. Still invite-only; 303,347 players at once.', key: 1,
+    parents: ['citadel', 'dota2', 'tf2', 'gears', 'smite', 'mnc'] },
 ];
 const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
+const MAIN_Y = new Set([Y.moba, Y.rts, Y.shoot, Y.fps]);
 
 // Deadlock's own milestones along its line
 const DL_MARKS = [
@@ -110,31 +159,34 @@ function buildPaths() {
   // main streams
   paths.push(P([[1989, -0.62], [1992, Y.rts], [2002.5, Y.rts], [2004.6, Y.moba]], { c: 'rts', w: 1.0, main: 1 }));
   paths.push(P([[1998.6, -0.6], [2000, Y.moba], [T1, Y.moba]], { c: 'moba', w: 1.3, main: 1, from: 1998.3 }));
-  paths.push(P([[1996.65, Y.shoot], [T1, Y.shoot]], { c: 'shoot', w: 1.3, main: 1 }));
-  // Aeon of Strife leaves StarCraft
+  paths.push(P([[1996.9, Y.shoot], [T1, Y.shoot]], { c: 'shoot', w: 1.3, main: 1 }));
+  paths.push(P([[1973.3, Y.fps], [T1, Y.fps]], { c: 'fps', w: 1.3, main: 1 }));
+  // Aeon of Strife leaves StarCraft; Team Fortress leaves Quake
   paths.push(P([[1998.25, Y.rts], [2000, Y.moba]], { c: 'rts', w: 0.45 }));
-  // branches: leave the parent line ~1.2 years before the node, then run to death / fade / edge
+  paths.push(P([[1996.5, Y.fps], [1996.9, Y.shoot]], { c: 'fps', w: 0.55, thread: 1 }));
+  // branches: leave the parent line ~1.3 years before the node, then run to death / fade / edge
   for (const n of NODES) {
-    if (n.y === Y.moba || n.y === Y.rts || n.y === Y.shoot || n.s === 'dl') continue;
+    if (n.s === 'dl' || (MAIN_Y.has(n.y) && n.s !== 'hybrid')) continue;
     if (n.id === 'herzog' || n.id === 'futurecop') continue;
     const par = n.parents ? byId[n.parents[0]] : null;
-    const py = par ? par.y : n.s === 'shoot' ? Y.shoot : n.s === 'hybrid' ? Y.shoot : Y.moba;
-    const t0 = Math.max(par ? par.year : T0, n.year - 1.3);
+    const py = par ? par.y : n.s === 'fps' ? Y.fps : n.s === 'shoot' || n.s === 'hybrid' ? Y.shoot : Y.moba;
+    const t0 = Math.max(par ? par.year : (n.s === 'fps' ? 1973.3 : T0), n.year - 1.3);
     const end = n.dead ?? n.faded ?? T1;
     const c = n.s;
     paths.push(P([[t0, py], [n.year, n.y], [end, n.y]], { c, w: 0.55, node: n, fade: !!n.faded, dead: !!n.dead, alive: !n.dead && !n.faded }));
     if (n.revive) paths.push(P([[n.revive, n.y], [T1, n.y]], { c, w: 0.4, node: n, alive: 1 }));
-    // second parent thread (hybrids braid both streams)
-    if (n.parents && n.parents[1] && n.s === 'hybrid') {
+    // second parent thread (braids across streams)
+    if (n.parents && n.parents[1]) {
       const p2 = byId[n.parents[1]];
-      paths.push(P([[Math.max(p2.year, n.year - 1.6), p2.y], [n.year, n.y]], { c: p2.s, w: 0.3, thread: 1 }));
+      if (p2 && p2.year < n.year && p2.y !== n.y) paths.push(P([[Math.max(p2.year, n.year - 1.6), p2.y], [n.year, n.y]], { c: p2.s, w: 0.3, thread: 1 }));
     }
   }
   // Paragon's free art → Predecessor (dotted inheritance)
-  paths.push(P([[2018.3, -0.06], [2024.1, -0.06]], { c: 'moba', w: 0.3, dotted: 1 }));
-  // Deadlock: threads from Dota 2 and TF2 into the secret years, then the bright line
+  paths.push(P([[2018.3, -0.1], [2024.1, -0.1]], { c: 'moba', w: 0.3, dotted: 1 }));
+  // Deadlock: threads from Dota 2, TF2 and the over-the-shoulder shooters, then the bright line
   paths.push(P([[2013.5, Y.moba], [2018.5, Y.dl]], { c: 'moba', w: 0.55, thread: 1, toDl: 1 }));
   paths.push(P([[2007.8, Y.shoot], [2018.5, Y.dl]], { c: 'shoot', w: 0.55, thread: 1, toDl: 1 }));
+  paths.push(P([[2006.85, 0.63], [2018.5, Y.dl]], { c: 'fps', w: 0.55, thread: 1, toDl: 1 }));
   paths.push(P([[2018.5, Y.dl], [2024.65, Y.dl]], { c: 'dl', w: 0.5, dotted: 1 }));
   paths.push(P([[2024.65, Y.dl], [T1, Y.dl]], { c: 'dl', w: 1.6, main: 1, dl: 1 }));
   return paths;
@@ -155,7 +207,7 @@ export function river(plate) {
   const view = plate.querySelector('.view');
   const cv = document.createElement('canvas'); cv.className = 'c2d'; view.prepend(cv);
   cv.setAttribute('role', 'img');
-  cv.setAttribute('aria-label', 'A timeline from 1989 to 2026 showing strategy games and team shooters flowing into Deadlock. The same information is listed in the card below the figure.');
+  cv.setAttribute('aria-label', 'A timeline from 1973 to 2026 showing three families of games, strategy games and MOBAs, team shooters, and first-person shooters, flowing into Deadlock. Each game is described in the card below the figure.');
   const ctx = cv.getContext('2d');
   const card = plate.querySelector('[data-card]');
   const scrub = plate.querySelector('input[type=range]');
@@ -179,14 +231,16 @@ export function river(plate) {
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(view);
 
   // map (t, y) → screen
-  function pad() { return vertical ? { a: 40, b: 26, l: 30, r: 30 } : { a: 54, b: 36, l: 34, r: 34 }; }
+  function pad() { return vertical ? { a: 40, b: 26, l: 30, r: 30 } : { a: 54, b: 36, l: 34, r: 52 }; }
+  const FR = 0.13; // share of the axis given to 1972–1988
+  const U = (t) => (t < TB ? FR * (t - T0) / (TB - T0) : FR + (1 - FR) * (t - TB) / (T1 - TB));
   function S(t, y) {
     const p = pad();
-    const u = (t - T0) / (T1 - T0);
+    const u = U(t);
     if (!vertical) return [p.a + u * (W - p.a - p.b), p.l + (y + 1) / 2 * (H - p.l - p.r)];
     return [p.l + (y + 1) / 2 * (W - p.l - p.r), p.a + u * (H - p.a - p.b)];
   }
-  const ppy = () => (vertical ? H : W) / (T1 - T0); // pixels per year
+  const ppy = () => (vertical ? H : W) * 0.87 / (T1 - TB); // pixels per year (after the break)
 
   // particles riding the paths
   const parts = [];
@@ -230,7 +284,15 @@ export function river(plate) {
     // decade grid
     ctx.font = '500 11px "DM Mono", monospace';
     ctx.textBaseline = 'middle';
-    for (let yr = 1990; yr <= 2025; yr += 5) {
+    {
+      const [bx, by] = S(TB, 1);
+      ctx.strokeStyle = 'rgba(232,226,212,0.18)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (!vertical) { for (const o of [-3, 3]) { ctx.moveTo(bx + o - 4, H - 22); ctx.lineTo(bx + o + 4, H - 6); } }
+      else { for (const o of [-3, 3]) { ctx.moveTo(4, by + o + 4); ctx.lineTo(20, by + o - 4); } }
+      ctx.stroke();
+    }
+    for (const yr of [1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]) {
       const [x, y] = S(yr, -1);
       const [x2, y2] = S(yr, 1);
       ctx.strokeStyle = yr % 10 ? 'rgba(232,226,212,0.035)' : 'rgba(232,226,212,0.08)';
@@ -253,8 +315,8 @@ export function river(plate) {
     };
     if (!vertical) {
       lab('STRATEGY GAMES · YOU COMMAND AN ARMY', 1989.1, -1.0, COL.rts);
-      lab('TEAM SHOOTERS', 1989.1, Y.shoot - 0.035, COL.shoot);
-      lab('YOU ARE ONE PERSON', 1989.1, Y.shoot + 0.035, COL.shoot);
+      lab('TEAM SHOOTERS · PICK A ROLE', 1989.1, Y.shoot, COL.shoot);
+      lab('FIRST-PERSON SHOOTERS', 1974.6, Y.fps + 0.07, COL.fps);
       lab('MOBAS · YOU ARE ONE HERO IN A WAR', 2006.6, Y.moba + 0.075, COL.moba);
     }
 
@@ -442,12 +504,13 @@ export function river(plate) {
   });
   setCursor(T1);
 
+  window.__famDraw = (yr) => { if (yr) setCursor(yr); draw(performance.now()); }; // debug: draw without rAF
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (visible) {
       if (playing) {
-        const nc = cursor + dt * 1.9;
+        const nc = cursor + dt * (cursor < TB ? 7 : 1.9);
         if (nc >= T1) { setCursor(T1); playing = false; playBtn.setAttribute('aria-pressed', 'false'); } else setCursor(nc);
         // follow the newest node in the card
         const latest = order.filter((n) => n.year <= cursor).pop();

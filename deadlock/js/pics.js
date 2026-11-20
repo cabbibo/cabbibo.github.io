@@ -17,6 +17,23 @@ const glow = (id, c) => `<radialGradient id="${id}"><stop offset="0" stop-color=
 
 // ---------------------------------------------------------------- drawings
 const PICS = {
+  // Valve's games on one line; hollow = began as someone else's fan project
+  valve() {
+    const G = [[1998, 'Half-Life', 0], [1999, 'Team Fortress', 1], [2000, 'Counter-Strike', 1], [2004, 'Half-Life 2', 0], [2007, 'Portal', 1], [2007.4, 'Team Fortress 2', 0], [2008, 'Left 4 Dead', 1], [2011, 'Portal 2', 0], [2013, 'Dota 2', 1], [2018, 'Artifact', 0], [2020, 'Half-Life: Alyx', 0], [2024, 'Deadlock', 0]];
+    const X = (y) => 30 + ((y - 1996) / 30) * 540;
+    let b = `<line x1="20" y1="120" x2="580" y2="120" stroke="${B}" stroke-width="1.5"/>`;
+    for (let y = 2000; y <= 2025; y += 5) b += `<line x1="${X(y)}" y1="116" x2="${X(y)}" y2="124" stroke="${F}"/>` + t(X(y), 142, y, { size: 10, c: F });
+    b += `<rect x="${X(2003)}" y="126" width="${X(2026) - X(2003)}" height="4" fill="${O}" opacity="0.5"/>` + t(X(2003) + 4, 160, 'STEAM, 2003 →', { a: 'start', size: 9, c: O });
+    G.forEach(([y, n, mod], i) => {
+      const x = X(y), up = i % 2 === 0, ly = up ? 42 : 80, c = n === 'Deadlock' ? A : n === 'Artifact' ? 'var(--blood)' : P;
+      b += `<line x1="${x}" y1="${up ? 52 : 90}" x2="${x}" y2="114" stroke="${R}"/>`;
+      b += `<circle cx="${x}" cy="120" r="6" fill="${mod ? 'var(--ink)' : c}" stroke="${c}" stroke-width="2"/>`;
+      b += t(x, ly, n.toUpperCase(), { c, size: 10 });
+    });
+    b += `<circle cx="30" cy="12" r="5" fill="var(--ink)" stroke="${P}" stroke-width="2"/>` + t(42, 16, 'BEGAN AS SOMEONE ELSE’S FAN PROJECT', { a: 'start', size: 9 });
+    return svg(600, 168, b, 'Valve games from 1998 to 2024; several began as fan projects');
+  },
+
   // two gods, six heroes each
   teams() {
     let b = `<defs>${glow('gA', '#f0a43a')}${glow('gS', '#6b97ff')}</defs>`;
