@@ -196,6 +196,37 @@ export function lanes(el) {
     }
   }
 
+  // swap in the real structure models from the game files (sizes kept readable for the sim)
+  import('./models.js').then(async (M) => {
+    const REAL = { guardian: ['boss_tier_01_brazier_guardian', 'boss_tier_01_brazier_guardian', 42], walker: ['boss_tier_02_sun_walker', 'boss_tier_02_sun_walker', 56],
+      baseguard: ['boss_tier_01_brazier_guardian', 'boss_tier_01_brazier_guardian', 32], shrine: ['shrine_amber', 'shrine_sapphire', 34], patron: ['patron_amber', 'patron_sapphire', 88] };
+    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+    const pm = new THREE.PMREMGenerator(s.renderer);
+    scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 1.1;
+    const blue = new THREE.Color(0x9fb4ff);
+    for (const st of structures) {
+      const [a, b, h] = REAL[st.kind];
+      const real = await M.heroModel(st.team ? b : a, h);
+      const glowCol = new THREE.Color(st.team ? 0x2a4a9a : 0x8a5410);
+      real.traverse((o) => {
+        if (!o.isMesh || o.material.blending === THREE.AdditiveBlending) return;
+        o.material = o.material.clone();
+        if (st.team === 1 && a === b) o.material.color.multiply(blue);
+        o.material.emissive = glowCol; o.material.emissiveIntensity = 0.55;
+        if (o.material.map && !o.material.emissiveMap) o.material.emissiveMap = o.material.map;
+      });
+      real.rotation.y = st.team === 0 ? Math.PI : 0;
+      const keep = st.mesh.children.filter((c) => c.isSprite || c === st.pit || c === st.core || c === st.halo);
+      st.mesh.clear(); st.mesh.add(real, ...keep);
+      st.mesh.userData.legs = [];
+      if (st.kind === 'patron') { st.ped = real; if (st.core) { st.core.position.y = h * 0.62; } }
+      if (st.phase === 2) real.visible = false;
+      st.mesh.traverse((o) => { o.userData.struct = st; });
+      st.h = h;
+      st.bar.position.copy(st.pos).add(new THREE.Vector3(0, h + 10, 0));
+    }
+  }).catch((e) => console.warn('real structures unavailable', e));
+
   // ------------------------------------------------------------ units
   const MAXT = 900;
   const trooperGeo = new THREE.CapsuleGeometry(3.2, 6, 3, 8); trooperGeo.translate(0, 6.4, 0);

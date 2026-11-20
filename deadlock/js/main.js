@@ -2,7 +2,8 @@
 // and lazy boot of each chapter's explorable when it nears the viewport.
 import { GLOSSARY } from './glossary.js';
 import { drawPics } from './pics.js';
-drawPics();
+import { drawClips } from './media.js';
+drawPics(); drawClips();
 
 // ---- lazy boot: <div data-boot="module#export"> gets booted once near view
 const booted = new WeakSet();
@@ -35,7 +36,7 @@ function route() {
   if (!tab && id) { inner = document.getElementById(id); tab = inner && inner.closest('[data-tab]'); }
   tabs.forEach((t) => { t.hidden = t !== tab; });
   document.body.classList.toggle('in-tab', !!tab);
-  tabLinks.forEach((a) => a.classList.toggle('on', tab && a.dataset.tablink === tab.id));
+  tabLinks.forEach((a) => a.classList.toggle('on', !!tab && a.dataset.tablink === tab.id));
   const on = tabLinks.find((a) => a.classList.contains('on'));
   if (on && nav) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
   if (tab) {

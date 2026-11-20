@@ -106,9 +106,23 @@
 
   <figure class="pic wide" data-pic="towers"><figcaption>Five layers of defense, broken one at a time. Towers shrug off damage unless your soldiers walk in with you.</figcaption></figure>
 
+  <div class="clips" style="max-width:56rem">
+    <figure class="photo"><img src="https://cdn.deadlock.wiki/Map_colored.png" alt="The Deadlock map with its three lanes colored" loading="lazy" referrerpolicy="no-referrer"><figcaption>The real map: York in yellow, Broadway in blue, Greenwich in green. © Valve, via <a href="https://deadlock.wiki/">deadlock.wiki</a></figcaption></figure>
+    <figure class="photo"><img src="assets/minimap.webp" alt="The in-game minimap: streets in grey, buildings as holes" loading="lazy"><figcaption>The in-game minimap, straight from the game files. Grey is street; the gaps are buildings. © Valve</figcaption></figure>
+  </div>
+
   <div class="prose">
     <p class="small">Try <em>No heroes</em>, then <em>Archmother abandons York</em>, at high speed. The lane they leave collapses; the lanes they reinforce push back. Whole matches are made of that trade. Until February 2025 there were four streets; Valve cut one.</p>
   </div>
+</section>
+
+<section class="storyset wrap" id="real-structures">
+  <p class="big-line" style="text-align:center;margin-inline:auto">These are the real ones, <em>straight from the game files</em>, at their true sizes.</p>
+  <figure class="plate" data-boot="models#structures">
+    <div class="view"><div class="hud tl" data-status></div></div>
+    <div class="controls"><span data-info style="flex:1;min-width:14rem">Click any of them.</span><button data-all>See all</button></div>
+    <figcaption class="cap"><span class="fig">The map's cast, to scale</span><span class="small">Models © Valve, exported from Deadlock with Source 2 Viewer. Drag to turn.</span></figcaption>
+  </figure>
 </section>
 
 <section class="chapter wrap" id="souls">
@@ -176,6 +190,8 @@
       padding: 0.8rem 0.9rem 0.9rem; background: var(--ink-2); cursor: pointer; text-align: left; position: relative;
     }
     #roster .hcard:hover { background: var(--ink-3); }
+    #roster .hpic { display: block; width: 100%; aspect-ratio: 280 / 300; object-fit: cover; object-position: top; margin: -0.2rem 0 0.6rem; background: radial-gradient(circle at 50% 35%, #2a2f38, #13171c); filter: saturate(0.92); }
+    #roster .hcard:hover .hpic { filter: none; }
     #roster .hcard:focus-visible { outline: 2px solid var(--soul); outline-offset: -2px; }
     #roster .hname { font-family: var(--f-display); font-weight: 700; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1; color: var(--paper); }
     #roster .hwave { font-family: var(--f-mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
@@ -265,7 +281,7 @@
       </div>
     </div>
     <div class="hgrid" data-grid></div>
-    <figcaption class="cap"><span class="fig">The cast</span><span data-count></span><span class="small">Tags are Valve's own. Descriptions are short summaries; for the original roster they are ours, from general knowledge of the game.</span></figcaption>
+    <figcaption class="cap"><span class="fig">The cast</span><span data-count></span><span class="small">Tags are Valve's own. Portraits © Valve, from the game files. Descriptions are short summaries.</span></figcaption>
   </figure>
 
   <div class="prose">
@@ -321,7 +337,7 @@
 </section>
 
 <section class="storyset wrap" id="story-shelly">
-  <div class="story">
+  <div class="story art" style="--bg:url(assets/heroes/bebop_bg.webp)"><img class="portrait" src="assets/heroes/bebop.webp" alt="Bebop, from his hero card" width="280" height="380">
     <span class="kicker">A story · Heroes</span>
     <h3>A robot fighting for his mother</h3>
     <p>In a New York junkyard, a widow named Shelly built herself a son out of scrap and named him after the jazz they played at night. Now she is sick. Bebop fights in Deadlock for money to pay for her medicine, and he hasn't told her.</p>
@@ -333,10 +349,14 @@
     <figcaption class="cap"><span class="fig">Miss Shelly</span><span>Almost every hero has something to say to Bebop about her. Pick one. Quoted lines are the game's; italics are paraphrased.</span></figcaption>
   </figure>
 
+  <div class="clips" style="max-width:52rem">
+    <figure class="photo"><img src="https://cdn.deadlock.wiki/Shelly_Fisher_Visual.png" alt="Shelly Fisher" loading="lazy" referrerpolicy="no-referrer"><figcaption>Shelly Fisher, who built him. © Valve, via <a href="https://deadlock.wiki/">deadlock.wiki</a></figcaption></figure>
+    <figure class="photo"><img src="https://cdn.deadlock.wiki/Bebop_Render.png" alt="Bebop" loading="lazy" referrerpolicy="no-referrer"><figcaption>Bebop. © Valve, via <a href="https://deadlock.wiki/">deadlock.wiki</a></figcaption></figure>
+  </div>
 </section>
 
 <section class="storyset wrap" id="story-votes">
-  <div class="story">
+  <div class="story art" style="--bg:url(assets/heroes/nurse_bg.webp)"><img class="portrait" src="assets/heroes/nurse.webp" alt="Nurse Harrow, from her hero card" width="280" height="380">
     <span class="kicker">A story · October 2026</span>
     <h3>22,194 people who believed in a nurse</h3>
     <p>Players voted on which new hero Valve would release next. Over 110 million votes later, Nurse Harrow came last. When she finally arrived, Valve's patch notes thanked the people who had voted only for her.</p>
@@ -626,6 +646,13 @@
     <li><a href="https://www.pcgamer.com/the-international-2018-dota-2-results-og-vs-psg">PC Gamer, TI8 final</a>; <a href="https://win.gg/news/ceb-discusses-og-win-chinese-crowd-at-the-international-2019/">win.gg on Ceb and N0tail at TI9</a>; <a href="https://www.gosugamers.net/dota2/news/47217-og-bring-ana-back-for-ti8-qualifiers">GosuGamers on Ana's return</a>.</li>
     <li><a href="https://dotesports.com/dota-2/news/team-spirit-champions-ti-2026">Dot Esports, TI 2026</a>; <a href="https://sg.news.yahoo.com/dota-2-valve-announces-dota-pro-circuit-will-end-with-the-2023-season-002326952.html">end of the Dota Pro Circuit</a>; <a href="https://deadlock.wiki/Update:July_30,_2026">Deadlock ranked update</a>.</li>
   </ul>
+  <p class="big-line" style="margin-top:3rem">Watch it happen.</p>
+  <div class="clips">
+  <figure class="clip" data-yt="UjZYMI1zB9s" data-title="Free to Play (2014)" data-credit="Valve’s documentary following three players to the first International"></figure>
+  <figure class="clip" data-yt="Bv4CqIxqTMA" data-title="True Sight: The International 2018" data-credit="Valve · OG’s impossible run"></figure>
+  <figure class="clip" data-yt="NFEwN1N3vvA" data-title="True Sight: The International 2021" data-credit="Valve · Team Spirit’s first Aegis"></figure>
+  <figure class="clip" data-yt="uEWUiU5tHIs" data-title="The “$6 million Echo Slam” (TI5)" data-credit="Fan multicam by Johan Svedberg"></figure>
+  </div>
 </section>
 
 <section class="storyset wrap" id="story-gambit">
@@ -639,13 +666,17 @@
     <figcaption class="cap"><span class="fig">The urn gambit</span><span>The shape of the story, not real match data. Melee Creeps were signed by Cloud9 in November 2026.</span></figcaption>
   </figure>
 
+  <div class="clips" style="max-width:52rem">
+  <figure class="clip" data-yt="HQdDdbhILqY" data-title="The urn gambit, as it happened" data-credit="Clip by supertf · Night Shift #40 NA finals"></figure>
+    <figure class="photo" style="align-self:center"><figcaption style="font-size:1rem">Full broadcast: <a href="https://www.youtube.com/watch?v=1UNNg2o-JIs&amp;t=21419s">Night Shift #40, Floormen vs Melee Creeps ↗</a><br>Melee Creeps’ signing: <a href="https://insider-gaming.com/cloud9-signs-north-american-deadlock-esports-team/">Insider Gaming ↗</a></figcaption></figure>
+  </div>
 </section>
 
 <section class="storyset wrap"><div class="cards">
     <div>
       <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="20" y="70" width="160" height="6" fill="var(--rule)"/><g fill="var(--amber)"><circle cx="60" cy="40" r="7"/><rect x="53" y="49" width="14" height="20" rx="5"/></g><g fill="var(--sapphire)"><circle cx="140" cy="40" r="7"/><rect x="133" y="49" width="14" height="20" rx="5"/></g><rect x="84" y="22" width="32" height="22" fill="none" stroke="var(--brass)"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">TORONTO · 3 AUG 2025</text></svg>
       <h4>Deathy's first LAN</h4><p>A Montreal streamer who co-founded Death Slam, which ran Deadlock's first in-person tournament. Before Valve built any stage, players with day jobs built their own.</p>
-    </div>
+    <p class="src-links"><a href="https://www.twitch.tv/deathydl">Deathy on Twitch ↗</a><a href="https://dse.gg">Death Slam ↗</a></p></div>
 </div></section>
 </div>
 <div class="tab" id="architecture" data-tab data-label="Architecture" hidden>
@@ -777,9 +808,18 @@
   </div>
   <div class="legend-key"><span class="src">◆ Documented: a source says so</span><span class="inf">◇ Our reading: a reasonable guess</span></div>
 
+  <p class="big-line" style="margin-top:3.5rem">One player matched the skyline <em>to real photographs.</em></p>
+  <div class="clips">
+    <figure class="photo"><img src="https://images.steamusercontent.com/ugc/11756411928084414006/BEB5112C753DA60E55DD25DF21F9094F6CED83D7/" alt="Flatiron Building, real and in Deadlock" loading="lazy" referrerpolicy="no-referrer"><figcaption>Flatiron Building (1902)</figcaption></figure>
+    <figure class="photo"><img src="https://images.steamusercontent.com/ugc/12630068592007003511/1A37D17F8CE16F37EFB4B3B8328797312C94A152/" alt="Chrysler Building, real and in Deadlock" loading="lazy" referrerpolicy="no-referrer"><figcaption>Chrysler Building (1930)</figcaption></figure>
+    <figure class="photo"><img src="https://images.steamusercontent.com/ugc/13604104233700778758/00551FA751B15D1332E5A7DDB8FA27DD2B471CAB/" alt="Brooklyn Bridge, real and in Deadlock" loading="lazy" referrerpolicy="no-referrer"><figcaption>Brooklyn Bridge (1883)</figcaption></figure>
+    <figure class="photo"><img src="https://images.steamusercontent.com/ugc/12840047090125726467/A511590650136204AB8C279935E2ADCC30D8E72C/" alt="Empire State Building, real and in Deadlock" loading="lazy" referrerpolicy="no-referrer"><figcaption>Empire State Building (1931)</figcaption></figure>
+  </div>
+  <p class="small" style="max-width:var(--col);margin:0 auto">Images from <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">“Real New York buildings in Deadlock, explained”</a> by silvershroud, shown with credit and linked from the original guide. The full guide covers 30 buildings.</p>
+
   <div class="note-row">
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Baroness Hotel</h4><p>Modelled on the <a href="https://en.wikipedia.org/wiki/Plaza_Hotel">Plaza Hotel</a> (1907, <a href="https://en.wikipedia.org/wiki/Henry_Janeway_Hardenbergh">Henry J. Hardenbergh</a>) and its green mansard roof. The name belongs to a real hotel in Seattle, about eleven miles from Valve's office.</p><p class="src-links"><a href="https://tracklock.gg/articles/deadlock-real-baroness-hotel">Tracklock ↗</a><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">Steam guide ↗</a></p></div>
-    <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The New York Oracle</h4><p>The in-game newspaper building echoes the <a href="https://en.wikipedia.org/wiki/One_Times_Square">Times Tower</a> on <a href="https://en.wikipedia.org/wiki/Times_Square">Times Square</a> (1904). The masthead even mimics the <em>Times</em> lettering. Prophecy replaces the news.</p><p class="src-links"><a href="https://deadlock.wiki/The_New_York_Oracle">Deadlock Wiki ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><img class="shot" src="https://cdn.deadlock.wiki/Baroness_Broadway.png" alt="The Baroness Hotel in Deadlock" loading="lazy" referrerpolicy="no-referrer"><h4>Baroness Hotel</h4><p>Modelled on the <a href="https://en.wikipedia.org/wiki/Plaza_Hotel">Plaza Hotel</a> (1907, <a href="https://en.wikipedia.org/wiki/Henry_Janeway_Hardenbergh">Henry J. Hardenbergh</a>) and its green mansard roof. The name belongs to a real hotel in Seattle, about eleven miles from Valve's office.</p><p class="src-links"><a href="https://tracklock.gg/articles/deadlock-real-baroness-hotel">Tracklock ↗</a><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3378301007">Steam guide ↗</a></p></div>
+    <div class="note"><span class="eyebrow src">◆ Documented</span><img class="shot" src="https://cdn.deadlock.wiki/New_York_Oracle_Building.png" alt="The New York Oracle building in Deadlock" loading="lazy" referrerpolicy="no-referrer"><h4>The New York Oracle</h4><p>The in-game newspaper building echoes the <a href="https://en.wikipedia.org/wiki/One_Times_Square">Times Tower</a> on <a href="https://en.wikipedia.org/wiki/Times_Square">Times Square</a> (1904). The masthead even mimics the <em>Times</em> lettering. Prophecy replaces the news.</p><p class="src-links"><a href="https://deadlock.wiki/The_New_York_Oracle">Deadlock Wiki ↗</a></p></div>
     <div class="note"><span class="eyebrow src">◆ Documented</span><h4>Plaza District</h4><p>A sunken plaza, a skating rink in the voice lines, and an Atlas holding a glowing sphere: <a href="https://en.wikipedia.org/wiki/Rockefeller_Center">Rockefeller Center</a> (1930s), with its <a href="https://en.wikipedia.org/wiki/Atlas_(statue)"><em>Atlas</em> statue</a> (1937), turned demonic.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
     <div class="note"><span class="eyebrow src">◆ Documented</span><h4>The bull</h4><p>A bull statue stands near the game's stock exchange. The real <a href="https://en.wikipedia.org/wiki/Charging_Bull"><em>Charging Bull</em></a> arrived in 1989, decades after this city's era. A cheeky anachronism.</p><p class="src-links"><a href="https://deadlock.wiki/Cursed_Apple">Deadlock Wiki ↗</a></p></div>
   </div>
@@ -812,6 +852,16 @@
       <li><a href="https://publicdomainreview.org/essay/modern-babylon-ziggurat-skyscrapers-and-hugh-ferriss-retrofuturism/">"Modern Babylon: Ziggurat Skyscrapers and Hugh Ferriss's Retrofuturism"</a>, The Public Domain Review.</li>
     </ul>
   </div>
+</section>
+
+<section class="storyset wrap" id="real-landmarks">
+  <p class="big-line" style="text-align:center;margin-inline:auto">Walk around the <em>real</em> landmarks.</p>
+  <figure class="plate" data-boot="models#landmarks">
+    <div class="view"><div class="hud tl" data-status></div></div>
+    <div class="controls"><div class="grp" data-pick></div></div>
+    <div class="controls"><span data-info></span></div>
+    <figcaption class="cap"><span class="fig">Landmarks from the game files</span><span class="small">Models © Valve, exported from Deadlock with Source 2 Viewer.</span></figcaption>
+  </figure>
 </section>
 
 </div>
@@ -906,13 +956,22 @@
     <li><a href="https://www.pcgamer.com/uk/a-dota-2-custom-mode-may-be-2019s-most-popular-new-game">Dota Auto Chess</a> (PC Gamer); <a href="https://www.pcgamesinsider.biz/news/72459/garrys-mod-has-sold-20m-copies/">Garry's Mod at 20 million</a>; <a href="https://www.evl.uic.edu/aej/smurf.html">Castle Smurfenstein</a>.</li>
     <li><a href="https://www.gamingdeputy.com/france/deadlock-mods-bannissement/">Deadlock and mods</a> (GamingDeputy, Nov 2026); <a href="https://pcgamer.com/games/moba/valve-says-deadlock-is-still-too-unfinished-to-release-publicly-but-has-hero-cosmetics-and-new-game-modes-in-the-works">hero cosmetics planned</a> (PC Gamer).</li>
   </ul>
+  <p class="big-line" style="margin-top:3rem">From Valve’s shorts <em>to fans’ feature films.</em></p>
+  <div class="clips">
+  <figure class="clip" data-yt="jHgZh4GV9G0" data-title="Meet the Heavy (2007)" data-credit="Valve · the first Meet the Team short"></figure>
+  <figure class="clip" data-yt="36lSzUMBJnc" data-title="Meet the Medic (2012)" data-credit="Valve · made in what became Source Filmmaker"></figure>
+  <figure class="clip" data-yt="Zri1c_If6Ic" data-title="Introducing the Source Filmmaker (2012)" data-credit="Valve · the tool, released free"></figure>
+  <figure class="clip" data-yt="GLlLQ3LmZWU" data-title="Expiration Date (2014)" data-credit="Valve · a 20-minute TF2 film"></figure>
+  <figure class="clip" data-yt="V0ODG8bFme0" data-title="Emesis Blue (2023)" data-credit="Fortress Films · a 108-minute fan film made in SFM"></figure>
+  </div>
+  <p class="small" style="max-width:var(--col);margin:0 auto">Also: <a href="https://www.youtube.com/watch?v=OR4N5OhcY9s">Meet the Spy ↗</a> (age-restricted on YouTube, so it can’t play here).</p>
 </section>
 
 <section class="storyset wrap"><div class="cards">
     <div>
-      <svg viewBox="0 0 200 110" aria-hidden="true"><path d="M70 70 q30 -50 60 0" fill="none" stroke="var(--paper)" stroke-width="2"/><path d="M78 40 l8 -14 l8 10 l8 -12 l8 12 l8 -10 l8 14" fill="none" stroke="var(--brass)" stroke-width="2"/><circle cx="92" cy="58" r="2.5" fill="var(--paper)"/><circle cx="108" cy="58" r="2.5" fill="var(--paper)"/><path d="M130 70 q20 10 30 -6" fill="none" stroke="var(--paper)" stroke-width="2"/><text x="100" y="98" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">FROM A FORUM DRAWING</text></svg>
+      <img src="assets/heroes/ratking.webp" alt="Rat King, from his hero card" style="width:100%;height:150px;object-fit:cover;object-position:top;display:block;margin-bottom:0.8rem" loading="lazy">
       <h4>The Rat King</h4><p>A fan posted a drawing of a rat-king hero on the official forums. It became a running joke, then a real hero, and players voted him in first.</p>
-    </div>
+    <p class="src-links"><a href="https://forums.playdeadlock.com/threads/hero-concept-the-rat-king-with-some-drawings.80291/">The original forum post ↗</a></p></div>
     <div>
       <svg viewBox="0 0 200 110" aria-hidden="true"><rect x="40" y="20" width="120" height="58" fill="none" stroke="var(--rule)"/><g fill="var(--brass)"><circle cx="75" cy="62" r="5"/><rect x="70" y="68" width="10" height="16" rx="4"/><circle cx="100" cy="62" r="5"/><rect x="95" y="68" width="10" height="16" rx="4"/><circle cx="125" cy="62" r="5"/><rect x="120" y="68" width="10" height="16" rx="4"/></g><text x="100" y="102" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle">BELLEVUE · 28 SEP 2026</text></svg>
       <h4>Costumes at the door</h4><p>The night before a big update, fans dressed as their heroes performed outside Valve's office, joking that it would make the patch arrive faster.</p>
@@ -1081,6 +1140,9 @@
       <li><strong>"Valve time."</strong> Development reportedly began around 2018 under the codename <em>Citadel</em>. Valve still calls the game unfinished.</li>
     </ul>
     <p>It doesn't always work. <em>Artifact</em> (2018) skipped the long public testing and collapsed in months. Deadlock is the opposite experiment.</p>
+  </div>
+  <div class="clips" style="max-width:40rem">
+  <figure class="clip" data-yt="9Yomqk0C6kE" data-title="Valve’s Secret Weapon" data-credit="Game Maker’s Toolkit · on how Valve playtests"></figure>
   </div>
 </section>
 

@@ -63,12 +63,14 @@ const LENSES = {
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
+const PORTRAIT = {"Infernus": "inferno", "Seven": "gigawatt", "Vindicta": "hornet", "Lady Geist": "spectre", "Abrams": "bull", "Wraith": "wraith", "McGinnis": "engineer", "Paradox": "chrono", "Dynamo": "sumo", "Kelvin": "kelvin", "Haze": "haze", "Holliday": "astro", "Bebop": "bebop", "Calico": "nano", "Grey Talon": "archer", "Mo & Krill": "digger", "Shiv": "shiv", "Ivy": "tengu", "Warden": "warden", "Yamato": "yamato", "Lash": "lash", "Viscous": "viscous", "Pocket": "synth", "Mirage": "mirage", "Vyper": "kali", "Sinclair": "magician", "Mina": "vampirebat", "Drifter": "drifter", "Venator": "priest", "Victor": "frank", "Paige": "bookworm", "The Doorman": "doorman", "Billy": "punkgoat", "Graves": "necro", "Apollo": "fencer", "Deadman Danny": "deadpack", "Rem": "familiar", "Silver": "werewolf", "Celeste": "unicorn", "Rat King": "ratking", "Solomon": "chessmaster", "Violet": "artist", "Nurse Harrow": "nurse", "Baba": "baba"};
 export function roster(el) {
   const grid = el.querySelector('[data-grid]');
   const count = el.querySelector('[data-count]');
   let wave = 'all', lens = 'all';
   grid.innerHTML = HEROES.map(([name, tags, w, line], i) => `
     <button class="hcard" data-i="${i}" data-w="${w}" aria-expanded="false">
+      ${PORTRAIT[name] ? `<img class="hpic" src="assets/heroes/${PORTRAIT[name]}.webp" alt="" loading="lazy" width="280" height="380">` : ''}
       <span class="hname">${esc(name)}</span>
       <span class="hwave">${WAVES[w]}</span>
       <span class="htags">${tags.map((t) => `<span>${esc(t)}</span>`).join('')}</span>

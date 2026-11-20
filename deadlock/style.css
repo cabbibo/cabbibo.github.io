@@ -285,3 +285,25 @@ footer { padding-block: 4rem 5rem; border-top: 1px solid var(--rule); margin-top
 body.in-tab .hero, body.in-tab .tabindex { display: none; }
 .note-row { display: flex; flex-wrap: wrap; }
 .note-row > .note { flex: 1 1 15rem; }
+
+.storyset .story.art { position: relative; padding: 2.4rem 1.2rem 1.6rem; isolation: isolate; overflow: hidden; }
+.storyset .story.art::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--bg) right center / cover no-repeat; opacity: 0.45; mask-image: linear-gradient(to bottom, #000 40%, transparent); -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent); }
+.storyset .story .portrait { display: block; width: 140px; height: auto; margin: 0 auto 1rem; border: 1px solid var(--brass-2); background: #1b1f26; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+
+/* credited clips and photos */
+.clips { max-width: var(--wide); margin: 2.4rem auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.4rem; }
+.clip { margin: 0; min-width: 0; }
+.clip-poster { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 1px solid var(--brass-2); background: var(--ink-3); overflow: hidden; cursor: pointer; border-radius: 0; }
+.clip-poster img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.85) brightness(0.8); transition: filter 0.2s, transform 0.4s; }
+.clip-poster:hover img { filter: none; transform: scale(1.03); }
+.clip-play { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(11,13,16,0.75); border: 1px solid var(--brass); }
+.clip-play::after { content: ""; position: absolute; left: 23px; top: 18px; border-left: 16px solid var(--paper); border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+.clip.noimg .clip-poster { display: none; }
+.clip-frame { width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--brass-2); display: block; background: #000; }
+.clip figcaption { display: flex; flex-direction: column; gap: 0.15rem; padding-top: 0.55rem; font-size: 0.92rem; color: var(--dim); }
+.clip figcaption b { font-family: var(--f-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 1.1rem; color: var(--paper); }
+.photo { margin: 0; min-width: 0; }
+.photo img { width: 100%; display: block; border: 1px solid var(--brass-2); background: var(--ink-3); }
+.photo figcaption { font-size: 0.85rem; color: var(--dim); padding-top: 0.45rem; }
+.photo figcaption a { color: var(--brass); }
+.note .shot { width: calc(100% + 2.4rem); margin: -1.1rem -1.2rem 0.8rem; display: block; aspect-ratio: 4 / 3; object-fit: cover; border-bottom: 1px solid var(--rule); }

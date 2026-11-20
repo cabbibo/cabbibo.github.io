@@ -89,6 +89,15 @@ export function shelly(el) {
   const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.22, 10, 20), dark); wheel.position.y = 0.6; wheel.rotation.y = Math.PI / 2; bebop.add(wheel);
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 1, 10), dark); neck.position.y = 1.0; bebop.add(neck);
   bebop.position.set(3.2, 0, 1); bebop.rotation.y = 0.42; scene.add(bebop);
+  // swap in the real Bebop from the game files once it loads
+  import('./models.js').then(async (M) => {
+    const real = await M.heroModel('bebop', 4.4);
+    real.traverse((o) => { if (o.isMesh) { o.castShadow = true; } });
+    bebop.clear(); bebop.add(real); bebop.rotation.y = 0.55;
+    const pm = new THREE.PMREMGenerator(s.renderer);
+    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+    scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.18;
+  }).catch((e) => console.warn('real Bebop unavailable', e));
   const fill = new THREE.DirectionalLight(0x8fa8e0, 1.4); fill.position.set(16, 8, 14); scene.add(fill);
   const rim = new THREE.PointLight(0xffb060, 14, 14, 1.5); rim.position.set(0.5, 3, -0.5); scene.add(rim);
 
