@@ -189,7 +189,7 @@ export function editor(el) {
     }
     for (const p of mod.troopers) p.t += (p.team ? -1 : 1) * dt * 0.09;
     // waves meet and pop
-    for (const a of mod.troopers) if (!a.dead && a.team === 0) for (const b of mod.troopers) if (!b.dead && b.team === 1 && b.lane === a.lane && b.t - a.t < 0.025) { a.dead = b.dead = true; break; }
+    for (const a of mod.troopers) if (!a.dead && a.team === 0) for (const b of mod.troopers) if (!b.dead && b.team === 1 && b.lane === a.lane && Math.abs(b.t - a.t) < 0.025) { a.dead = b.dead = true; break; }
     mod.troopers = mod.troopers.filter((p) => !p.dead && p.t > -0.1 && p.t < 1.1);
     const h = mod.hero; h.t += h.dir * dt * 0.12; if (h.t > 0.62 || h.t < 0.12) h.dir *= -1;
     for (const k of packets) k.t += dt * 1.4;
@@ -248,10 +248,10 @@ const ROWS = [
   { name: 'Capture the flag', nodes: [['Quake', 1996, 'base'], ['Threewave CTF', 1996.6, 'mod', 'One modder’s rules. Now a standard mode in shooters.'], ['A standard mode', 1999, 'genre', 'Capture the flag became part of nearly every shooter.']] },
   { name: 'Counter-Strike', nodes: [['Half-Life', 1998.8, 'base'], ['Counter-Strike', 1999.5, 'mod', 'Two hobbyists made it free. It became the most-played online shooter on earth.'], ['Bought by Valve', 2000, 'hire', 'Valve bought it and hired them.'], ['Counter-Strike 2', 2023, 'game', 'Still one of Steam’s most-played games.']] },
   { name: 'Subnautica', nodes: [['Half-Life', 1998.8, 'base'], ['Natural Selection', 2002, 'mod', 'Aliens versus marines, one side building a base.'], ['Unknown Worlds', 2006, 'company', 'The mod became a studio, which later made Subnautica.']] },
-  { name: 'The MOBA', nodes: [['StarCraft', 1998, 'base'], ['Aeon of Strife', 1999.5, 'mod', 'One hero each, three lanes, endless soldiers. Around 1998–2002; the author is disputed.'], ['DotA', 2003, 'mod', 'A Warcraft III map passed between three volunteer designers.'], ['Hired by Valve', 2009, 'hire', 'Valve hired DotA’s designer, IceFrog. Riot had hired his predecessor.'], ['Dota 2', 2013, 'game', 'Valve’s remake. A world-famous esport.'], ['Deadlock', 2024, 'game', 'The lanes and souls of DotA, played with a gun.']] },
+  { name: 'The MOBA', nodes: [['StarCraft', 1998, 'base'], ['Aeon of Strife', 1999.5, 'mod', 'One hero each, three lanes, endless soldiers. Around 1998–2002; the author is disputed.'], ['DotA', 2003, 'mod', 'A Warcraft III map passed between three volunteer designers.'], ['Hired by Valve', 2009, 'hire', 'Valve hired DotA’s designer, IceFrog. Riot had hired his predecessor.'], ['Dota 2', 2013, 'game', 'Valve’s remake. A world-famous esport.'], ['Deadlock', 2024, 'game', 'The lanes and souls of DotA, played with a gun.', 'r']] },
   { name: 'Garry’s Mod', nodes: [['Half-Life 2', 2004.8, 'base'], ['Garry’s Mod', 2004.95, 'mod', 'A sandbox for posing and playing with Half-Life 2’s physics. 20 million sold.'], ['Facepunch', 2009, 'company', 'Garry’s studio, later the makers of Rust.']] },
-  { name: 'Battle royale', nodes: [['ARMA 2', 2009, 'base'], ['DayZ', 2012, 'mod', 'A zombie survival mod. Its creator was hired by the studio that made ARMA.'], ['Battle Royale mod', 2013, 'mod', 'Brendan Greene’s last-player-standing rules.'], ['PUBG', 2017, 'game', 'The mod became a game played by millions.'], ['Fortnite BR', 2017.7, 'genre', 'Months later, a whole genre.']] },
-  { name: 'Auto-battlers', nodes: [['Dota 2', 2013, 'base'], ['Dota Auto Chess', 2019, 'mod', 'A Dota 2 custom game. 7 million subscribers in its first month.'], ['A new genre', 2019.5, 'genre', 'Within months: Underlords, Teamfight Tactics, Auto Chess.']] },
+  { name: 'Battle royale', nodes: [['ARMA 2', 2009, 'base'], ['DayZ', 2012, 'mod', 'A zombie survival mod. Its creator was hired by the studio that made ARMA.'], ['Battle Royale mod', 2013, 'mod', 'Brendan Greene’s last-player-standing rules.'], ['PUBG', 2017, 'game', 'The mod became a game played by millions.'], ['Fortnite BR', 2017.7, 'genre', 'Months later, a whole genre.', 'r']] },
+  { name: 'Auto-battlers', nodes: [['Dota 2', 2013, 'base'], ['Dota Auto Chess', 2019, 'mod', 'A Dota 2 custom game. 7 million subscribers in its first month.'], ['A new genre', 2019.5, 'genre', 'Within months: Underlords, Teamfight Tactics, Auto Chess.', 'r']] },
 ];
 const KIND = { base: ['solid', '--faint', 'The game it was built on'], mod: ['ring', '--paper', 'Fan-made mod'], hire: ['diamond', '--amber', 'Valve hired or bought it'], company: ['square', '--soul', 'Became a studio'], game: ['solid', '--brass', 'Became a game'], genre: ['star', '--sapphire', 'Became a genre'] };
 
@@ -259,7 +259,7 @@ export function tree(el) {
   const box = el.querySelector('[data-tree]');
   const card = el.querySelector('[data-treecard]');
   const Y0 = 1980, Y1 = 2026;
-  const W = 900, rowH = 46, top = 34, H = top + ROWS.length * rowH + 30, left = 150, right = 30;
+  const W = 960, rowH = 54, top = 34, H = top + ROWS.length * rowH + 30, left = 150, right = 30;
   const X = (y) => left + ((y - Y0) / (Y1 - Y0)) * (W - left - right);
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mods that became games, genres, studios and Valve hires, 1981 to 2024">`;
   for (let y = 1980; y <= 2025; y += 5) s += `<line x1="${X(y)}" y1="${top - 10}" x2="${X(y)}" y2="${H - 24}" stroke="var(--rule)"/><text x="${X(y)}" y="${H - 8}" fill="var(--faint)" font-family="var(--f-mono)" font-size="11" text-anchor="middle">${y}</text>`;
@@ -282,8 +282,18 @@ export function tree(el) {
       const i = flat.length; flat.push({ row: row.name, n });
       s += shape(n[2], xs[j], y, i);
       const lab = n[0];
-      const up = j % 2 === 0;
-      s += `<text x="${xs[j]}" y="${up ? y - 13 : y + 21}" fill="${n[2] === 'base' ? 'var(--faint)' : 'var(--dim)'}" font-family="var(--f-mono)" font-size="10" text-anchor="middle" pointer-events="none">${lab}</text>`;
+      if (n[2] === 'base') {
+        const roomLeft = xs[j] - 10 - lab.length * 6.2 > left;
+        s += roomLeft
+          ? `<text x="${xs[j] - 10}" y="${y + 4}" fill="var(--faint)" font-family="var(--f-mono)" font-size="10" text-anchor="end" pointer-events="none">${lab}</text>`
+          : `<text x="${xs[j]}" y="${y - 13}" fill="var(--faint)" font-family="var(--f-mono)" font-size="10" text-anchor="middle" pointer-events="none">${lab}</text>`;
+      } else if (n[4] === 'r') {
+        s += `<text x="${xs[j] + 13}" y="${y + 4}" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="start" pointer-events="none">${lab}</text>`;
+      } else {
+        const k = row.nodes.slice(0, j).filter((m) => m[2] !== 'base').length;
+        const up = k % 2 === 1;
+        s += `<text x="${xs[j]}" y="${up ? y - 13 : y + 21}" fill="var(--dim)" font-family="var(--f-mono)" font-size="10" text-anchor="middle" pointer-events="none">${lab}</text>`;
+      }
     });
   });
   s += '</svg>';
@@ -377,7 +387,7 @@ export function filmset(el) {
   scene.add(path);
 
   const keys = [ // camera positions orbiting the actor; [theta, phi, radius]
-    [0.2, 1.25, 7.5], [0.9, 1.35, 4.2], [1.6, 1.15, 3.0],
+    [0.2, 1.25, 8.5], [0.95, 1.3, 6], [1.7, 1.18, 4.8],
   ];
   const target = new THREE.Vector3(0, 1.6, 0);
   const fromSph = (k, v = new THREE.Vector3()) => v.set(Math.sin(k[0]) * Math.sin(k[1]) * k[2], target.y + Math.cos(k[1]) * k[2], Math.cos(k[0]) * Math.sin(k[1]) * k[2]);
@@ -444,8 +454,9 @@ export function filmset(el) {
     // the actor breathes; the wrench sways
     actor.position.y = Math.sin(t * 1.6) * 0.02;
     if (rolling) {
-      rollT += reduceMotion ? DUR : dt;
-      const u = smooth(clamp(rollT / DUR));
+      rollT += dt;
+      // reduced motion: hard cuts between keyframes instead of a glide
+      const u = reduceMotion ? Math.min(1, Math.floor((rollT / DUR) * keys.length) / Math.max(1, keys.length - 1)) : smooth(clamp(rollT / DUR));
       const p = curve.getPointAt(u);
       s.camera.position.copy(p);
       camLook.copy(target).add(new THREE.Vector3(0, -0.1 + 0.2 * u, 0));
@@ -470,5 +481,5 @@ export function filmset(el) {
   });
   s.onResize = (w, h) => { rad = w / h < 1 ? 17 : 13; };
   s.resize();
-  window.__mods = Object.assign(window.__mods || {}, { roll: () => rollB.click(), keys });
+  window.__mods = Object.assign(window.__mods || {}, { roll: () => rollB.click(), keys, film: s });
 }

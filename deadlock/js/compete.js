@@ -16,7 +16,7 @@ export function arena(el) {
   const view = el.querySelector('.view');
   const s = stage(view, { fov: 36, fog: [180, 520], bg: 0x07090c });
   const scene = s.scene;
-  const rig = orbitRig(s, { radius: 190, theta: 0.4, phi: 1.12, minR: 90, maxR: 320, auto: 0.035, target: new THREE.Vector3(0, 14, 0) });
+  const rig = orbitRig(s, { radius: 175, theta: 0.4, phi: 1.24, minR: 90, maxR: 320, auto: 0.035, target: new THREE.Vector3(0, 14, 0) });
   const R = rng(2011);
 
   scene.add(new THREE.HemisphereLight(0x9fb0d0, 0x0a0b0e, 0.6));
@@ -157,7 +157,7 @@ export function arena(el) {
     el.querySelectorAll('[data-arena]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.arena === m)));
     label.textContent = MODES[m].label; cap.textContent = MODES[m].cap;
     layoutSeats(MODES[m].seats);
-    if (m === 'ti1') { rig.tPhi = 1.2; rig.tR = 170; } else if (m === 'dl') { rig.tPhi = 0.95; rig.tR = 230; } else { rig.tPhi = 1.12; rig.tR = 190; }
+    if (m === 'ti1') { rig.tPhi = 1.2; rig.tR = 170; } else if (m === 'dl') { rig.tPhi = 0.95; rig.tR = 230; } else { rig.tPhi = 1.24; rig.tR = 175; }
   }
   el.querySelectorAll('[data-arena]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.arena)));
   setMode('ti26');
@@ -186,7 +186,7 @@ export function arena(el) {
     screenBox.scale.setScalar(Math.max(0.001, arenaK + hallK * 0.55));
     screenBox.position.set(0, lerp(40, 22, hallK), lerp(0, -18, hallK));
     screenBox.rotation.y = arenaK > 0.5 ? t * 0.08 : 0;
-    beams.forEach((b, i) => { b.pivot.visible = arenaK > 0.05; b.pivot.children[0].material.opacity = 0.07 * arenaK; b.pivot.rotation.z = Math.sin(t * 0.5 + b.ph) * 0.45; b.pivot.rotation.x = Math.cos(t * 0.4 + b.ph) * 0.35; });
+    beams.forEach((b, i) => { b.pivot.visible = arenaK > 0.05; b.pivot.children[0].material.opacity = 0.045 * arenaK; b.pivot.rotation.z = Math.sin(t * 0.5 + b.ph) * 0.45; b.pivot.rotation.x = Math.cos(t * 0.4 + b.ph) * 0.35; });
     wall.scale.y = Math.max(0.001, hallK); wall.visible = hallK > 0.02;
     booths.forEach((b) => { b.g.scale.setScalar(Math.max(0.001, 1 - dlK)); });
     platform.scale.set(1, Math.max(0.05, 1 - dlK * 0.9), 1);
@@ -268,14 +268,15 @@ export function aegis(el) {
 }
 
 // ================================================================ SHUFFLE (OG, 2015–2019)
+// [x, y, w, h] in % for wide boards, then for narrow (phone) boards
 const ZONES = [
-  { id: 'secret', name: 'Team Secret', x: 4, y: 6 },
-  { id: 'og', name: 'OG', x: 36, y: 6, big: true },
-  { id: 'eg', name: 'Evil Geniuses', x: 72, y: 6 },
-  { id: 'vgj', name: 'VGJ.Storm', x: 72, y: 56 },
-  { id: 'coach', name: 'Coach’s chair', x: 4, y: 56 },
-  { id: 'away', name: 'Away from the game', x: 4, y: 78 },
-  { id: 'pubs', name: 'Unknown, in Finland', x: 72, y: 78 },
+  { id: 'secret', name: 'Team Secret', wide: [3, 6, 24, 18], narrow: [2, 2, 47, 16] },
+  { id: 'og', name: 'OG', big: true, wide: [35, 6, 30, 44], narrow: [2, 21, 96, 34] },
+  { id: 'eg', name: 'Evil Geniuses', wide: [73, 6, 24, 18], narrow: [51, 2, 47, 16] },
+  { id: 'vgj', name: 'VGJ.Storm', wide: [73, 56, 24, 18], narrow: [51, 60, 47, 17] },
+  { id: 'coach', name: 'Coach’s chair', wide: [3, 56, 24, 18], narrow: [2, 60, 47, 17] },
+  { id: 'away', name: 'Away from the game', wide: [3, 78, 24, 18], narrow: [2, 81, 47, 17] },
+  { id: 'pubs', name: 'Unknown, in Finland', wide: [73, 78, 24, 18], narrow: [51, 81, 47, 17] },
 ];
 const PEOPLE = ['N0tail', 'Fly', 'Puppey', 's4', 'JerAx', 'Resolut1on', 'Ceb', 'Ana', 'Topson'];
 // where everyone is at each step (people not listed are hidden)
@@ -284,7 +285,7 @@ const STEPS = [
   { when: '2015', text: 'So they start their own team. They call it OG.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'og' } },
   { when: '2017–18', text: 'OG becomes one of the best teams in the world. Ceb, a former player, coaches.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'og', s4: 'og', JerAx: 'og', Resolut1on: 'og', Ceb: 'coach', Ana: 'away', Topson: 'pubs' } },
   { when: 'March 2018', text: 'Resolut1on leaves for another team.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'og', s4: 'og', JerAx: 'og', Resolut1on: 'vgj', Ceb: 'coach', Ana: 'away', Topson: 'pubs' } },
-  { when: 'May 2018', text: 'Then Fly, N0tail’s oldest friend in the game, leaves for a rival, taking s4 with him. OG loses its invitation to The International.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'eg', s4: 'eg', JerAx: 'og', Resolut1on: 'vgj', Ceb: 'coach', Ana: 'away', Topson: 'pubs' } },
+  { when: 'May 2018', text: 'Then Fly, N0tail’s longtime friend, leaves for a rival, and s4 goes too. OG loses its invitation to The International.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'eg', s4: 'eg', JerAx: 'og', Resolut1on: 'vgj', Ceb: 'coach', Ana: 'away', Topson: 'pubs' } },
   { when: 'June 2018', text: 'The coach puts his headset back on. Ana comes back to the game. An unknown Finnish kid called Topson joins. They start from the open qualifiers, the bottom rung.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'eg', s4: 'eg', JerAx: 'og', Resolut1on: 'vgj', Ceb: 'og', Ana: 'og', Topson: 'og' } },
   { when: 'August 2018', text: 'OG win The International, 3–2 in the final. Fly and s4 finish third.', at: { Puppey: 'secret', N0tail: 'og', Fly: 'eg', s4: 'eg', JerAx: 'og', Resolut1on: 'vgj', Ceb: 'og', Ana: 'og', Topson: 'og' }, aegis: 1 },
   { when: 'August 2019', text: 'The same five win again: the first team ever to do it twice. N0tail makes Ceb lift the trophy first.', at: { N0tail: 'og', JerAx: 'og', Ceb: 'og', Ana: 'og', Topson: 'og' }, aegis: 2 },
@@ -293,11 +294,13 @@ const STEPS = [
 export function shuffle(el) {
   const board = el.querySelector('[data-board]');
   const note = el.querySelector('[data-step]');
-  board.innerHTML = ZONES.map((z) => `<div class="zone${z.big ? ' big' : ''}" data-z="${z.id}" style="left:${z.x}%;top:${z.y}%"><span>${z.name}</span><i class="aegis" aria-hidden="true"></i></div>`).join('') +
+  board.innerHTML = ZONES.map((z) => `<div class="zone${z.big ? ' big' : ''}" data-z="${z.id}"><span>${z.name}</span><i class="aegis" aria-hidden="true"></i></div>`).join('') +
     PEOPLE.map((p) => `<div class="chip" data-p="${p}">${p}</div>`).join('');
   let step = 0;
   const zoneEl = (id) => board.querySelector(`[data-z="${id}"]`);
   function place() {
+    const narrow = board.clientWidth < 560;
+    ZONES.forEach((z) => { const [x, y, w, h] = narrow ? z.narrow : z.wide; Object.assign(zoneEl(z.id).style, { left: x + '%', top: y + '%', width: w + '%', height: h + '%' }); });
     const st = STEPS[step];
     const count = {};
     PEOPLE.forEach((p) => {
@@ -306,10 +309,10 @@ export function shuffle(el) {
       if (!z) { c.style.opacity = '0'; return; }
       const ze = zoneEl(z);
       const n = (count[z] = (count[z] || 0) + 1) - 1;
-      const bx = ze.offsetLeft + 10, by = ze.offsetTop + 30;
-      const cols = ze.classList.contains('big') ? 3 : 2;
+      const bx = ze.offsetLeft + 8, by = ze.offsetTop + (narrow && !ze.classList.contains('big') ? 24 : 32);
+      const cols = ze.classList.contains('big') ? (narrow ? 4 : 3) : 2;
       c.style.opacity = '1';
-      c.style.transform = `translate(${bx + (n % cols) * (ze.clientWidth - 16) / cols}px, ${by + Math.floor(n / cols) * 30}px)`;
+      c.style.transform = `translate(${bx + (n % cols) * (ze.clientWidth - 16) / cols}px, ${by + Math.floor(n / cols) * (narrow ? 26 : 30)}px)`;
       c.classList.toggle('gone', !!(st.out && st.out.includes(p)));
       c.classList.toggle('og', z === 'og');
     });
