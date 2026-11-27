@@ -71,7 +71,18 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 .who summary b{font-weight:500;color:var(--ink)}
 .who div{background:var(--soft);border-radius:14px;padding:14px 16px;margin-top:8px;font-size:16px;line-height:1.5}
 .who div p+p{margin-top:8px}
-.road{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;max-width:480px}
+.road{margin:12px 0 0;display:grid;gap:4px;max-width:520px}
+.rp{display:grid;grid-template-columns:56px 1fr;align-items:baseline;border-top:1px solid var(--line);padding:8px 0}
+.rs{font-size:40px;line-height:1;font-weight:300;color:var(--ink);text-decoration:none}
+.rs.m{font-style:italic}
+.rp ol{list-style:none;margin:0;padding:0}
+.rp ol a{display:block;padding:5px 0;min-height:32px;color:var(--ink);text-decoration:none;font-size:17px}
+.rp a:hover{color:var(--b)}
+.part{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:64px max(20px,4vw);background:var(--bg);border-top:1px solid var(--ink);position:relative;z-index:4}
+.part .pl{margin:0;font-style:italic;font-size:clamp(20px,3vw,30px);color:var(--mute)}
+.part .sym{margin:0;font-weight:300;font-size:clamp(180px,62vw,520px);line-height:.85;letter-spacing:-.04em}
+.part .sym.m{font-style:italic}
+.part .pv{margin:24px 0 0;max-width:30ch;font-size:clamp(19px,2.2vw,24px);line-height:1.4}
 .road li{counter-increment:r}
 .road a{display:flex;align-items:baseline;gap:10px;min-height:40px;padding:8px 0;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);font-size:17px;line-height:1.2}
 .road a::before{content:attr(data-n);font:italic 15px Newsreader,Georgia,serif;color:var(--mute);width:2.4em;flex:none}
@@ -127,30 +138,56 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <section class="hero">
   <h1 class="eq"><span class="m">e</span><sup><span class="m">i</span>π</sup> + 1 = 0</h1>
   <div class="five">
-    <div><b class="m">e</b><span>growth</span></div>
-    <div><b class="m">i</b><span>√−1</span></div>
-    <div><b>π</b><span>circles</span></div>
     <div><b>1</b><span>counting</span></div>
     <div><b>0</b><span>nothing</span></div>
+    <div><b class="m">i</b><span>√−1</span></div>
+    <div><b>π</b><span>circles</span></div>
+    <div><b class="m">e</b><span>growth</span></div>
   </div>
   <p>Each came from a different problem, in a different century. This is how they ended up in one line.</p>
   <p>The same arithmetic runs audio filters, shaders, phone radios and quantum physics.</p>
-  <ol class="road" id="road"><li><a href="#ch-negatives" data-n="I.">Negatives</a></li><li><a href="#ch-between" data-n="II.">Between</a></li><li><a href="#ch-gaps" data-n="III.">Gaps within gaps</a></li><li><a href="#ch-beyond" data-n="IV.">Gaps between the gaps</a></li><li><a href="#ch-quarter" data-n="V.">A quarter turn</a></li><li><a href="#ch-ladder" data-n="VI.">The ladder</a></li><li><a href="#ch-forever" data-n="VII.">Forever</a></li><li><a href="#ch-growth" data-n="VIII.">Growth turns</a></li><li><a href="#ch-sequency" data-n="IX.">Sequency and simultaneity</a></li></ol>
+  <div class="road" id="road"><div class="rp"><a class="rs" href="#part-one">1</a><ol><li><a href="#ch-one">One</a></li></ol></div><div class="rp"><a class="rs" href="#part-zero">0</a><ol><li><a href="#ch-zero">Zero</a></li></ol></div><div class="rp"><a class="rs m" href="#part-i">i</a><ol><li><a href="#ch-negatives">Negatives</a></li><li><a href="#ch-between">Between</a></li><li><a href="#ch-gaps">Gaps within gaps</a></li><li><a href="#ch-quarter">A quarter turn</a></li><li><a href="#ch-ladder">The ladder</a></li></ol></div><div class="rp"><a class="rs" href="#part-pi">π</a><ol><li><a href="#ch-beyond">Gaps between the gaps</a></li></ol></div><div class="rp"><a class="rs m" href="#part-e">e</a><ol><li><a href="#ch-forever">Forever</a></li><li><a href="#ch-growth">Growth turns</a></li><li><a href="#ch-sequency">Sequency and simultaneity</a></li></ol></div></div>
 </section>
 </div>
 
-<section class="ch" data-i="0"><div class="tl"><div class="stage"><canvas></canvas></div>
+<header class="part" id="part-one"><p class="pl">Part one</p><p class="sym">1</p><p class="pv">Where counting starts, and why nothing is ever exactly one.</p></header>
+<section class="ch" data-i="0" id="ch-one"><div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
-
-
-<li class="beat" data-s="apples2" data-y="-9999" data-d="counting"><span class="yr">counting</span><p>Numbers are easy. Count apples: two.</p></li>
-<li class="beat" data-s="apples4"><p>Add two: four.</p></li>
-<li class="beat" data-s="takeok"><p>Take two away: two again. All fine.</p></li>
-
+<li class="beat" data-s="apples1" data-y="-9999" data-d="counting"><span class="yr">counting</span><p>Counting starts with one. One apple.</p></li>
+<li class="beat" data-s="appdiff"><p>No two apples are the same. Calling each one “one apple” ignores everything that makes it this apple.</p></li>
+<li class="beat" data-s="rod"><p class="wt">Wait.</p><p>Is anything in the world exactly 1? Measure a one-metre rod closely enough and it’s always a little off.</p></li>
+<li class="beat" data-s="rod"><p>1 is an idea we lay over things. That’s what makes it useful: every apple counts the same.</p></li>
+<li class="beat" data-s="appdiff" data-y="-300" data-d="~300 BC"><span class="yr">~300 BC</span><p>For Euclid, one wasn’t even a number. A number was a multitude made of units. The unit was what numbers were made from.</p>
+<details class="who"><summary><b>Chrysippus</b> c. 280–207 BC</summary><div><p>A Stoic philosopher who argued that one is a number too. It took a long time for that to catch on.</p></div></details></li>
+<li class="beat" data-s="apples2"><p>Count by adding one at a time. +1, +1: two apples.</p></li>
+<li class="beat" data-s="apples4"><p>Two more: four.</p></li>
+<li class="beat" data-s="times1"><p>×1 is the move that changes nothing. Three apples, taken one time: still three.</p></li>
+<li class="beat" data-s="times1"><p>So that’s where 1 comes from: where counting starts, and the move that leaves everything as it was.</p></li>
+<li class="beat recap" data-s="times1"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Count.</li><li>Treat different things as the same kind.</li><li>Leave something exactly as it is: ×1.</li></ul><div class="kit"><span class="new"><b>×1</b> do nothing</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="1" id="ch-negatives"><header class="div"><p class="rn">I.</p><h2>Negatives</h2><p class="pv">Numbers counted things. What happens when you take away more than you have?</p></header>
+<header class="part" id="part-zero"><p class="pl">Part two</p><p class="sym">0</p><p class="pv">Nothing, and the long argument over whether it counts.</p></header>
+<section class="ch" data-i="1" id="ch-zero"><div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="takeall"><p>Take two apples away from two.</p></li>
+<li class="beat" data-s="takeall"><p class="wt">Wait.</p><p>What’s left? Is nothing a number?</p></li>
+<li class="beat" data-s="place" data-y="-300.5" data-d="~300 BC"><span class="yr">~300 BC</span><p>Babylonian scribes wrote numbers in columns. An empty column was just a gap, until they began marking it with a sign. It held a place. It wasn’t yet a number.</p></li>
+<li class="beat" data-s="place" data-y="350" data-d="~350"><span class="yr">~350</span><p>Across the ocean, the Maya came up with a zero of their own, for their calendars.</p></li>
+<li class="beat" data-s="zline" data-y="628" data-d="628"><span class="yr">628</span><p>In India, Brahmagupta treated zero as a number with rules. A number minus itself is zero. Anything times zero is zero. He wrote rules for fortunes and debts too.</p>
+<details class="who"><summary><b>Brahmagupta</b> 598–c. 668</summary><div><p>He also tried dividing by zero, and said zero divided by zero is zero. Nobody has made that work since. The rest of his rules are the ones we still use.</p></div></details></li>
+<li class="beat" data-s="digits" data-y="1202" data-d="1202"><span class="yr">1202</span><p>Leonardo of Pisa, known as Fibonacci, brought these numerals, zero included, to Europe in his <i>Liber Abaci</i>.</p>
+<details class="who"><summary><b>Fibonacci</b> c. 1170–c. 1250</summary><div><p>As a boy he went with his father, a merchant and customs official, to a trading post in Bugia, in what is now Algeria. That is where he first learned the numerals.</p></div></details></li>
+<li class="beat" data-s="digits" data-y="1299" data-d="1299"><span class="yr">1299</span><p>Not everyone trusted them. That year Florence’s bankers’ guild kept the new numerals out of its official records.</p></li>
+<li class="beat" data-s="zmove"><p>+0 is the move that changes nothing.</p></li>
+<li class="beat" data-s="zcenter"><p>And zero is the centre of the line. Every stretch and turn to come happens around it.</p></li>
+<li class="beat" data-s="zcenter"><p>One move breaks: dividing by zero. How many nothings make 6? No amount does.</p></li>
+<li class="beat" data-s="zcenter"><p>So that’s where zero comes from: a gap that became a sign, then a number.</p></li>
+<li class="beat recap" data-s="zcenter"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Write any number with ten digits, using empty places.</li><li>Say “none”, and calculate with it.</li><li>Leave a number as it is: +0.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class="new"><b>+0</b> nothing</span></div></div></li>
+</ol></div></section>
+<header class="part" id="part-i"><p class="pl">Part three</p><p class="sym m">i</p><p class="pv">A number that, times itself, makes −1. Getting there takes five steps.</p></header>
+<section class="ch" data-i="2" id="ch-negatives"><header class="div"><p class="rn">I.</p><h2>Negatives</h2><p class="pv">Numbers counted things. What happens when you take away more than you have?</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="takeok"><p>Taking away makes sense now. Four take away two is two. Two take away two is zero.</p></li>
 <li class="beat" data-s="take"><p class="wt">Wait.</p><p>Take three apples from two?</p></li>
 <li class="beat" data-s="take"><p>There’s nothing left to take. That’s impossible.</p></li>
 <li class="beat" data-s="take"><p>But a trader can owe three apples, and a thermometer can read below zero. The ledger needs somewhere to put that.</p></li>
@@ -189,10 +226,10 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat recap" data-s="recap"><div class="rc">
 <p class="rk">What numbers were</p><p>Amounts. How many apples. Less than none made no sense.</p>
 <p class="rk">What numbers are</p><p>Moves on a line. Adding is a step. Multiplying is a stretch. ×−1 is a half turn around zero.</p>
-<p class="rk">Now we can</p><ul class="can"><li>Owe things: debts, temperatures below zero, steps behind the start.</li><li>Solve <i>x</i> + 3 = 1.</li></ul><div class="kit"><span class="new"><b>+</b> step</span><span class="new"><b>×</b> stretch</span><span class="new"><b>×−1</b> flip</span></div><p class="nx">Each new kind of number will add a move the old ones couldn’t make.</p></div></li>
+<p class="rk">Now we can</p><ul class="can"><li>Owe things: debts, temperatures below zero, steps behind the start.</li><li>Solve <i>x</i> + 3 = 1.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class="new"><b>+</b> step</span><span class="new"><b>×</b> stretch</span><span class="new"><b>×−1</b> flip</span></div><p class="nx">Each new kind of number will add a move the old ones couldn’t make.</p></div></li>
 
 </ol></div></section>
-<section class="ch" data-i="2" id="ch-between"><header class="div"><p class="rn">II.</p><h2>Between</h2><p class="pv">The line only stops at whole numbers. What lives in between?</p></header>
+<section class="ch" data-i="3" id="ch-between"><header class="div"><p class="rn">II.</p><h2>Between</h2><p class="pv">The line only stops at whole numbers. What lives in between?</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="between"><p class="wt">Wait.</p><p>The apple line only stops at whole numbers. What’s between 0 and 1?</p></li>
@@ -208,9 +245,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="third"><p>Some names never finish. ⅓ is 0.333…, with 3s running on forever, for the same point. The number is the point. The symbols are names for it.</p></li>
 <li class="beat" data-s="frac"><p>So that’s where fractions come from. The line now has a stop wherever you can cut.</p></li>
 
-<li class="beat recap" data-s="frac"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Share evenly: half an apple, a third of a day.</li><li>Measure parts of a unit.</li><li>Solve 2<i>x</i> = 1.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class="new"><b>×½</b> cut</span></div></div></li>
+<li class="beat recap" data-s="frac"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Share evenly: half an apple, a third of a day.</li><li>Measure parts of a unit.</li><li>Solve 2<i>x</i> = 1.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class="new"><b>×½</b> cut</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="3" id="ch-gaps"><header class="div"><p class="rn">III.</p><h2>Gaps within gaps</h2><p class="pv">Fractions seem to fill the line. They don’t quite.</p></header>
+<section class="ch" data-i="4" id="ch-gaps"><header class="div"><p class="rn">III.</p><h2>Gaps within gaps</h2><p class="pv">Fractions seem to fill the line. They don’t quite.</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="frac"><p>Fractions seem to fill everything. Surely that’s every number.</p></li>
@@ -231,25 +268,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="filled"><p>√2 fills the hole. So that’s where irrational numbers come from. They add no new move. They fill the holes.</p>
 <details class="who"><summary><b>Hippasus</b> 5th century BC</summary><div><p>Writers centuries later tell of a Pythagorean drowned at sea for giving away a secret. In some versions it was the irrational, in others a twelve-sided solid. The accounts disagree, and none is close to the time. Almost certainly a story.</p></div></details></li>
 
-<li class="beat recap" data-s="filled"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Measure any diagonal, any length you can draw.</li><li>Solve <i>x</i>² = 2.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class="new"><b>√</b> fill</span></div></div></li>
+<li class="beat recap" data-s="filled"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Measure any diagonal, any length you can draw.</li><li>Solve <i>x</i>² = 2.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class="new"><b>√</b> fill</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="4" id="ch-beyond"><header class="div"><p class="rn">IV.</p><h2>Gaps between the gaps</h2><p class="pv">Fractions and roots seem to fill the line. Most of it is something else.</p></header>
-<div class="tl"><div class="stage"><canvas></canvas></div>
-<ol class="beats"><div class="prog"></div>
-<li class="beat" data-s="algline"><p>Every number so far answers a short recipe of multiplying and adding. −2 answers <i>x</i> + 3 = 1. ½ answers 2<i>x</i> = 1. √2 answers <i>x</i>² = 2.</p></li>
-<li class="beat" data-s="algline"><p>Scatter the answers of lots of recipes like these. They seem to be everywhere.</p></li>
-<li class="beat" data-s="algline"><p class="wt">Wait.</p><p>Is every number the answer to some recipe like these?</p></li>
-<li class="beat" data-s="piwalk"><p>Here’s a suspect. Roll a circle of width 1 along the line. One full turn covers a distance called π, about 3.14.</p></li>
-<li class="beat" data-s="sqcirc"><p>Since ancient Greece, people tried to draw a square with exactly the area of a circle, using only ruler and compass. For over two thousand years, nobody managed it, and nobody could prove it impossible.</p></li>
-<li class="beat" data-s="liouville" data-y="1844" data-d="1844"><span class="yr">1844</span><p>Joseph Liouville built a number that answers no recipe at all, by hand, with 1s further and further apart. Numbers like this are called transcendental.</p></li>
-<li class="beat" data-s="lindemann" data-y="1882" data-d="1882"><span class="yr">1882</span><p>Ferdinand von Lindemann proved π is one. That settled it: the circle can’t be squared.</p></li>
-<li class="beat" data-s="lindemann"><p>So that’s where transcendental numbers come from: numbers no recipe of adding and multiplying can reach.</p></li>
-<li class="beat" data-s="darts"><p>Now throw darts at the line.</p></li>
-<li class="beat" data-s="dartzoom"><p>Zoom in on where one lands. The fractions and recipe answers thin out to nothing around it.</p></li>
-<li class="beat" data-s="dartzoom"><p>Almost every number on the line is transcendental. We can name only a handful.</p></li>
-<li class="beat recap" data-s="dartzoom"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Name numbers that no recipe of adding and multiplying can reach.</li><li>Close the two-thousand-year question of squaring the circle.</li><li>Say where a dart thrown at the line almost surely lands.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class="new"><b>π</b> beyond roots</span></div></div></li>
-</ol></div></section>
-<section class="ch" data-i="5" id="ch-quarter"><header class="div"><p class="rn">V.</p><h2>A quarter turn</h2><p class="pv">Every number times itself lands on the positive side. What could land on −1?</p></header>
+<section class="ch" data-i="5" id="ch-quarter"><header class="div"><p class="rn">IV.</p><h2>A quarter turn</h2><p class="pv">Every number times itself lands on the positive side. What could land on −1?</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="sq3m"><p>Squaring a number is doing its move twice. ×3, then ×3 again: ×9. So 3² = 9.</p></li>
@@ -272,7 +293,6 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="i2"><p>Call that move ×<i>i</i>. Two quarter turns make a half turn.</p></li>
 <li class="beat" data-s="i2"><p>So <i>i</i> × <i>i</i> = −1. The impossible question has an answer: a quarter turn.</p></li>
 <li class="beat" data-s="i2"><p>So that’s where imaginary numbers come from.</p></li>
-<li class="beat" data-s="pidist"><p>Walk a half turn round this circle and you cover π, the same π as the rolling circle.</p></li>
 <li class="beat" data-s="plane" data-y="1637" data-d="1637"><span class="yr">1637</span><p>René Descartes named them imaginary. He meant it as an insult.</p></li>
 <li class="beat" data-s="plane" data-y="1799" data-d="1799"><span class="yr">1799</span><p>A surveyor, Caspar Wessel, drew numbers as points on a plane.</p>
 <details class="who"><summary><b>Caspar Wessel</b> 1745–1818</summary><div><p>Norwegian, one of fourteen children of a minister, and poor most of his life. He spent decades triangulating Denmark and drew its first accurate map. This was his only mathematics paper. He wasn’t an Academy member, so a colleague read it for him in 1797. Almost no one noticed it until 1895.</p></div></details></li>
@@ -292,16 +312,16 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <details class="who"><summary><b>William Rowan Hamilton</b> 1843</summary><div><p>Hamilton spent years trying to do the same in three dimensions. In October 1843 his children asked him every morning whether he could multiply triplets yet. He could only add them. On the 16th, walking along a Dublin canal with his wife, he saw how to do it in four, and cut the rule into Broom Bridge with a knife: <i>i</i>² = <i>j</i>² = <i>k</i>² = <i>ijk</i> = −1.</p></div></details></li>
 <li class="beat" data-s="cx"><p>Anything that turns gets computed this way: alternating current, radio waves, a sprite rotating on screen.</p></li>
 
-<li class="beat recap" data-s="cx"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Treat a turn as a number.</li><li>Solve <i>x</i>² = −1, and finish Bombelli’s cubic.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class="new"><b>×i</b> turn</span></div></div></li>
+<li class="beat recap" data-s="cx"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Treat a turn as a number.</li><li>Solve <i>x</i>² = −1, and finish Bombelli’s cubic.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class="new"><b>×i</b> turn</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="6" id="ch-ladder"><header class="div"><p class="rn">VI.</p><h2>The ladder</h2><p class="pv">Each new kind of number answered an impossible equation. Does that ever stop?</p></header>
+<section class="ch" data-i="6" id="ch-ladder"><header class="div"><p class="rn">V.</p><h2>The ladder</h2><p class="pv">Each new kind of number answered an impossible equation. Does that ever stop?</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="r1"><p><i>x</i> + 3 = 1 was impossible. Negatives made it possible: −2.</p></li>
 <li class="beat" data-s="r2"><p>2<i>x</i> = 1 was impossible in whole numbers. Fractions: ½.</p></li>
 <li class="beat" data-s="r3"><p><i>x</i>² = 2 was impossible in fractions. √2.</p></li>
 <li class="beat" data-s="r4"><p><i>x</i>² = −1 was impossible on the line. <i>i</i>.</p></li>
-<li class="beat" data-s="recipe"><p>Each rung is one of those short recipes of multiplying and adding <i>x</i>. Mathematicians call them polynomials.</p></li>
+<li class="beat" data-s="recipe"><p>Each rung is a short recipe of multiplying and adding <i>x</i>. Mathematicians call these polynomials.</p></li>
 <li class="beat" data-s="harder"><p>Try harder recipes. Every answer is already in the plane.</p></li>
 <li class="beat" data-s="harder" data-y="1799.5" data-d="1799"><span class="yr">1799</span><p>Carl Friedrich Gauss, at 22, argued that every polynomial has its answers in the plane. The ladder stops here.</p>
 <details class="who"><summary><b>Carl Friedrich Gauss</b> 1777–1855</summary><div><p>It was his doctoral thesis. The proof had a gap nobody closed until 1920. He kept coming back to the theorem and published his last proof of it in 1849, fifty years after the first.</p></div></details></li>
@@ -312,9 +332,26 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="roots"><p><i>x</i><sup>n</sup> = 1 has <i>n</i> answers, spaced evenly round the circle.</p>
 <div class="ctl"><div class="grow"><input id="r-n" type="range" min="1" max="16" step="1" value="5" aria-label="n"><output id="o-n"></output></div></div></li>
 
-<li class="beat recap" data-s="roots"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Solve every polynomial equation. No impossible ones are left.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class="new"><b>✓</b> complete</span></div></div></li>
+<li class="beat recap" data-s="roots"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Solve every polynomial equation. No impossible ones are left.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class="new"><b>✓</b> complete</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="7" id="ch-forever"><header class="div"><p class="rn">VII.</p><h2>Forever</h2><p class="pv">Recipes that never end, and what they make.</p></header>
+<header class="part" id="part-pi"><p class="pl">Part four</p><p class="sym">π</p><p class="pv">Fractions and roots seem to fill the line. Most of it is something else.</p></header>
+<section class="ch" data-i="7" id="ch-beyond"><div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="algline"><p>Every number so far answers a polynomial. −2 answers <i>x</i> + 3 = 1. ½ answers 2<i>x</i> = 1. √2 answers <i>x</i>² = 2. <i>i</i> answers <i>x</i>² = −1.</p></li>
+<li class="beat" data-s="algline"><p>Scatter the answers of lots of polynomials on the line. They seem to be everywhere.</p></li>
+<li class="beat" data-s="algline"><p class="wt">Wait.</p><p>Is every number the answer to some polynomial?</p></li>
+<li class="beat" data-s="piwalk"><p>Here’s a suspect. Roll a circle of width 1 along the line. One full turn covers a distance called π, about 3.14.</p></li>
+<li class="beat" data-s="sqcirc"><p>Since ancient Greece, people tried to draw a square with exactly the area of a circle, using only ruler and compass. For over two thousand years, nobody managed it, and nobody could prove it impossible.</p></li>
+<li class="beat" data-s="liouville" data-y="1844" data-d="1844"><span class="yr">1844</span><p>Joseph Liouville built a number that answers no polynomial at all, by hand, with 1s further and further apart. Numbers like this are called transcendental.</p></li>
+<li class="beat" data-s="lindemann" data-y="1882" data-d="1882"><span class="yr">1882</span><p>Ferdinand von Lindemann proved π is one. That settled it: the circle can’t be squared.</p></li>
+<li class="beat" data-s="lindemann"><p>So that’s where transcendental numbers come from: numbers no polynomial can reach.</p></li>
+<li class="beat" data-s="darts"><p>Now throw darts at the line.</p></li>
+<li class="beat" data-s="dartzoom"><p>Zoom in on where one lands. The fractions and polynomial answers thin out to nothing around it.</p></li>
+<li class="beat" data-s="dartzoom"><p>Almost every number on the line is transcendental. We can name only a handful.</p></li>
+<li class="beat recap" data-s="dartzoom"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Name numbers that no polynomial can reach.</li><li>Close the two-thousand-year question of squaring the circle.</li><li>Say where a dart thrown at the line almost surely lands.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class="new"><b>π</b> beyond roots</span></div></div></li>
+</ol></div></section>
+<header class="part" id="part-e"><p class="pl">Part five</p><p class="sym m">e</p><p class="pv">Growth that never stops, and the turn that ties everything together.</p></header>
+<section class="ch" data-i="8" id="ch-forever"><header class="div"><p class="rn">I.</p><h2>Forever</h2><p class="pv">Recipes that never end, and what they make.</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="comp1"><p>What if the recipe never ends?</p></li>
@@ -338,9 +375,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <div class="ctl"><div class="grow"><label for="r-r">repeats</label><input id="r-r" type="range" min="1" max="60" step="1" value="4"></div><output id="o-r"></output></div></li>
 <li class="beat" data-s="halves"><p>And <i>e<sup>x</sup></i> = 0? Halve, halve, halve. Never zero. That one is off the ladder.</p></li>
 
-<li class="beat recap" data-s="halves"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Describe growth that feeds on itself: interest, populations, cooling.</li><li>Add up recipes that never end.</li><li>Draw shapes that repeat forever, like the Mandelbrot set.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class="new"><b>…</b> forever</span></div></div></li>
+<li class="beat recap" data-s="halves"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Describe growth that feeds on itself: interest, populations, cooling.</li><li>Add up recipes that never end.</li><li>Draw shapes that repeat forever, like the Mandelbrot set.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class="new"><b>…</b> forever</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="8" id="ch-growth"><header class="div"><p class="rn">VIII.</p><h2>Growth turns</h2><p class="pv">What happens when growth gets pushed sideways.</p></header>
+<section class="ch" data-i="9" id="ch-growth"><header class="div"><p class="rn">II.</p><h2>Growth turns</h2><p class="pv">What happens when growth gets pushed sideways.</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="grow"><p>Back to <i>e<sup>x</sup></i>, pushed by its own size. The bigger it gets, the harder the push.</p></li>
@@ -356,9 +393,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="fourier"><p>Chain a few spinning arrows of different sizes and speeds, and the tip draws a wave. Any sound can be pulled apart into arrows like these and rebuilt.</p>
 <div class="ctl"><div class="grow"><label for="r-f">arrows</label><input id="r-f" type="range" min="1" max="12" step="1" value="4"></div><output id="o-f"></output></div></li>
 
-<li class="beat recap" data-s="fourier"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Write turning with <i>e</i>: <i>e<sup>iθ</sup></i>.</li><li>Build waves and sounds out of spinning arrows.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class=""><b>…</b> forever</span><span class="new"><b>eⁱᶿ</b> spin</span></div></div></li>
+<li class="beat recap" data-s="fourier"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Write turning with <i>e</i>: <i>e<sup>iθ</sup></i>.</li><li>Build waves and sounds out of spinning arrows.</li></ul><div class="kit"><span class=""><b>×1</b> do nothing</span><span class=""><b>+0</b> nothing</span><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class=""><b>…</b> forever</span><span class="new"><b>eⁱᶿ</b> spin</span></div></div></li>
 </ol></div></section>
-<section class="ch" data-i="9" id="ch-sequency"><header class="div"><p class="rn">IX.</p><h2>Sequency and simultaneity</h2><p class="pv">An arrow, a circle, and a novel about time.</p></header>
+<section class="ch" data-i="10" id="ch-sequency"><header class="div"><p class="rn">III.</p><h2>Sequency and simultaneity</h2><p class="pv">An arrow, a circle, and a novel about time.</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
 <li class="beat" data-s="arrow" data-y="1974" data-d="1974"><span class="yr">1974</span><p><i>e</i> to a real power: an arrow. Time as a line. Sequency.</p></li>
@@ -374,7 +411,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 
 <div class="wrap">
 <footer class="end" id="end">
-  <div class="eq" aria-label="e to the i pi plus one equals zero"><a href="#ch-forever" style="transition-delay:.1s"><span class="m">e</span></a><sup><a href="#ch-quarter" style="transition-delay:.5s"><span class="m">i</span></a><a href="#ch-growth" style="transition-delay:.9s">π</a></sup> <a href="#ch-negatives" style="transition-delay:1.3s">+</a> <a href="#ch-negatives" style="transition-delay:1.6s">1</a> <a href="#ch-negatives" style="transition-delay:1.9s">=</a> <a href="#ch-negatives" style="transition-delay:2.2s">0</a></div>
+  <div class="eq" aria-label="e to the i pi plus one equals zero"><a href="#part-e" style="transition-delay:1.6s"><span class="m">e</span></a><sup><a href="#part-i" style="transition-delay:.8s"><span class="m">i</span></a><a href="#part-pi" style="transition-delay:1.2s">π</a></sup> <a href="#part-one" style="transition-delay:2s">+</a> <a href="#part-one" style="transition-delay:.1s">1</a> <a href="#part-zero" style="transition-delay:2.3s">=</a> <a href="#part-zero" style="transition-delay:.45s">0</a></div>
   <div class="merge" id="merge" aria-hidden="true"><span class="m1" style="left:0"><i>e</i><sup><i>i</i>π</sup></span><span class="m2" style="left:0">−1</span><span class="m3" style="left:120px">+1</span><span class="m4" style="left:64px">0</span></div>
   <p>Add 1, and you are back at nothing.</p>
   <p>Written in numbers where no equation like it is impossible.</p>
@@ -452,6 +489,16 @@ const STAGES={
   names:{cam:[.5,.4,1.05,.75],on:['axis','names']},
   dec:{cam:[.5,.4,1.05,.75],on:['axis','dec']},
   third:{cam:[.5,.4,1.05,.75],on:['axis','third']},
+  apples1:{cam:[1.5,.6,2.2,1.1],on:['ground','apples'],apples:1},
+  appdiff:{cam:[3,.6,3.2,1.3],on:['ground','appdiff']},
+  rod:{cam:t=>{const hw=1.3*Math.exp(-.85*clamp(t-.8,0,6.5));return[1-hw*.2,hw*.25,hw,hw*.55]},on:['rod']},
+  times1:{cam:[2,.4,2.6,1.2],on:['axis','times1'],op:'×1'},
+  takeall:{cam:[1.6,.6,2.9,1.3],on:['ground','apples','ghost0'],apples:t=>t<.4?2:t<.8?1:0},
+  place:{cam:[0,0,1,1],on:['place']},
+  zline:{cam:[1.5,.4,3.2,1.3],on:['axis','zline']},
+  digits:{cam:[0,0,1,1],on:['digits']},
+  zmove:{cam:[2,.4,2.6,1.2],on:['axis','times1'],op:'+0'},
+  zcenter:{cam:[0,.3,3.4,1.4],on:['axis','zcenter']},
   between:{cam:[1,.45,2,1],on:['axis','between']},
   pizza:{cam:[.5,.45,1.15,.8],on:['axis','pizza']},
   halve:{cam:[1.4,.45,1.8,.9],on:['axis','halve']},
@@ -511,7 +558,7 @@ const STAGES={
 };
 const LAYERS=[...new Set(Object.values(STAGES).flatMap(s=>s.on))];
 const L={};LAYERS.forEach(l=>L[l]=0);
-let stage='apples2',stageT0=performance.now(),lastZ=null,lastMH=null,lastAR=[[0,2]],lastTH={k:-2,n:2},lastCM='add',lastDL=['e'];
+let stage='apples2',stageT0=performance.now(),lastZ=null,lastMH=null,lastAR=[[0,2]],lastTH={k:-2,n:2},lastCM='add',lastDL=['e'],lastOP='×1';
 
 /* ---------- canvas ---------- */
 const CVS=[...document.querySelectorAll('.stage canvas')];let cv=CVS[0],g=cv.getContext('2d'),W=0,H=0,dpr=1,snap=true;
@@ -713,6 +760,30 @@ function draw(time,dt){
     dot(X(.5),oy,5,C.b);dot(X(.25),oy,4,C.ink)});
   A('third',()=>{const t=reduce?99:tsec,n=Math.floor(t*6);g.font=serif(20);g.textAlign='left';g.textBaseline='middle';g.fillStyle=C.ink;g.fillText('0.'+'3'.repeat(Math.min(n,80)),16,26);
     const x=X(1/3);dot(x,oy,5,C.b);tx('⅓',x,oy-24,C.b,'center',serif(20))});
+  A('appdiff',()=>{const t=reduce?9:tsec,A=[[.7,.26,0],[1.9,.33,.2],[3,.22,-.25],[4.1,.3,.1],[5.2,.27,-.1]];
+    A.forEach(([x,r,rot],i)=>{const a=ease((t-.2-i*.25)/.35);if(a<=0)return;g.save();g.globalAlpha*=a;g.translate(X(x),Y(.42));g.rotate(rot);apple(0,0,r*s,C.apple,1);g.restore()});
+    const ly=Y(.42)-.4*s-18;floats(A.map(([x],i)=>[X(x),ly,'1',.4+i*.25]),stage==='appdiff'?[X(2.95),ly,'5',2.2]:null,t)});
+  A('rod',()=>{const L1=1.00037,y=oy;g.fillStyle=C.stem;g.fillRect(X(0),y-14,X(L1)-X(0),10);ln(X(-1),y,X(3),y,C.mute);
+    const w=W/s,step=w>1?.1:w>.1?.01:w>.01?.001:.0001;for(let v=Math.ceil((cam.cx-W/2/s)/step)*step;v<cam.cx+W/2/s;v+=step){const x=X(v);ln(x,y,x,y+(Math.abs(v-Math.round(v))<step/2?14:6),C.mute)}
+    ln(X(1),y-30,X(1),y+16,C.ink,1.5);tx('1',X(1),y+30,C.ink,'center','14px '+sans);
+    const z=1.3/(W/2/s);if(z>3){tx('×'+Math.round(z).toLocaleString('en-US'),W-14,22,C.mute,'right','14px '+sans);tx(L1.toFixed(5),X(L1)+6,y-26,C.stem,'left','13px '+sans)}});
+  A('times1',()=>{const t=reduce?9:(tsec%3.4),op=S.op||lastOP;if(S.op)lastOP=S.op;const w=Math.sin(PI*clamp((t-.8)/.6,0,1))*3;
+    for(const n of[1,2,3]){apple(X(n),oy-12-w,9,C.apple,1)}floats([1,2,3].map((n,i)=>[X(n),Y(.75),op,.2+i*.15]),null,t,C.mute);
+    for(const n of[1,2,3])tx(''+n,X(n),oy+18,C.ink,'center','13px '+sans)});
+  A('ghost0',()=>{const a=ease((tsec-1.4)/.5);if(a<=0)return;g.save();g.globalAlpha*=a;g.setLineDash([3,4]);ring(X(1.5),Y(.42),.3*s,C.mute,1.25);g.setLineDash([]);
+    tx('0',X(1.5),oy+22,C.b,'center','17px '+sans);if(stage==='takeall'&&tsec>2.4)tx('?',X(1.5),Y(.42),C.mute,'center',serif(22,1));g.restore();
+    floats([[X(2),Y(.42)-.3*s-18,'−1',.3],[X(1),Y(.42)-.3*s-18,'−1',.7]],[X(1.5),Y(.42)-.3*s-18,'−2',1.3],tsec)});
+  A('place',()=>{const cw=Math.min(84,W/4.2),x0=W/2-1.5*cw,y0=H*.3,h=H*.4,t=reduce?9:tsec;g.strokeStyle=C.line;g.lineWidth=1;for(let j=0;j<3;j++)g.strokeRect(x0+j*cw,y0,cw,h);
+    const wedge=(x,y,sz)=>{g.fillStyle=C.ink;g.beginPath();g.moveTo(x,y);g.lineTo(x+sz*.6,y+sz*.5);g.lineTo(x,y+sz);g.closePath();g.fill()};
+    for(let k=0;k<3;k++)wedge(x0+cw*.25+k*9,y0+h*.35,18);for(let k=0;k<2;k++)wedge(x0+2*cw+cw*.3+k*10,y0+h*.35,18);
+    const a=ease((t-1)/.5);if(a>0){g.save();g.globalAlpha*=a;g.save();g.translate(x0+cw*1.5,y0+h*.5);g.rotate(-.5);g.fillStyle=C.b;for(const d of[-6,6]){g.beginPath();g.moveTo(d-5,-8);g.lineTo(d+5,0);g.lineTo(d-5,8);g.closePath();g.fill()}g.restore();g.restore()}
+    else{g.setLineDash([2,4]);g.strokeStyle=C.mute;g.strokeRect(x0+cw*1.2,y0+h*.3,cw*.6,h*.4);g.setLineDash([])}
+    tx('3',x0+cw*.5,y0+h+20,C.mute,'center','13px '+sans);tx('empty',x0+cw*1.5,y0+h+20,C.b,'center','13px '+sans);tx('2',x0+cw*2.5,y0+h+20,C.mute,'center','13px '+sans)});
+  A('zline',()=>{const t=reduce?9:tsec;floats([[X(1),Y(.8),'5 − 5',.3],[X(2.4),Y(.8),'5 × 0',.8]],[X(0),Y(.5),'0',1.8,C.b],t);const a=ease((t-2)/.4);dot(X(0),oy,3+3*a,a>0?C.b:C.mute)});
+  A('digits',()=>{const y=H*.36,cw=Math.min(30,(W-32)/10);for(let d=0;d<10;d++){tx(''+d,W/2+(d-4.5)*cw,y,d===0?C.b:C.ink,'center',serif(26))}
+    const t=reduce?9:tsec,a=ease((t-.8)/.5);if(a>0){g.save();g.globalAlpha*=a;tx('25',W/2-50,H*.66,C.ink,'center',serif(30));tx('205',W/2+50,H*.66,C.ink,'center',serif(30));
+      tx('0',W/2+50,H*.66+30,C.b,'center','12px '+sans);g.restore()}});
+  A('zcenter',()=>{const p=reduce?0:Math.sin(time*2.4);ring(ox,oy,10+2*p,C.b,1.75);ring(ox,oy,22+4*p,C.b,.75);tx('0',ox,oy+26,C.b,'center','15px '+sans)});
   A('between',()=>{for(let n=0;n<=3;n++)dot(X(n),oy,4.5,C.ink);const y=Y(.55),r=.28*s,b=reduce?0:Math.sin(time*2)*3;
     halfApple(X(.5)+r*.4,y+b,r,-1);
     g.setLineDash([2,4]);ring(X(.5),oy,7,C.mute);g.setLineDash([]);tx('?',X(.5)+r*.9,y+b-r*.6,C.mute,'center',serif(20,1))});
