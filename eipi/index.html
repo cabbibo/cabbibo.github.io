@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>e^iπ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&display=swap" rel="stylesheet">
+<style>
+/* VOICE plain talk, a notebook kept by hand
+   IDEA a timeline with one drawing that keeps growing beside it: apples, a line, a plane, a circle, a spiral
+   PICTURE one sticky canvas that carries every stage; a thin time scale on top
+   COLOUR near-white or near-black, ink, ultramarine for turning, vermilion for the thing you watch
+   TYPE Newsreader throughout; system sans for small labels
+   LAYOUT phone: scale, drawing, beats scrolling under it. wide: beats left, drawing right */
+:root{color-scheme:light dark;--apple:#d42a2f;--leaf:#3f9a3c;--stem:#6e4a2a;--flesh:#f6e6c1;--seed:#3b2414;--bg:#fbfbf9;--ink:#171717;--mute:#86847f;--line:#dcdad4;--soft:#f1f0ec;--a:#2244ee;--b:#e2421e}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--apple:#ee4b4f;--leaf:#5cc25a;--stem:#a87a4f;--flesh:#e9d4a4;--seed:#3b2414;--bg:#0e0e10;--ink:#e9e7e2;--mute:#8a8882;--line:#2e2e33;--soft:#18181b;--a:#8a9dff;--b:#ff7652}}
+:root[data-theme=dark]{color-scheme:dark;--apple:#ee4b4f;--leaf:#5cc25a;--stem:#a87a4f;--flesh:#e9d4a4;--seed:#3b2414;--bg:#0e0e10;--ink:#e9e7e2;--mute:#8a8882;--line:#2e2e33;--soft:#18181b;--a:#8a9dff;--b:#ff7652}
+:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 Newsreader,Georgia,serif;font-optical-sizing:auto;overflow-x:clip}
+.m{font-style:italic}
+sup{line-height:0}
+.bar{position:sticky;top:0;z-index:5;height:46px;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar canvas{display:block;width:100%;height:100%;cursor:pointer;touch-action:manipulation}
+.wrap{max-width:640px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-left)) 0 max(20px,env(safe-area-inset-right))}
+.hero{min-height:calc(92svh - 46px);display:flex;flex-direction:column;justify-content:center;padding:40px 0}
+.eq{font-weight:300;font-size:clamp(54px,17vw,128px);line-height:1;letter-spacing:-.02em;margin:0 0 44px;white-space:nowrap}
+.eq sup{font-size:.55em;vertical-align:.8em;margin-left:.02em}
+.five{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 32px;max-width:420px}
+.five div{display:flex;flex-direction:column}
+.five b{font-weight:400;font-size:30px;line-height:1.1}
+.five span{font:13px/1.3 ui-sans-serif,system-ui,sans-serif;color:var(--mute);margin-top:6px}
+.tl{position:relative}
+.stage{position:sticky;top:46px;z-index:3;height:min(44svh,400px);background:var(--bg)}
+.stage::after{content:"";position:absolute;left:0;right:0;bottom:-28px;height:28px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.beats{list-style:none;margin:0;padding:10svh 0 24svh;position:relative}
+.beats::before,.prog{content:"";position:absolute;left:66px;top:0;width:1px;background:var(--line);height:100%}
+.prog{background:var(--ink);height:0}
+.beat{position:relative;padding-left:86px;margin:0 0 22svh;opacity:.3;transition:opacity .35s}
+.beat.on{opacity:1}
+.beat::before{content:"";position:absolute;left:63px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--bg);border:1px solid var(--mute)}
+.beat.on::before{background:var(--b);border-color:var(--b)}
+.yr{position:absolute;left:0;top:.05em;width:56px;text-align:right;font-style:italic;font-size:16px;color:var(--mute);white-space:nowrap}
+.beat p{margin:0;text-wrap:pretty}
+.ctl{display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap;font:14px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--mute);margin-top:10px}
+.ctl output{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.grow{flex:1 1 150px;display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;background:none;height:44px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line);border-radius:1px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-10px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink)}
+input[type=range]:focus{outline:none}
+input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 5px color-mix(in srgb,var(--a) 25%,transparent)}
+button{font:15px/1 Newsreader,Georgia,serif;color:var(--ink);background:none;border:1px solid var(--line);border-radius:22px;min-height:44px;min-width:44px;padding:0 15px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:hover{border-color:var(--mute)}
+button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.ladder{display:grid;grid-template-columns:max-content 1fr;gap:4px 22px;margin:10px 0 0}
+.ladder span:nth-child(odd){font-style:italic;white-space:nowrap}
+.ladder span:nth-child(even){color:var(--mute)}
+.who{margin-top:12px}
+.who summary{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px 0 10px;border:1px solid var(--line);border-radius:18px;font:13px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--mute);cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.who summary::-webkit-details-marker{display:none}
+.who summary::before{content:"+";font-size:16px;width:12px;text-align:center;color:var(--b)}
+.who[open] summary::before{content:"−"}
+.who summary b{font-weight:500;color:var(--ink)}
+.who div{background:var(--soft);border-radius:14px;padding:14px 16px;margin-top:8px;font-size:16px;line-height:1.5}
+.who div p+p{margin-top:8px}
+.road{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;max-width:480px}
+.road li{counter-increment:r}
+.road a{display:flex;align-items:baseline;gap:10px;min-height:40px;padding:8px 0;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);font-size:17px;line-height:1.2}
+.road a::before{content:attr(data-n);font:italic 15px Newsreader,Georgia,serif;color:var(--mute);width:2.4em;flex:none}
+.road a:hover{color:var(--b)}
+.road a:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.chap{position:relative;padding-left:86px;margin:0 0 16svh}
+.chap::before{content:"";position:absolute;left:58px;top:.6em;width:17px;height:1px;background:var(--ink)}
+.chap h2{margin:0;font-weight:300;font-size:clamp(34px,9vw,46px);line-height:1.05;letter-spacing:-.02em;text-wrap:balance}
+.wt{font-size:28px;font-style:italic;line-height:1.1;margin:0 0 6px!important}
+.beat.recap{padding-left:0;margin:8svh 0 32svh}
+.beat.recap::before{display:none}
+.rc{position:relative;z-index:1;background:var(--bg);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:30px 4px 30px 86px}
+.rc .rk{font-style:italic;color:var(--mute);font-size:16px}
+.rc p+p{margin-top:6px}.rc p+.rk{margin-top:18px}
+.rc .nx{margin-top:20px}
+.can{list-style:none;margin:6px 0 0;padding:0}
+.can li{position:relative;padding-left:18px;margin-top:4px}
+.can li::before{content:"";position:absolute;left:0;top:.75em;width:8px;height:1px;background:var(--ink)}
+.kit{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.kit span{font:13px/1 ui-sans-serif,system-ui,sans-serif;color:var(--mute);border:1px solid var(--line);border-radius:14px;padding:6px 10px;white-space:nowrap}
+.kit b{font:italic 14px Newsreader,Georgia,serif;color:var(--ink);margin-right:2px}
+.kit .new{border-color:var(--b);color:var(--b)}.kit .new b{color:var(--b)}
+.ch{position:relative}
+.div{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:64px max(20px,4vw);border-top:1px solid var(--line);background:var(--bg);position:relative;z-index:4}
+.div .rn{margin:0;font-weight:300;font-style:italic;font-size:clamp(56px,18vw,180px);line-height:.95;color:var(--mute)}
+.div h2{margin:0;font-weight:300;font-size:clamp(52px,15vw,168px);line-height:.95;letter-spacing:-.03em;text-wrap:balance}
+.div .pv{margin:28px 0 0;max-width:30ch;font-size:clamp(19px,2.2vw,24px);line-height:1.4}
+.end{min-height:70svh;display:flex;flex-direction:column;justify-content:center;padding:40px 0 96px}
+.end .eq{margin-bottom:24px}
+@media(min-width:900px){
+  .tl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:40px;max-width:1200px;margin:0 auto;padding:0 32px}
+  .stage{order:2;top:70px;height:calc(100svh - 100px);max-height:760px}
+  .stage::after{display:none}
+  .beats{order:1;padding:30svh 0 40svh}
+  .beat{margin-bottom:34svh}
+}
+@media(prefers-reduced-motion:reduce){.beat{transition:none}}
+.end .eq a{color:inherit;text-decoration:none;opacity:.18;transition:opacity .7s,color .3s}
+.end.lit .eq a{opacity:1}
+.end .eq a:hover,.end .eq a:focus-visible{color:var(--b);outline:none}
+.merge{position:relative;height:60px;font:300 40px/60px Newsreader,Georgia,serif;margin:0 0 24px;width:220px}
+.merge span{position:absolute;top:0;transition:transform .9s cubic-bezier(.6,0,.3,1),opacity .7s}
+.merge .m2,.merge .m4{opacity:0}
+.merge.s1 .m1{opacity:0}.merge.s1 .m2{opacity:1}
+.merge.s2 .m2{transform:translateX(64px);opacity:0}.merge.s2 .m3{transform:translateX(-56px);opacity:0}.merge.s2 .m4{opacity:1}
+@media(prefers-reduced-motion:reduce){.merge span,.end .eq a{transition:none}}
+</style>
+</head>
+<body>
+<header class="bar"><canvas id="ov" aria-label="Timeline overview. Tap to jump."></canvas></header>
+
+<div class="wrap">
+<section class="hero">
+  <h1 class="eq"><span class="m">e</span><sup><span class="m">i</span>π</sup> + 1 = 0</h1>
+  <div class="five">
+    <div><b class="m">e</b><span>growth</span></div>
+    <div><b class="m">i</b><span>√−1</span></div>
+    <div><b>π</b><span>circles</span></div>
+    <div><b>1</b><span>counting</span></div>
+    <div><b>0</b><span>nothing</span></div>
+  </div>
+  <p>Each came from a different problem, in a different century. This is how they ended up in one line.</p>
+  <p>The same arithmetic runs audio filters, shaders, phone radios and quantum physics.</p>
+  <ol class="road" id="road"><li><a href="#ch-negatives" data-n="I.">Negatives</a></li><li><a href="#ch-between" data-n="II.">Between</a></li><li><a href="#ch-gaps" data-n="III.">Gaps within gaps</a></li><li><a href="#ch-beyond" data-n="IV.">Gaps between the gaps</a></li><li><a href="#ch-quarter" data-n="V.">A quarter turn</a></li><li><a href="#ch-ladder" data-n="VI.">The ladder</a></li><li><a href="#ch-forever" data-n="VII.">Forever</a></li><li><a href="#ch-growth" data-n="VIII.">Growth turns</a></li><li><a href="#ch-sequency" data-n="IX.">Sequency and simultaneity</a></li></ol>
+</section>
+</div>
+
+<section class="ch" data-i="0"><div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+
+
+<li class="beat" data-s="apples2" data-y="-9999" data-d="counting"><span class="yr">counting</span><p>Numbers are easy. Count apples: two.</p></li>
+<li class="beat" data-s="apples4"><p>Add two: four.</p></li>
+<li class="beat" data-s="takeok"><p>Take two away: two again. All fine.</p></li>
+
+</ol></div></section>
+<section class="ch" data-i="1" id="ch-negatives"><header class="div"><p class="rn">I.</p><h2>Negatives</h2><p class="pv">Numbers counted things. What happens when you take away more than you have?</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="take"><p class="wt">Wait.</p><p>Take three apples from two?</p></li>
+<li class="beat" data-s="take"><p>There’s nothing left to take. That’s impossible.</p></li>
+<li class="beat" data-s="take"><p>But a trader can owe three apples, and a thermometer can read below zero. The ledger needs somewhere to put that.</p></li>
+<li class="beat" data-s="line"><p>Unless numbers aren’t things. Put the apples on a line.</p></li>
+<li class="beat" data-s="add"><p>Adding two is two steps right along the apple line.</p></li>
+<li class="beat" data-s="sub"><p>Taking three is three steps left. Nothing stops you at zero. You land on −1.</p></li>
+<li class="beat" data-s="negs"><p>Negative numbers build the other side of the line. Three from two is possible now: −1.</p></li>
+<li class="beat" data-s="plus2"><p>So a number is a move. +2 is two steps right, wherever you start.</p></li>
+<li class="beat" data-s="minus3"><p>−3 is three steps left.</p></li>
+<li class="beat" data-s="negs"><p>So that’s where negative numbers come from.</p></li>
+<li class="beat" data-s="negs" data-y="1544" data-d="1544"><span class="yr">1544</span><p>Plenty of people hated this. Michael Stifel called them absurd numbers.</p>
+<details class="who"><summary><b>Michael Stifel</b> c. 1487–1567</summary><div><p>An Augustinian monk who took Luther’s side in the Reformation, a split in the church, not in mathematics. A pro-Luther poem in 1522 made things tense enough that he left his monastery. He also did “word calculations” on the letters of the Bible, and in 1532 announced that the world would end at 8 a.m. on 19 October 1533. It didn’t, and he made no more predictions.</p></div></details></li>
+<li class="beat" data-s="negs" data-y="1545" data-d="1545"><span class="yr">1545</span><p>Gerolamo Cardano used them in his great book of algebra, and called them fictitious.</p>
+<details class="who"><summary><b>Gerolamo Cardano</b> 1501–1576</summary><div>
+<p>Born illegitimate in Pavia, which got him turned away by Milan’s college of physicians. He became a famous doctor anyway.</p>
+<p>He was also a compulsive gambler. At one low point he pawned his wife’s jewellery and the family landed in the poorhouse. Out of the dice came a book on games of chance, the first real study of probability, written around 1564 and not printed until 1663.</p>
+<p>In 1539 Niccolò Tartaglia gave him the solution of the cubic, in verse, after Cardano swore not to publish it. Then Cardano found that Scipione del Ferro had solved it first, and printed it in his <i>Ars Magna</i> in 1545, with credit to both. Tartaglia fought him for a decade.</p>
+<p>In 1560 his eldest son was beheaded for poisoning his wife. In 1570 the Inquisition jailed him for heresy. One charge: he had cast a horoscope of Jesus.</p>
+<p>He wrote his autobiography, <i>De Vita Propria</i>, in Rome. Legend says he predicted the day he would die, and some say he made sure of it. He died there in 1576.</p>
+</div></details></li>
+<li class="beat" data-s="groups"><p>Now a new kind of move. Not a step, but a stretch.</p></li>
+<li class="beat" data-s="groups"><p>Multiplying is repeated groups. Three bags of two apples: six.</p></li>
+<li class="beat" data-s="mul3"><p>On the apple line, ×3 sends 2 to 6, and 1 to 3. Everything moves three times as far from zero. Zero stays put.</p></li>
+<li class="beat" data-s="compA"><p>Add 2 to every point. 0 goes to 2, 1 to 3, 2 to 4. Every point moves the same distance.</p></li>
+<li class="beat" data-s="compM"><p>Now multiply every point by 2. 1 goes to 2, 2 to 4, 3 to 6. Far points move further. 0 doesn’t move at all.</p></li>
+<li class="beat" data-s="debt"><p>Owe 2 apples, three times over, and you owe 6. (−2) × 3 = −6. The stretch works on the other side too.</p></li>
+<li class="beat" data-s="flip"><p>And ×−1? It turns 2 into −2, a credit into a debt. Watch the dots.</p></li>
+<li class="beat" data-s="flip"><p>Every point swings over the top, round zero, to its mirror side. ×−1 is a half turn: 180°.</p></li>
+<li class="beat" data-s="twoflip"><p>Do it again and they keep going, round the bottom, back home. ×−1 ×−1 → ×1. That’s why (−5) × (−5) = 25.</p></li>
+<li class="beat" data-s="twoflip" data-y="1758" data-d="1758"><span class="yr">1758</span><p>Francis Maseres called that nonsense, and argued negatives should be cut out of algebra. Two half turns answer him.</p>
+<details class="who"><summary><b>Francis Maseres</b> 1731–1824</summary><div><p>A London lawyer and judge, once attorney general of Quebec, still in the wig and ruffles of his youth long after they went out. He paid to reprint old mathematics out of his own pocket, and slowed algebra teaching in Britain for decades.</p></div></details></li>
+<li class="beat" data-s="mtoy"><p>So a multiplication is a stretch, maybe with a flip. Stack a few.</p>
+<div class="ctl"><button data-m="2">×2</button><button data-m="3">×3</button><button data-m="-1">×−1</button><button id="m-reset">reset</button></div>
+<div class="ctl"><output id="o-m">2</output></div></li>
+
+<li class="beat recap" data-s="recap"><div class="rc">
+<p class="rk">What numbers were</p><p>Amounts. How many apples. Less than none made no sense.</p>
+<p class="rk">What numbers are</p><p>Moves on a line. Adding is a step. Multiplying is a stretch. ×−1 is a half turn around zero.</p>
+<p class="rk">Now we can</p><ul class="can"><li>Owe things: debts, temperatures below zero, steps behind the start.</li><li>Solve <i>x</i> + 3 = 1.</li></ul><div class="kit"><span class="new"><b>+</b> step</span><span class="new"><b>×</b> stretch</span><span class="new"><b>×−1</b> flip</span></div><p class="nx">Each new kind of number will add a move the old ones couldn’t make.</p></div></li>
+
+</ol></div></section>
+<section class="ch" data-i="2" id="ch-between"><header class="div"><p class="rn">II.</p><h2>Between</h2><p class="pv">The line only stops at whole numbers. What lives in between?</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="between"><p class="wt">Wait.</p><p>The apple line only stops at whole numbers. What’s between 0 and 1?</p></li>
+<li class="beat" data-s="between"><p>Half an apple has nowhere to go.</p></li>
+<li class="beat" data-s="pizza"><p>Cut an apple down the middle. Each half is ½. Now there’s a stop between 0 and 1.</p></li>
+<li class="beat" data-s="halve"><p>Halving is a move too: ×½ squeezes the whole apple line toward zero. Twice makes quarter apples.</p></li>
+<li class="beat" data-s="frac"><p>Cut apples into thirds, fifths, sevenths: new stops between the old ones. Fractions describe the in-between, which whole numbers couldn’t.</p></li>
+<li class="beat" data-s="frac" data-y="-1550" data-d="~1550 BC"><span class="yr">~1550 BC</span><p>Egyptian scribes used fractions all the time. The Rhind papyrus is full of them.</p>
+<details class="who"><summary><b>Ahmes</b> scribe, c. 1550 BC</summary><div><p>He copied the papyrus from an older text that is now lost. It writes fractions as sums of pieces of one, like 2/5 = 1/3 + 1/15, with a table of them for every odd number up to 101.</p></div></details></li>
+<li class="beat" data-s="frac" data-y="-375" data-d="~375 BC"><span class="yr">~375 BC</span><p>Greek mathematicians didn’t count them as numbers. A number was a count of whole units, and the one couldn’t be split. In Plato’s <i>Republic</i>, the experts mock anyone who tries.</p></li>
+<li class="beat" data-s="names"><p>½, 0.5, 2/4, 50%: many names, one point.</p></li>
+<li class="beat" data-s="dec"><p>0.5 is a fraction too: 5/10. Decimals are fractions with 10, 100, 1000 on the bottom.</p></li>
+<li class="beat" data-s="third"><p>Some names never finish. ⅓ is 0.333…, with 3s running on forever, for the same point. The number is the point. The symbols are names for it.</p></li>
+<li class="beat" data-s="frac"><p>So that’s where fractions come from. The line now has a stop wherever you can cut.</p></li>
+
+<li class="beat recap" data-s="frac"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Share evenly: half an apple, a third of a day.</li><li>Measure parts of a unit.</li><li>Solve 2<i>x</i> = 1.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class="new"><b>×½</b> cut</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="3" id="ch-gaps"><header class="div"><p class="rn">III.</p><h2>Gaps within gaps</h2><p class="pv">Fractions seem to fill the line. They don’t quite.</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="frac"><p>Fractions seem to fill everything. Surely that’s every number.</p></li>
+<li class="beat" data-s="sq3"><p>Multiply a number by itself and you get a square. Sides of 3 hold 9 little squares: 3 × 3 = 9, written 3².</p></li>
+<li class="beat" data-s="sq3"><p>It’s the stretch move, used on itself.</p></li>
+<li class="beat" data-s="sqback"><p>Run it backwards. Which side gives an area of 4? 2. An area of 9? 3.</p></li>
+<li class="beat" data-s="sqback"><p>An area of 2? Which <i>x</i> gives <i>x</i>² = 2?</p></li>
+<li class="beat" data-s="dbl"><p>Draw a square with sides of 1, then the square on its diagonal. It’s made of four half-squares: area exactly 2.</p>
+<details class="who"><summary><b>Plato’s <i>Meno</i></b></summary><div><p>Socrates draws this in the sand for a boy who has never studied geometry and, only asking questions, leads him to it: the square twice as big is the square on the diagonal.</p></div></details></li>
+<li class="beat" data-s="dbl"><p>So the diagonal is the side whose square is 2.</p></li>
+<li class="beat" data-s="plot"><p>Builders and surveyors walk that diagonal across square plots. Its length has to be a number.</p></li>
+<li class="beat" data-s="ybc" data-y="-1700" data-d="~1700 BC"><span class="yr">~1700 BC</span><p>Babylonian scribes measured it closely. A clay tablet, YBC 7289, gives it as about 1.41421296.</p></li>
+<li class="beat" data-s="ybc"><p>Close, but would it ever come out exact?</p></li>
+<li class="beat" data-s="square" data-y="-500" data-d="~500 BC"><span class="yr">~500 BC</span><p>Greek mathematicians asked which fraction it is. Swing the diagonal down onto the line.</p></li>
+<li class="beat" data-s="zoom"><p class="wt">Wait.</p><p>Zoom in where it lands. It’s between 7/5 and 3/2.</p></li>
+<li class="beat" data-s="zoom"><p>Zoom in as far as you like. Two fractions on either side, and √2 always in the space between.</p></li>
+<li class="beat" data-s="zoom"><p>No fraction ever lands on it. You can walk that length, yet as a fraction it’s impossible. There’s a hole in the line.</p></li>
+<li class="beat" data-s="filled"><p>√2 fills the hole. So that’s where irrational numbers come from. They add no new move. They fill the holes.</p>
+<details class="who"><summary><b>Hippasus</b> 5th century BC</summary><div><p>Writers centuries later tell of a Pythagorean drowned at sea for giving away a secret. In some versions it was the irrational, in others a twelve-sided solid. The accounts disagree, and none is close to the time. Almost certainly a story.</p></div></details></li>
+
+<li class="beat recap" data-s="filled"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Measure any diagonal, any length you can draw.</li><li>Solve <i>x</i>² = 2.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class="new"><b>√</b> fill</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="4" id="ch-beyond"><header class="div"><p class="rn">IV.</p><h2>Gaps between the gaps</h2><p class="pv">Fractions and roots seem to fill the line. Most of it is something else.</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="algline"><p>Every number so far answers a short recipe of multiplying and adding. −2 answers <i>x</i> + 3 = 1. ½ answers 2<i>x</i> = 1. √2 answers <i>x</i>² = 2.</p></li>
+<li class="beat" data-s="algline"><p>Scatter the answers of lots of recipes like these. They seem to be everywhere.</p></li>
+<li class="beat" data-s="algline"><p class="wt">Wait.</p><p>Is every number the answer to some recipe like these?</p></li>
+<li class="beat" data-s="piwalk"><p>Here’s a suspect. Roll a circle of width 1 along the line. One full turn covers a distance called π, about 3.14.</p></li>
+<li class="beat" data-s="sqcirc"><p>Since ancient Greece, people tried to draw a square with exactly the area of a circle, using only ruler and compass. For over two thousand years, nobody managed it, and nobody could prove it impossible.</p></li>
+<li class="beat" data-s="liouville" data-y="1844" data-d="1844"><span class="yr">1844</span><p>Joseph Liouville built a number that answers no recipe at all, by hand, with 1s further and further apart. Numbers like this are called transcendental.</p></li>
+<li class="beat" data-s="lindemann" data-y="1882" data-d="1882"><span class="yr">1882</span><p>Ferdinand von Lindemann proved π is one. That settled it: the circle can’t be squared.</p></li>
+<li class="beat" data-s="lindemann"><p>So that’s where transcendental numbers come from: numbers no recipe of adding and multiplying can reach.</p></li>
+<li class="beat" data-s="darts"><p>Now throw darts at the line.</p></li>
+<li class="beat" data-s="dartzoom"><p>Zoom in on where one lands. The fractions and recipe answers thin out to nothing around it.</p></li>
+<li class="beat" data-s="dartzoom"><p>Almost every number on the line is transcendental. We can name only a handful.</p></li>
+<li class="beat recap" data-s="dartzoom"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Name numbers that no recipe of adding and multiplying can reach.</li><li>Close the two-thousand-year question of squaring the circle.</li><li>Say where a dart thrown at the line almost surely lands.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class="new"><b>π</b> beyond roots</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="5" id="ch-quarter"><header class="div"><p class="rn">V.</p><h2>A quarter turn</h2><p class="pv">Every number times itself lands on the positive side. What could land on −1?</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="sq3m"><p>Squaring a number is doing its move twice. ×3, then ×3 again: ×9. So 3² = 9.</p></li>
+<li class="beat" data-s="sqhalf"><p>½ × ½ = ¼. Shrink, then shrink again.</p></li>
+<li class="beat" data-s="sqneg2"><p>(−2) × (−2) = 4. Stretch and flip, then stretch and flip again. The flips cancel.</p></li>
+<li class="beat" data-s="sqneg1"><p>(−1) × (−1) = 1. Two half turns: a full circle.</p></li>
+<li class="beat" data-s="pow3"><p>2³ = 2 × 2 × 2: the move done three times. The little number counts how many times.</p></li>
+<li class="beat" data-s="sqland"><p>Every square lands on the positive side, whichever side it starts from.</p></li>
+<li class="beat" data-s="sqland"><p class="wt">Wait.</p><p>What move, done twice, lands on −1?</p></li>
+<li class="beat" data-s="ask"><p>Nothing on the line. Plus times plus is plus, minus times minus is plus. It’s impossible.</p></li>
+<li class="beat" data-s="ask" data-y="1545.5" data-d="1545"><span class="yr">1545</span><p>Cardano had already run into √−15 in a problem. He called the arithmetic as subtle as it is useless.</p></li>
+<li class="beat" data-s="cubic"><p>Why bother? Take <i>x</i>³ = 15<i>x</i> + 4. The answer is plainly 4.</p></li>
+<li class="beat" data-s="cubic2"><p>But the cubic formula only reaches 4 by going through √−121. Its path leaves the line and comes back.</p></li>
+<li class="beat" data-s="cubic2" data-y="1572" data-d="1572"><span class="yr">1572</span><p>Rafael Bombelli took that detour seriously, and wrote down rules for calculating with it.</p>
+<details class="who"><summary><b>Rafael Bombelli</b> 1526–1572</summary><div><p>A wool merchant’s son from Bologna who never went to university. He became a hydraulic engineer, draining marshes in the Val di Chiana, and started his <i>Algebra</i> while that project was on hold. Three books came out in 1572, the year he died. The last two were never finished.</p></div></details></li>
+<li class="beat" data-s="flip2"><p>Remember, ×−1 is a half turn. So we need a move that, done twice, makes a half turn.</p></li>
+<li class="beat" data-s="halfq"><p>So what is half of a half turn?</p></li>
+<li class="beat" data-s="halfq"><p>Nowhere on the line is halfway round. The line isn’t enough.</p></li>
+<li class="beat" data-s="quarter"><p>So the dot lifts off it. The line becomes a plane, and every point has two parts: across and up.</p></li>
+<li class="beat" data-s="i2"><p>Call that move ×<i>i</i>. Two quarter turns make a half turn.</p></li>
+<li class="beat" data-s="i2"><p>So <i>i</i> × <i>i</i> = −1. The impossible question has an answer: a quarter turn.</p></li>
+<li class="beat" data-s="i2"><p>So that’s where imaginary numbers come from.</p></li>
+<li class="beat" data-s="pidist"><p>Walk a half turn round this circle and you cover π, the same π as the rolling circle.</p></li>
+<li class="beat" data-s="plane" data-y="1637" data-d="1637"><span class="yr">1637</span><p>René Descartes named them imaginary. He meant it as an insult.</p></li>
+<li class="beat" data-s="plane" data-y="1799" data-d="1799"><span class="yr">1799</span><p>A surveyor, Caspar Wessel, drew numbers as points on a plane.</p>
+<details class="who"><summary><b>Caspar Wessel</b> 1745–1818</summary><div><p>Norwegian, one of fourteen children of a minister, and poor most of his life. He spent decades triangulating Denmark and drew its first accurate map. This was his only mathematics paper. He wasn’t an Academy member, so a colleague read it for him in 1797. Almost no one noticed it until 1895.</p></div></details></li>
+<li class="beat" data-s="plane" data-y="1806" data-d="1806"><span class="yr">1806</span><p>In Paris, Jean-Robert Argand had the same idea, and left his name off it.</p>
+<details class="who"><summary><b>Jean-Robert Argand</b> 1768–1822</summary><div><p>He had a few copies printed and sent one to Legendre, who was unimpressed and mentioned it in a letter. In 1813 Jacques Français found that letter among his late brother’s papers, published the idea, and asked the unknown author to come forward. Argand did. Little else about him is certain. The usual story that he kept books in Paris may be about another man with the same name.</p></div></details></li>
+<li class="beat" data-s="plane"><p>Gauss later suggested calling them lateral numbers. Sideways ones.</p></li>
+<li class="beat" data-s="qi2"><p>Try ×<i>i</i> on an ordinary number. 2 turns a quarter, to 2<i>i</i>.</p></li>
+<li class="beat" data-s="q2i"><p>×2 then ×<i>i</i>: stretch, then turn. Together they make one move, ×2<i>i</i>.</p></li>
+<li class="beat" data-s="qtri"><p>So every point in the plane is a move. Which move? Look at where it sends 1.</p></li>
+<li class="beat" data-s="qtri"><p>Call that point <i>b</i>. The triangle from 0 to 1 to <i>b</i> is the move.</p></li>
+<li class="beat" data-s="qmul"><p>To multiply <i>a</i> by <i>b</i>, do the same move to <i>a</i>: the same triangle, scaled and turned to sit on <i>a</i>.</p></li>
+<li class="beat" data-s="qmul"><p>Same shape, so lengths multiply and angles add.</p></li>
+<li class="beat" data-s="cx"><p>Try it. Drag <i>a</i>. Pick a move, and tap it again to repeat it.</p>
+<div class="ctl"><button data-b="0,1">×<i>i</i></button><button data-b="2,0">×2</button><button data-b="-1,0">×−1</button><button data-b="1,1">×(1+<i>i</i>)</button><button data-b="0.5,0">×½</button><button id="b-reset">reset</button></div>
+<div class="ctl"><output id="o-cx"></output></div></li>
+<li class="beat" data-s="cx"><p>Graph paper has points but no way to multiply them. This plane does.</p>
+<details class="who"><summary><b>William Rowan Hamilton</b> 1843</summary><div><p>Hamilton spent years trying to do the same in three dimensions. In October 1843 his children asked him every morning whether he could multiply triplets yet. He could only add them. On the 16th, walking along a Dublin canal with his wife, he saw how to do it in four, and cut the rule into Broom Bridge with a knife: <i>i</i>² = <i>j</i>² = <i>k</i>² = <i>ijk</i> = −1.</p></div></details></li>
+<li class="beat" data-s="cx"><p>Anything that turns gets computed this way: alternating current, radio waves, a sprite rotating on screen.</p></li>
+
+<li class="beat recap" data-s="cx"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Treat a turn as a number.</li><li>Solve <i>x</i>² = −1, and finish Bombelli’s cubic.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class="new"><b>×i</b> turn</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="6" id="ch-ladder"><header class="div"><p class="rn">VI.</p><h2>The ladder</h2><p class="pv">Each new kind of number answered an impossible equation. Does that ever stop?</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="r1"><p><i>x</i> + 3 = 1 was impossible. Negatives made it possible: −2.</p></li>
+<li class="beat" data-s="r2"><p>2<i>x</i> = 1 was impossible in whole numbers. Fractions: ½.</p></li>
+<li class="beat" data-s="r3"><p><i>x</i>² = 2 was impossible in fractions. √2.</p></li>
+<li class="beat" data-s="r4"><p><i>x</i>² = −1 was impossible on the line. <i>i</i>.</p></li>
+<li class="beat" data-s="recipe"><p>Each rung is one of those short recipes of multiplying and adding <i>x</i>. Mathematicians call them polynomials.</p></li>
+<li class="beat" data-s="harder"><p>Try harder recipes. Every answer is already in the plane.</p></li>
+<li class="beat" data-s="harder" data-y="1799.5" data-d="1799"><span class="yr">1799</span><p>Carl Friedrich Gauss, at 22, argued that every polynomial has its answers in the plane. The ladder stops here.</p>
+<details class="who"><summary><b>Carl Friedrich Gauss</b> 1777–1855</summary><div><p>It was his doctoral thesis. The proof had a gap nobody closed until 1920. He kept coming back to the theorem and published his last proof of it in 1849, fifty years after the first.</p></div></details></li>
+<li class="beat" data-s="complete"><p>With <i>i</i>, no equation like these is impossible any more. Every one has its answers here.</p></li>
+<li class="beat" data-s="complete"><p>The numbers are complete. You can stop inventing new ones.</p></li>
+<li class="beat" data-s="alg"><p>Here are the answers of every polynomial whose numbers are all 1 or −1, thousands of them. Raise the highest power.</p>
+<div class="ctl"><div class="grow"><label for="r-d">highest power</label><input id="r-d" type="range" min="1" max="12" step="1" value="8"></div><output id="o-d"></output></div></li>
+<li class="beat" data-s="roots"><p><i>x</i><sup>n</sup> = 1 has <i>n</i> answers, spaced evenly round the circle.</p>
+<div class="ctl"><div class="grow"><input id="r-n" type="range" min="1" max="16" step="1" value="5" aria-label="n"><output id="o-n"></output></div></div></li>
+
+<li class="beat recap" data-s="roots"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Solve every polynomial equation. No impossible ones are left.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class="new"><b>✓</b> complete</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="7" id="ch-forever"><header class="div"><p class="rn">VII.</p><h2>Forever</h2><p class="pv">Recipes that never end, and what they make.</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="comp1"><p>What if the recipe never ends?</p></li>
+<li class="beat" data-s="comp1"><p>Money earning interest grows out of itself. So does a population. A cooling cup of coffee shrinks the same way.</p></li>
+<li class="beat" data-s="comp1"><p>Grow 1 by 100% in one go: 2.</p></li>
+<li class="beat" data-s="comp2"><p>Grow in two halves instead, 50% and then 50% of that: 2.25. A bit more.</p></li>
+<li class="beat" data-s="compn"><p>Cut it into more and more steps. The total climbs, then stalls near 2.718. That number is <i>e</i>.</p></li>
+<li class="beat" data-s="grow"><p>Keep growing like that for a time <i>x</i> and you reach <i>e<sup>x</sup></i>. Its speed at each moment, the arrow, equals its size.</p></li>
+<li class="beat" data-s="series"><p>A second road to <i>e</i>, also without end: 1 + 1 + ½ + ⅙ + 1/24 + … Each step divides by one more.</p></li>
+<li class="beat" data-s="hermite" data-y="1873" data-d="1873"><span class="yr">1873</span><p><i>e</i> turns out to be transcendental too, like π. Charles Hermite proved it.</p></li>
+<li class="beat" data-s="pie"><p>Nobody knows whether π + <i>e</i> is.</p></li>
+<li class="beat" data-s="deriv"><p>For <i>e<sup>x</sup></i> it’s 1 + <i>x</i> + <i>x</i>²/2 + <i>x</i>³/6 + … Work out how fast each piece grows and it slides down a slot. Same series: it is its own speed.</p></li>
+<li class="beat" data-s="pw1"><p>Remember, 2² is the move ×2 done twice.</p></li>
+<li class="beat" data-s="pw2"><p>2<sup>½</sup> is half that move: a move that, done twice, makes ×2. So 2<sup>½</sup> = √2.</p></li>
+<li class="beat" data-s="pw3"><p>2<sup>√2</sup> gets closed in on the same way: 2<sup>1.4</sup>, 2<sup>1.41</sup>, 2<sup>1.414</sup>, …</p></li>
+<li class="beat" data-s="pw3" data-y="1934" data-d="1934"><span class="yr">1934</span><p>Aleksandr Gelfond and Theodor Schneider: 2<sup>√2</sup> is transcendental too.</p>
+<details class="who"><summary><b>David Hilbert</b> 1919</summary><div><p>Hilbert put this question on his famous list of problems in 1900. In a 1919 lecture he reportedly told the audience that no one in the hall would live to see it answered. It took fifteen years.</p></div></details></li>
+<li class="beat" data-s="orbit"><p>Coastlines and ferns repeat their shape at every size. No short recipe draws them.</p></li>
+<li class="beat" data-s="orbit"><p>Another kind of forever: repeat. <i>z</i> → <i>z</i>² + <i>c</i>, again and again. Some points run away. Some never do.</p></li>
+<li class="beat" data-s="mandel"><p>Mark every <i>c</i> that never runs away.</p>
+<div class="ctl"><div class="grow"><label for="r-r">repeats</label><input id="r-r" type="range" min="1" max="60" step="1" value="4"></div><output id="o-r"></output></div></li>
+<li class="beat" data-s="halves"><p>And <i>e<sup>x</sup></i> = 0? Halve, halve, halve. Never zero. That one is off the ladder.</p></li>
+
+<li class="beat recap" data-s="halves"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Describe growth that feeds on itself: interest, populations, cooling.</li><li>Add up recipes that never end.</li><li>Draw shapes that repeat forever, like the Mandelbrot set.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class="new"><b>…</b> forever</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="8" id="ch-growth"><header class="div"><p class="rn">VIII.</p><h2>Growth turns</h2><p class="pv">What happens when growth gets pushed sideways.</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="grow"><p>Back to <i>e<sup>x</sup></i>, pushed by its own size. The bigger it gets, the harder the push.</p></li>
+<li class="beat" data-s="turn"><p>Put <i>i</i> in the exponent, <i>e<sup>ix</sup></i>, and the push is turned a quarter, ×<i>i</i>. It always points sideways.</p></li>
+<li class="beat" data-s="turn"><p>Pushed sideways forever, you go round in a circle.</p></li>
+<li class="beat" data-s="shadow"><p>Watch the circling dot’s shadows. Across is called cos θ, up is sin θ, where θ is how far round it has gone.</p></li>
+<li class="beat" data-s="euler"><p>Build it from small steps. Start at 1. Push sideways by <i>i</i>π/<i>n</i> of where you are, <i>n</i> times.</p>
+<div class="ctl"><button id="m-st" aria-pressed="true">steps</button><button id="m-sr" aria-pressed="false">series</button><div class="grow"><input id="r-e" type="range" min="1" max="80" step="1" value="4" aria-label="n"></div></div>
+<div class="ctl"><output id="o-e"></output></div></li>
+<li class="beat" data-s="euler"><p>Smaller steps bend onto the circle and land halfway round, at −1.</p></li>
+<li class="beat" data-s="turn" data-y="1748" data-d="1748"><span class="yr">1748</span><p>So <i>e<sup>iθ</sup></i> = cos θ + <i>i</i> sin θ: go θ round the circle. Leonhard Euler wrote it down.</p>
+<details class="who"><summary><b>Leonhard Euler</b> 1707–1783</summary><div><p>He lost the sight of one eye around 1738 and was almost completely blind from 1766. His output went up. With scribes and a huge memory (he could recite the whole <i>Aeneid</i>), he averaged about a paper a week in 1775. He said some of his best ideas came with a baby in his arms and children playing at his feet.</p></div></details></li>
+<li class="beat" data-s="fourier"><p>Chain a few spinning arrows of different sizes and speeds, and the tip draws a wave. Any sound can be pulled apart into arrows like these and rebuilt.</p>
+<div class="ctl"><div class="grow"><label for="r-f">arrows</label><input id="r-f" type="range" min="1" max="12" step="1" value="4"></div><output id="o-f"></output></div></li>
+
+<li class="beat recap" data-s="fourier"><div class="rc"><p class="rk">Now we can</p><ul class="can"><li>Write turning with <i>e</i>: <i>e<sup>iθ</sup></i>.</li><li>Build waves and sounds out of spinning arrows.</li></ul><div class="kit"><span class=""><b>+</b> step</span><span class=""><b>×</b> stretch</span><span class=""><b>×−1</b> flip</span><span class=""><b>×½</b> cut</span><span class=""><b>√</b> fill</span><span class=""><b>π</b> beyond roots</span><span class=""><b>×i</b> turn</span><span class=""><b>✓</b> complete</span><span class=""><b>…</b> forever</span><span class="new"><b>eⁱᶿ</b> spin</span></div></div></li>
+</ol></div></section>
+<section class="ch" data-i="9" id="ch-sequency"><header class="div"><p class="rn">IX.</p><h2>Sequency and simultaneity</h2><p class="pv">An arrow, a circle, and a novel about time.</p></header>
+<div class="tl"><div class="stage"><canvas></canvas></div>
+<ol class="beats"><div class="prog"></div>
+<li class="beat" data-s="arrow" data-y="1974" data-d="1974"><span class="yr">1974</span><p><i>e</i> to a real power: an arrow. Time as a line. Sequency.</p></li>
+<li class="beat" data-s="circ"><p><i>e</i> to an imaginary power: a circle. Time as return. Simultaneity.</p></li>
+<li class="beat" data-s="circ"><p>In Ursula K. Le Guin’s <i>The Dispossessed</i>, the physicist Shevek spends the book trying to hold both in one theory.</p>
+<details class="who"><summary><b>Ursula K. Le Guin</b> 1929–2018</summary><div><p>Born in Berkeley. Her father, Alfred Kroeber, was an anthropologist. Her mother, Theodora Kroeber, wrote <i>Ishi in Two Worlds</i>. <i>The Dispossessed</i> won both the Hugo and the Nebula.</p></div></details></li>
+<li class="beat" data-s="spiral"><p>Growth and turning at once: a spiral.</p>
+<div class="ctl"><div class="grow"><label for="r-g">growth</label><input id="r-g" type="range" min="-0.25" max="0.25" step="0.01" value="0.12"></div><output id="o-g"></output></div></li>
+<li class="beat" data-s="spiral"><p>A rhyme, not physics.</p></li>
+<li class="beat" data-s="half"><p>Halfway round the circle from 1 is −1.</p></li>
+</ol></div></section>
+
+
+<div class="wrap">
+<footer class="end" id="end">
+  <div class="eq" aria-label="e to the i pi plus one equals zero"><a href="#ch-forever" style="transition-delay:.1s"><span class="m">e</span></a><sup><a href="#ch-quarter" style="transition-delay:.5s"><span class="m">i</span></a><a href="#ch-growth" style="transition-delay:.9s">π</a></sup> <a href="#ch-negatives" style="transition-delay:1.3s">+</a> <a href="#ch-negatives" style="transition-delay:1.6s">1</a> <a href="#ch-negatives" style="transition-delay:1.9s">=</a> <a href="#ch-negatives" style="transition-delay:2.2s">0</a></div>
+  <div class="merge" id="merge" aria-hidden="true"><span class="m1" style="left:0"><i>e</i><sup><i>i</i>π</sup></span><span class="m2" style="left:0">−1</span><span class="m3" style="left:120px">+1</span><span class="m4" style="left:64px">0</span></div>
+  <p>Add 1, and you are back at nothing.</p>
+  <p>Written in numbers where no equation like it is impossible.</p>
+</footer>
+</div>
+
+<script>
+{
+const root=document.documentElement,TAU=Math.PI*2,PI=Math.PI,R2=Math.SQRT2,E=Math.E;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=id=>document.getElementById(id);
+const C={};let themeV=0;
+const readC=()=>{const s=getComputedStyle(root);for(const k of['bg','ink','mute','line','a','b','apple','leaf','stem','flesh','seed'])C[k]=s.getPropertyValue('--'+k).trim();themeV++};
+readC();
+const sans='ui-sans-serif,system-ui,sans-serif',serif=(n,it)=>(it?'italic ':'')+n+'px Newsreader,Georgia,serif';
+const minus=v=>(v<0?'−':'')+Math.abs(v);
+const num=(v,d)=>{const s=Math.abs(v).toFixed(d);return(v<0&&+s!==0?'−':'')+s};
+const cfmt=(x,y)=>num(x,2)+(y<0?' − ':' + ')+Math.abs(y).toFixed(2)+'i';
+const hex=h=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255]};
+const ease=t=>(1-Math.cos(PI*Math.max(0,Math.min(1,t))))/2;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const fact=n=>n<2?1:n*fact(n-1);
+const rnd=i=>{const x=Math.sin(i*12.9898+4.1)*43758.5453;return x-Math.floor(x)};
+
+/* polynomial roots (Durand-Kerner); c low to high */
+function dk(c){const d=c.length-1,lead=c[d],a=c.map(v=>v/lead),re=new Float64Array(d),im=new Float64Array(d);
+  let zr=1,zi=0;for(let j=0;j<d;j++){re[j]=zr;im[j]=zi;const t=zr*.4-zi*.9;zi=zr*.9+zi*.4;zr=t}
+  for(let it=0;it<200;it++){let md=0;for(let i=0;i<d;i++){let pr=1,pi=0;const xr=re[i],xi=im[i];
+    for(let j=d-1;j>=0;j--){const t=pr*xr-pi*xi+a[j];pi=pr*xi+pi*xr;pr=t}
+    let qr=1,qi=0;for(let j=0;j<d;j++){if(j===i)continue;const dr=xr-re[j],di=xi-im[j],t=qr*dr-qi*di;qi=qr*di+qi*dr;qr=t}
+    const den=qr*qr+qi*qi||1e-30,wr=(pr*qr+pi*qi)/den,wi=(pi*qr-pr*qi)/den;re[i]-=wr;im[i]-=wi;md=Math.max(md,wr*wr+wi*wi)}if(md<1e-24)break}
+  const out=[];for(let i=0;i<d;i++)out.push([re[i],im[i]]);return out}
+
+/* ---------- state ---------- */
+const st={nx:2,flipT:0,flipping:false,k:2,kT:2,n:5,rep:4,deg:8,eN:4,mode:'steps',g:.12,A:{x:1.2,y:.5},AT:{x:1.2,y:.5},mp:[1,2],mfrom:[1,2],mk:1,mt:0,mlab:'',mlog:[],nf:4,tr:[],B:{x:0,y:1},apples:2,dim:0,morph:0,gs:.12};
+const BRK=[[1.4,1.5,'7/5','3/2'],[1.41,1.42,'141/100','142/100'],[1.414,1.415,'1414/1000','1415/1000'],[1.4142,1.4143,'14142/10000','14143/10000']];
+const bracketCam=l=>{const[a,b]=BRK[l];return[(a+b)/2,(b-a)*.25,(b-a)*.62,(b-a)*.5]};
+const mkZoom=(zt,h0)=>t=>{const hw=h0*Math.exp(-.9*clamp(t,0,7));return[zt-hw*.35,hw*.25,hw,hw*.7]};const P2=Math.pow(2,R2);
+const halvesCam=t=>{const x=Math.pow(.5,Math.min(t%13,12));return[x*.55,x*.18,x*.75,x*.5]};
+const STAGES={
+  apples2:{cam:[2.2,.6,2.9,1.3],on:['ground','apples'],apples:2},
+  apples4:{cam:[2.6,.6,2.9,1.3],on:['ground','apples'],apples:t=>t<.3?2:t<.7?3:4},
+  takeok:{cam:[2.6,.6,2.9,1.3],on:['ground','apples'],apples:t=>t<.3?4:t<.7?3:2},
+  take:{cam:[1.6,.6,2.9,1.3],on:['ground','apples','ghost'],apples:t=>t<.3?2:t<.7?1:0},
+  line:{cam:[1.8,.2,3.2,1.3],on:['axis','apples'],apples:2,morph:1},
+  add:{cam:[2.2,.25,3.2,1.3],on:['axis','hop'],hop:[2,1,2]},
+  sub:{cam:[.6,.25,3.4,1.3],on:['axis','neg','hop'],hop:[2,-1,3]},
+  negs:{cam:[0,.1,4.4,1.4],on:['axis','neg']},
+  groups:{cam:[3,.6,3.6,1.5],on:['axis','groups']},
+  mul3:{cam:[3,.35,3.8,1.3],on:['axis','mul3']},
+  debt:{cam:[-3,.4,4,1.3],on:['axis','neg','mhop'],mh:{p:[0,-2,-4,-6],l:['−2','−2','−2'],m:'×3',r:'−6'}},
+  flip:{cam:[0,.9,3.2,2.3],on:['axis','neg','flip']},
+  twoflip:{cam:[0,0,3,2.6],on:['axis','neg','flip2'],frs:[1,2]},
+  plus2:{cam:[1,.4,3.8,1.3],on:['axis','neg','arrows'],ar:[[0,2],[3,2],[-1,2]]},
+  minus3:{cam:[.5,.4,3.8,1.3],on:['axis','neg','arrows'],ar:[[2,-3],[4,-3],[0,-3]]},
+  compA:{cam:[3,.75,3.7,1.5],on:['compare'],cm:'add'},
+  compM:{cam:[3,.75,3.7,1.5],on:['compare'],cm:'mul'},
+  recap:{cam:[0,.7,3.6,1.6],on:['axis','neg','recap']},
+  mtoy:{cam:()=>{const M=Math.max(2,...st.mp.map(Math.abs),...st.mfrom.map(Math.abs)),hw=Math.max(3.4,M*1.25);return[0,hw*.3,hw,hw*.6]},on:['axis','neg','mtoy']},
+  qi2:{cam:[.7,.9,1.9,1.6],on:['axis','neg','imag','circle','qi2']},
+  q2i:{cam:[.7,.9,1.9,1.6],on:['axis','neg','imag','circle','q2i']},
+  qtri:{cam:[.5,.45,1.5,1.25],on:['axis','neg','imag','circle','qtri']},
+  qmul:{cam:[.6,.65,1.9,1.6],on:['axis','neg','imag','circle','qtri','qmul']},
+  sq3:{cam:[1.5,1.5,2.3,1.95],on:['sq3']},
+  sqback:{cam:[1.6,1.55,2.3,1.95],on:['sqback']},
+  dbl:{cam:[0,1,1.65,1.3],on:['dbl']},
+  ybc:{cam:[.5,.5,1.1,.85],on:['ybc']},
+  sq3m:{cam:[4.5,.4,5.2,1.6],on:['axis','mhop'],mh:{p:[1,3,9],l:['×3','×3'],m:'×9',r:'9'}},
+  sqhalf:{cam:[.55,.25,.75,.5],on:['axis','mhop'],mh:{p:[1,.5,.25],l:['×½','×½'],m:'×¼',r:'¼'}},
+  sqneg2:{cam:[1,-.6,3.6,2.7],on:['axis','neg','th'],th:{k:-2,n:2}},
+  sqneg1:{cam:[0,0,1.7,1.45],on:['axis','neg','th'],th:{k:-1,n:2}},
+  pow3:{cam:[4.4,.45,4.4,1.5],on:['axis','mhop'],mh:{p:[1,2,4,8],l:['×2','×2','×2'],m:'×8',r:'8 = 2³'}},
+  sqland:{cam:[.6,.45,3.4,1.5],on:['axis','neg','sqland']},
+  names:{cam:[.5,.4,1.05,.75],on:['axis','names']},
+  dec:{cam:[.5,.4,1.05,.75],on:['axis','dec']},
+  third:{cam:[.5,.4,1.05,.75],on:['axis','third']},
+  between:{cam:[1,.45,2,1],on:['axis','between']},
+  pizza:{cam:[.5,.45,1.15,.8],on:['axis','pizza']},
+  halve:{cam:[1.4,.45,1.8,.9],on:['axis','halve']},
+  frac:{cam:[.6,.1,2.4,1.1],on:['axis','neg','frac']},
+  square:{cam:[1,.5,1.45,.9],on:['axis','frac','square']},
+  zoom:{cam:t=>bracketCam(Math.min(3,Math.floor(t/2.4))),on:['axis','brk']},
+  pw1:{cam:[2.4,.45,2.4,1.2],on:['axis','mhop'],mh:{p:[1,2,4],l:['×2','×2'],m:'2²',r:'4'}},
+  pw2:{cam:[1.5,.35,1.2,.75],on:['axis','mhop'],mh:{p:[1,R2,2],l:['×√2','×√2'],m:'×2',r:'2',k:[R2,'2^½']}},
+  pw3:{cam:mkZoom(P2,.04),on:['axis','zoom'],zt:P2,zl:'2^√2',ap:[['2^1.4',2**1.4,0],['2^1.41',2**1.41,1.5],['2^1.414',2**1.414,3],['2^1.4142',2**1.4142,4.5]]},
+  comp1:{cam:[1.6,.35,1.2,.75],on:['axis','mhop'],mh:{p:[1,2],l:['×2'],m:null,r:'2'}},
+  comp2:{cam:[1.7,.35,1.2,.75],on:['axis','mhop'],mh:{p:[1,1.5,2.25],l:['×1.5','×1.5'],m:'×2.25',r:'2.25'}},
+  compn:{cam:[2.3,.4,.8,.55],on:['axis','compn']},
+  plot:{cam:[1,.5,1.45,.9],on:['axis','frac','square']},
+  cubic:{cam:[2,.4,2.8,1.3],on:['axis','neg','cubic']},
+  cubic2:{cam:[2,.3,2.6,1.5],on:['axis','neg','cubic','cubic2']},
+  sqcirc:{cam:[1.6,.35,2.2,1.1],on:['sqcirc']},
+  fourier:{cam:[0,0,2,2],on:['fourier']},
+  complete:{cam:[-.2,.15,2.5,2.1],on:['axis','neg','imag','circle','complete']},
+  pidist:{cam:[0,.45,1.7,1.25],on:['axis','neg','imag','circle','pidist']},
+  shadow:{cam:[0,0,1.75,1.75],on:['axis','neg','imag','circle','shadow']},
+  filled:{cam:()=>bracketCam(3),on:['axis','brk'],solid:1},
+  ask:{cam:[0,.1,3.6,1.3],on:['axis','neg','ask']},
+  flip2:{cam:[0,0,1.9,1.6],on:['axis','neg','flip2']},
+  halfq:{cam:[0,.6,2.6,1.9],on:['axis','neg','turnq'],turn:[PI,0]},
+  quarter:{cam:[0,.3,2.3,2],on:['axis','neg','imag','turnq'],turn:[PI/2,1]},
+  i2:{cam:[0,.1,2.2,2.1],on:['axis','neg','imag','circle','turnq','i2'],turn:[PI,2]},
+  plane:{cam:[0,0,2.2,2.2],on:['axis','neg','imag','circle','imark']},
+  cx:{cam:()=>{const p=cm(st.AT,st.B),M=Math.max(1,Math.hypot(st.AT.x,st.AT.y),Math.hypot(p.x,p.y),Math.hypot(st.B.x,st.B.y))*1.25,hw=Math.max(2.35,M);return[0,0,hw,hw]},on:['axis','neg','imag','circle','cx']},
+  r1:{cam:[-.4,.4,3,1.5],on:['axis','neg','ladder'],rung:0},
+  r2:{cam:[0,.4,3,1.5],on:['axis','neg','ladder'],rung:1},
+  r3:{cam:[0,.4,3,1.5],on:['axis','neg','ladder'],rung:2},
+  r4:{cam:[0,.5,2.6,1.8],on:['axis','neg','imag','ladder'],rung:3},
+  harder:{cam:[-.2,.1,2.4,2.1],on:['axis','neg','imag','circle','ladder','harder'],rung:4},
+  roots:{cam:[0,0,1.55,1.55],on:['axis','neg','imag','circle','roots']},
+  recipe:{cam:[0,.6,2.2,1.7],on:['axis','neg','recipe']},
+  series:{cam:[1.5,.4,1.8,.95],on:['axis','series']},
+  deriv:{cam:[1.5,.4,1.8,.95],on:['deriv']},
+  orbit:{cam:[-.1,.25,1.5,1.45],on:['axis','neg','imag','orbit']},
+  mandel:{cam:[-.62,0,1.55,1.22],on:['axis','neg','imag','mandel']},
+  halves:{cam:halvesCam,on:['axis','halves']},
+  algline:{cam:[1.25,.3,2.3,1.1],on:['axis','neg','algline']},
+  liouville:{cam:[.4,.3,1.2,.7],on:['axis','algline','liou']},
+  hermite:{cam:[1.6,.35,2.2,1.1],on:['axis','algline','drop'],dl:['e']},
+  lindemann:{cam:[1.6,.35,2.2,1.1],on:['axis','algline','drop'],dl:['π']},
+  piwalk:{cam:[1.7,.65,2.1,1.15],on:['axis','piwalk']},
+  dartzoom:{cam:t=>{const T=1.2817361,hw=1.4*Math.exp(-.75*clamp(t,0,8));return[T,hw*.3,hw,hw*.6]},on:['axis','dz']},
+  alg:{cam:[.2,0,2.4,2.15],on:['axis','neg','imag','alg']},
+  darts:{cam:[1.6,.4,2.4,1.15],on:['axis','neg','algline','darts']},
+  pie:{cam:[3.4,.45,3.2,1.4],on:['axis','algline','pie']},
+  grow:{cam:[1.9,.45,2.5,1.4],on:['axis','grow']},
+  turn:{cam:[0,0,1.75,1.75],on:['axis','neg','imag','circle','spin']},
+  euler:{cam:null,on:['axis','neg','imag','circle','euler']},
+  arrow:{cam:[0,0,2.3,2.3],on:['axis','neg','imag','arrow']},
+  circ:{cam:[0,0,2.3,2.3],on:['axis','neg','imag','circle','circ']},
+  spiral:{cam:[0,0,2.3,2.3],on:['axis','neg','imag','spiral']},
+  half:{cam:[0,.4,1.6,1.2],on:['axis','neg','imag','half']}
+};
+const LAYERS=[...new Set(Object.values(STAGES).flatMap(s=>s.on))];
+const L={};LAYERS.forEach(l=>L[l]=0);
+let stage='apples2',stageT0=performance.now(),lastZ=null,lastMH=null,lastAR=[[0,2]],lastTH={k:-2,n:2},lastCM='add',lastDL=['e'];
+
+/* ---------- canvas ---------- */
+const CVS=[...document.querySelectorAll('.stage canvas')];let cv=CVS[0],g=cv.getContext('2d'),W=0,H=0,dpr=1,snap=true;
+const cam={cx:2.2,cy:.6,ls:Math.log(60)},camInit={v:false};
+const sizeCv=c=>{const r=c.getBoundingClientRect();if(!r.width)return;const d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);if(c===cv){dpr=d;W=r.width;H=r.height}};
+const rofig=new ResizeObserver(es=>es.forEach(e=>sizeCv(e.target)));CVS.forEach(c=>rofig.observe(c));
+function useCanvas(c){if(c===cv)return;cv=c;g=c.getContext('2d');sizeCv(c);camInit.v=false;snap=true}
+let s=60;const X=x=>W/2+(x-cam.cx)*s,Y=y=>H/2-(y-cam.cy)*s;
+function dot(x,y,r,col){g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}
+function ring(x,y,r,col,w=1){g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.arc(x,y,r,0,TAU);g.stroke()}
+function ln(x1,y1,x2,y2,col,w=1){g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}
+function tx(t,x,y,col,al='center',font='13px '+sans){g.fillStyle=col;g.textAlign=al;g.textBaseline='middle';g.font=font;g.fillText(t,x,y)}
+function arrowHead(x,y,ux,uy,col){g.fillStyle=col;g.beginPath();g.moveTo(x+ux*7,y+uy*7);g.lineTo(x-uy*4.5-ux,y+ux*4.5-uy);g.lineTo(x+uy*4.5-ux,y-ux*4.5-uy);g.fill()}
+/* the page's one visual grammar: small numbers float up, then slide together into one */
+function floats(items,merge,t,col){col=col||C.ink;const m=merge?ease((t-merge[3])/.5):0;
+  for(const[x,y,label,t0]of items){const a=ease((t-t0)/.35);if(a<=0)continue;const px=x+(merge?(merge[0]-x)*m:0),py=y-(1-a)*10+(merge?(merge[1]-y)*m:0);
+    g.save();g.globalAlpha*=a*(1-m);tx(label,px,py,col,'center','15px '+sans);g.restore()}
+  if(merge&&m>0){g.save();g.globalAlpha*=m;tx(merge[2],merge[0],merge[1]-(1-m)*4,merge[4]||col,'center','17px '+sans);g.restore()}}
+function apple(x,y,r,col,leaf){dot(x,y,r,C.apple);if(leaf>.05){ln(x,y-r*.85,x+r*.12,y-r*1.35,C.stem,Math.max(1.2,r*.1));g.fillStyle=C.leaf;g.beginPath();g.ellipse(x+r*.42,y-r*1.2,r*.32,r*.14,-.5,0,TAU);g.fill()}}
+function halfApple(x,y,r,dir){const a0=dir<0?PI/2:-PI/2,a1=dir<0?PI*1.5:PI/2;g.fillStyle=C.apple;g.beginPath();g.moveTo(x,y);g.arc(x,y,r,a0,a1);g.closePath();g.fill();
+  g.fillStyle=C.flesh;g.beginPath();g.moveTo(x,y);g.arc(x,y,r*.84,a0,a1);g.closePath();g.fill();
+  g.save();g.globalAlpha*=.35;g.fillStyle=C.stem;g.beginPath();g.ellipse(x+dir*r*.14,y,r*.11,r*.3,0,0,TAU);g.fill();g.restore();
+  for(const sy of[-1,1]){g.fillStyle=C.seed;g.beginPath();g.ellipse(x+dir*r*.16,y+sy*r*.13,r*.05,r*.08,0,0,TAU);g.fill()}}
+function wedge(x,y,r,q){const h=PI/q,a0=-PI/2-h,a1=-PI/2+h;g.fillStyle=C.apple;g.beginPath();g.moveTo(x,y);g.arc(x,y,r,a0,a1);g.closePath();g.fill();
+  g.fillStyle=C.flesh;g.beginPath();g.moveTo(x,y);g.arc(x,y,r*.8,a0,a1);g.closePath();g.fill();g.fillStyle=C.seed;g.beginPath();g.arc(x,y-r*.3,Math.max(.8,r*.07),0,TAU);g.fill()}
+function eqText(t){tx(t,16,22,C.ink,'left',serif(20,1))}
+
+/* euler path */
+function eulerPts(){const pts=[];if(st.mode==='steps'){let x=1,y=0;pts.push([1,0]);const b=PI/st.eN;for(let j=0;j<st.eN;j++){const t=x-y*b;y=y+x*b;x=t;pts.push([x,y])}}
+  else{let sx=0,sy=0,tr=1,ti=0;pts.push([0,0]);const m=Math.min(st.eN,40);for(let j=0;j<m;j++){sx+=tr;sy+=ti;pts.push([sx,sy]);const nr=-ti*PI/(j+1),ni=tr*PI/(j+1);tr=nr;ti=ni}}return pts}
+function eulerCam(){const p=eulerPts();let a0=-1.2,a1=1.2,b0=-1.2,b1=1.2;for(const[x,y]of p){a0=Math.min(a0,x);a1=Math.max(a1,x);b0=Math.min(b0,y);b1=Math.max(b1,y)}return[(a0+a1)/2,(b0+b1)/2,(a1-a0)/2+.25,(b1-b0)/2+.25]}
+
+/* mandelbrot: computed a few rows per frame so nothing blocks */
+const MB={x0:-2.25,x1:.95,y0:-1.3,y1:1.3,w:560,h:455,counts:null,row:0,c:null,img:null,key:''};
+function mbStep(budget){if(MB.row>=MB.h)return;if(!MB.counts){MB.counts=new Uint16Array(MB.w*MB.h);MB.c=document.createElement('canvas');MB.c.width=MB.w;MB.c.height=MB.h}
+  const t0=performance.now(),dx=(MB.x1-MB.x0)/MB.w,dy=(MB.y1-MB.y0)/MB.h;
+  while(MB.row<MB.h&&performance.now()-t0<budget){const j=MB.row++,ci=MB.y1-(j+.5)*dy;
+    for(let i=0;i<MB.w;i++){const cr=MB.x0+(i+.5)*dx;let x=0,y=0,n=0;while(n<160){const x2=x*x,y2=y*y;if(x2+y2>4)break;y=2*x*y+ci;x=x2-y2+cr;n++}MB.counts[j*MB.w+i]=n>=160?0:n+1}}
+  MB.key=''}
+function mbImage(){if(!MB.c)return null;const key=st.rep+':'+themeV+':'+MB.row;if(key!==MB.key){MB.key=key;const cg=MB.c.getContext('2d');if(!MB.img)MB.img=cg.createImageData(MB.w,MB.h);
+  const d=MB.img.data,ink=hex(C.ink),ac=hex(C.a),n=MB.row*MB.w;
+  for(let i=0;i<n;i++){const c=MB.counts[i],o=i*4;if(c===0||c>st.rep){d[o]=ink[0];d[o+1]=ink[1];d[o+2]=ink[2];d[o+3]=255}else{d[o]=ac[0];d[o+1]=ac[1];d[o+2]=ac[2];d[o+3]=Math.round(255*(.05+.5*Math.pow(c/st.rep,3)))}}
+  cg.putImageData(MB.img,0,0)}return MB.c}
+
+/* algebraic numbers in the plane, cached */
+const rootCache=[];
+function rootsDeg(d){if(rootCache[d])return rootCache[d];const out=new Float32Array(2*d*(1<<d));let o=0;const c=new Array(d+1);c[d]=1;
+  for(let m=0;m<(1<<d);m++){for(let j=0;j<d;j++)c[j]=(m>>j)&1?1:-1;for(const[a,b]of dk(c)){out[o++]=a;out[o++]=b}}return rootCache[d]=out}
+const AL={x0:-2.3,x1:3.7,y0:-2.15,y1:2.15,ppu:150,c:null,key:''};
+function algImage(){if(!AL.c){AL.c=document.createElement('canvas');AL.c.width=Math.round((AL.x1-AL.x0)*AL.ppu);AL.c.height=Math.round((AL.y1-AL.y0)*AL.ppu)}
+  const key=st.deg+':'+themeV;if(key!==AL.key){AL.key=key;const cg=AL.c.getContext('2d');cg.clearRect(0,0,AL.c.width,AL.c.height);cg.fillStyle=C.ink;let n=0;
+    for(let d=1;d<=st.deg;d++){const r=rootsDeg(d);cg.globalAlpha=d===st.deg?.95:.6;const z=d===st.deg?2.4:2;for(let i=0;i<r.length;i+=2)cg.fillRect((r[i]-AL.x0)*AL.ppu-z/2,(AL.y1-r[i+1])*AL.ppu-z/2,z,z);n+=r.length/2}
+    cg.globalAlpha=1;$('o-d').textContent=n.toLocaleString('en-US')+' roots'}return AL.c}
+/* real algebraic numbers of low degree, for the line */
+let ALGR=null;
+function algReal(){if(ALGR)return ALGR;const m=new Map();
+  for(let a=1;a<=3;a++)for(let b=-3;b<=3;b++){if(b!==0)m.set((-b/a).toFixed(6),1);
+    for(let c=-3;c<=3;c++){const D=b*b-4*a*c;if(D>0&&Math.sqrt(D)%1!==0)for(const sg of[1,-1])m.set(((-b+sg*Math.sqrt(D))/(2*a)).toFixed(6),2);
+      for(let d=-3;d<=3;d++){if(d===0)continue;for(const[x,y]of dk([d,c,b,a]))if(Math.abs(y)<1e-7&&!m.has(x.toFixed(6)))m.set(x.toFixed(6),3)}}}
+  for(let p=-12;p<=40;p++)for(let q=1;q<=8;q++)if(gcd(Math.abs(p),q)===1)m.set((p/q).toFixed(6),1);
+  ALGR=[...m].map(([k,v])=>[+k,v]).filter(([x])=>x>-6&&x<8);return ALGR}
+
+/* ladder data */
+const cm=(p,q)=>({x:p.x*q.x-p.y*q.y,y:p.x*q.y+p.y*q.x});const QB={x:.98,y:.69},QA={x:1.3,y:.35};
+const RUNGS=[{eq:'x + 3 = 1',x:-2,y:0,l:'−2'},{eq:'2x = 1',x:.5,y:0,l:'½'},{eq:'x² = 2',x:R2,y:0,l:'√2'},{eq:'x² = −1',x:0,y:1,l:'i'}];
+let HARD=null;const hard=()=>HARD||(HARD=[{eq:'x³ = 1',r:dk([-1,0,0,1])},{eq:'x⁵ = 1',r:dk([-1,0,0,0,0,1])},{eq:'x⁵ − x + 1 = 0',r:dk([1,-1,0,0,0,1])}]);
+
+/* drag in the plane */
+let drag=null;
+const toW=(cx,cy)=>{const r=cv.getBoundingClientRect();return{x:cam.cx+(cx-r.left-W/2)/s,y:cam.cy-(cy-r.top-H/2)/s}};
+const hit=(cx,cy)=>{if(stage!=='cx')return null;const p=toW(cx,cy);let best=null,bd=34/s;for(const h of[st.B,st.A]){const d=Math.hypot(h.x-p.x,h.y-p.y);if(d<bd){bd=d;best=h}}return best};
+CVS.forEach(c=>{c.addEventListener('touchstart',e=>{const t=e.touches[0];if(c===cv&&t&&hit(t.clientX,t.clientY))e.preventDefault()},{passive:false});
+c.addEventListener('pointerdown',e=>{if(c!==cv)return;const h=hit(e.clientX,e.clientY);if(h){drag=h;c.setPointerCapture(e.pointerId)}});
+c.addEventListener('pointermove',e=>{if(!drag)return;const p=toW(e.clientX,e.clientY),m=2.2;let x=clamp(p.x,-m,m),y=clamp(p.y,-m,m);
+  if(drag===st.B)for(const q of[[1,0],[0,1],[-1,0],[0,-1]])if(Math.hypot(x-q[0],y-q[1])<.1){x=q[0];y=q[1]}drag.x=x;drag.y=y;if(drag===st.A){st.AT.x=x;st.AT.y=y}});
+const up=()=>{drag=null};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up)});
+
+/* ---------- frame ---------- */
+let last=performance.now(),running=true;
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(MB.row<MB.h)mbStep(running&&stage==='mandel'?8:3);
+  if(running&&W)draw(now/1000,dt);requestAnimationFrame(frame)}
+function draw(time,dt){
+  const S=STAGES[stage],tsec=reduce?60:time-stageT0/1000,k=reduce?1:1-Math.exp(-dt*5),ka=reduce?1:1-Math.exp(-dt*7);
+  const kl=snap?1:ka;for(const l of LAYERS){const t=S.on.includes(l)?1:0;L[l]+=(t-L[l])*kl;if(Math.abs(t-L[l])<.003)L[l]=t}
+  const tap=typeof S.apples==='function'?S.apples(tsec):S.apples;st.apples+=((tap??st.apples)-st.apples)*(snap?1:ka);st.morph+=((S.morph||0)-st.morph)*(snap?1:ka);snap=false;st.k+=(st.kT-st.k)*ka;
+  const c=typeof S.cam==='function'?S.cam(reduce?7:tsec):S.cam||eulerCam(),ts=Math.min(W/2/c[2],H/2/c[3]);
+  if(!camInit.v){cam.cx=c[0];cam.cy=c[1];cam.ls=Math.log(ts);camInit.v=true}
+  const kc=typeof S.cam==='function'?1-Math.exp(-dt*9):k;
+  cam.cx+=(c[0]-cam.cx)*kc;cam.cy+=(c[1]-cam.cy)*kc;cam.ls+=(Math.log(ts)-cam.ls)*kc;s=Math.exp(cam.ls);
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.lineCap='round';g.lineJoin='round';
+  const ox=X(0),oy=Y(0);
+  const A=(l,f)=>{if(L[l]>.004){g.save();g.globalAlpha=L[l];f(L[l]);g.restore()}};
+
+  A('ground',()=>ln(0,oy,W,oy,C.line));
+  A('axis',a=>{ln(0,oy,W,oy,C.mute);if(s>16&&s<3000){const n0=Math.ceil(cam.cx-W/2/s),n1=Math.floor(cam.cx+W/2/s);
+    for(let n=n0;n<=n1;n++){const al=n<0?L.neg:1;if(al<.01)continue;g.globalAlpha=a*al;const x=X(n);ln(x,oy-4,x,oy+4,C.mute);
+      if(s>30&&(L.imag<.5||Math.abs(n)===1)&&L.half<.5&&L.halves<.5)tx(minus(n),x,oy+18,C.mute)}}});
+  A('imag',()=>{ln(ox,0,ox,H,C.line);for(const v of[1,-1]){const y=Y(v);ln(ox-4,y,ox+4,y,C.mute)}if(s>40){tx('i',ox+10,Y(1)-10,C.mute,'left',serif(15,1));tx('−i',ox+10,Y(-1)+12,C.mute,'left',serif(15,1))}});
+  A('circle',()=>ring(ox,oy,s,C.line));
+  A('brk',()=>{const lv=stage==='zoom'?Math.min(3,Math.floor((reduce?9:tsec)/2.4)):3,solid=!!S.solid;
+    BRK.forEach(([a,b,la,lb],i)=>{const al=i===lv?1:i<lv?.25:0;if(al<=0)return;g.save();g.globalAlpha*=al;for(const[v,l]of[[a,la],[b,lb]]){const x=X(v);if(x<-80||x>W+80)continue;ln(x,oy-26,x,oy+6,C.ink,1.5);if(i===lv)tx(l,clamp(x,40,W-40),oy+20,C.ink,'center','13px '+sans)}g.restore()});
+    const x=X(R2);if(solid){const a=ease((tsec-.3)/.6);dot(x,oy,3+3*a,C.b);tx('√2',x,oy-24,C.b,'center',serif(18))}
+    else{const p=.5+.5*Math.sin(time*3);g.save();g.globalAlpha*=.4+.4*p;g.setLineDash([2,4]);ring(x,oy,8,C.b,1.25);g.setLineDash([]);tx('?',x,oy-24,C.b,'center',serif(18,1));g.restore()}
+    const zf=Math.round(.62/((BRK[lv][1]-BRK[lv][0])*.62)/10);if(lv>0)tx('×'+Math.pow(10,lv),W-14,22,C.mute,'right','14px '+sans)});
+  A('solid',()=>{ln(0,oy,W,oy,C.ink,2.5);dot(X(R2),oy,4.5,C.b);tx('√2',X(R2),oy-18,C.b,'center',serif(16))});
+
+  /* negatives */
+  A('apples',()=>{const m=st.morph,n=st.apples;for(let j=1;j<=Math.ceil(n-.01);j++){const al=Math.min(1,n-j+1);if(al<=0)continue;
+      g.globalAlpha=L.apples*al*(1-.75*st.dim);const r=(1-m)*.3*s+m*5;apple(X(j),Y((1-m)*.42),r,C.b,1-m)}
+    if(st.morph<.5){g.globalAlpha=L.apples;const ly=Y(.42)-.3*s-18;
+      if(stage==='apples2')floats([[X(1),ly,'+1',.2],[X(2),ly,'+1',.6]],[X(1.5),ly,'2',1.4],tsec);
+      const res=(v,x,col,t0)=>{const a=ease((tsec-t0)/.5);if(a>0){g.save();g.globalAlpha=L.apples*a;tx(v,X(x),oy+22,col,'center','17px '+sans);g.restore()}};
+      if(stage==='apples4'){floats([[X(3),ly,'+1',.3],[X(4),ly,'+1',.7]],[X(3.5),ly,'+2',1.5],tsec);res('4',2.5,C.ink,2.2)}
+      else if(stage==='takeok'){floats([[X(4),ly,'−1',.3],[X(3),ly,'−1',.7]],[X(3.5),ly,'−2',1.5],tsec);res('2',1.5,C.ink,2.2)}
+      else if(stage==='take'){floats([[X(2),ly,'−1',.3],[X(1),ly,'−1',.7],[X(0),ly,'−1',1.1]],[X(1),ly,'−3',1.9],tsec);res('−1',0,C.b,2.6)}}});
+  A('ghost',()=>{g.setLineDash([3,4]);ring(X(0),Y(.42),.3*s,C.mute,1.25);g.setLineDash([]);tx('?',X(0),Y(.42),C.mute,'center',serif(22,1))});
+  A('hop',()=>{const[a,d,cnt]=S.hop||STAGES.add.hop,per=.6,cyc=cnt*per+1.6,t=reduce?cyc:(tsec%cyc);
+    const done=Math.min(cnt,Math.floor(t/per)),fr=done<cnt?(t-done*per)/per:0;
+    g.setLineDash([2,4]);for(let j=0;j<done;j++){const x0=X(a+d*j),x1=X(a+d*(j+1));g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();g.ellipse((x0+x1)/2,oy,Math.abs(x1-x0)/2,.42*s,0,PI,TAU);g.stroke()}g.setLineDash([]);
+    const e=ease(fr),px=a+d*(done+e),py=Math.sin(PI*e)*.42;dot(X(a),oy,3,C.mute);dot(X(px),Y(py),6,C.b);
+    const sg=d>0?'+':'−',ly=Y(.42)-24;floats(Array.from({length:cnt},(_,j)=>[X(a+d*(j+.5)),ly,sg+'1',(j+.5)*per]),[X(a+d*cnt/2),ly,sg+cnt,cnt*per+.15],t);
+    if(t>cnt*per+.1){g.globalAlpha*=ease((t-cnt*per-.1)/.4);tx(minus(a+d*cnt),X(a+d*cnt),oy-18,C.b,'center','15px '+sans)}});
+  A('groups',()=>{for(let j=0;j<3;j++){const a=ease((tsec-.2-j*.35)/.35);if(a<=0)continue;g.save();g.globalAlpha*=a;
+      const x0=X(2*j+.12),x1=X(2*j+1.88),y0=Y(1),y1=Y(.16);g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();if(g.roundRect)g.roundRect(x0,y0,x1-x0,y1-y0,10);else g.rect(x0,y0,x1-x0,y1-y0);g.stroke();
+      for(const dx of[.55,1.45])apple(X(2*j+dx),Y(.55),.25*s,C.b,1);g.restore()}
+    const ly=Y(1)-18;floats([0,1,2].map(j=>[X(2*j+1),ly,'+2',.5+j*.35]),[X(3),ly,'×3',1.9],tsec);
+    const r=ease((tsec-2.5)/.4);if(r>0){g.save();g.globalAlpha*=r;dot(X(6),oy,5.5,C.b);tx('6',X(6),oy+20,C.b,'center','15px '+sans);g.restore()}});
+  A('mul3',()=>{const t=reduce?9:(tsec%4.2),e=ease((t-.7)/1.1),done=ease((t-1.8)/.4);ring(ox,oy,8,C.ink,1.25);
+    for(const p of[1,2]){dot(X(p),oy,3,C.mute);const x=X(p*(1+2*e));ln(ox,oy-(p===2?10:-10),x,oy-(p===2?10:-10),C.a,1.25);dot(x,oy,p===2?6:4.5,p===2?C.b:C.ink);
+      g.save();g.globalAlpha*=1-done;tx('×3',x,oy-(p===2?28:-28),C.ink,'center','14px '+sans);g.restore();
+      if(done>0){g.save();g.globalAlpha*=done;tx(''+3*p,x,oy+(p===2?22:-24),p===2?C.b:C.ink,'center','15px '+sans);g.restore()}}});
+  A('flip',()=>{const t=reduce?9:(tsec%4.2),a=PI*ease((t-.7)/1.3);ring(ox,oy,7,C.ink,1.25);
+    for(const r0 of[1,2]){const r=r0*s;g.setLineDash([2,5]);g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();g.arc(ox,oy,r,0,-PI,true);g.stroke();g.setLineDash([]);
+      g.strokeStyle=C.b;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,r,0,-a,true);g.stroke();dot(X(r0),oy,3,C.mute);
+      dot(ox+r*Math.cos(a),oy-r*Math.sin(a),r0===2?6:4.5,r0===2?C.b:C.ink);
+      const q=ease((t-2.1)/.4);if(q>0){g.save();g.globalAlpha*=q;tx('−'+r0,X(-r0),oy+20,r0===2?C.b:C.ink,'center','15px '+sans);g.restore()}}
+    g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();g.arc(ox,oy,18,0,-a,true);g.stroke();
+    floats([[ox,Y(2)-20,'×−1',.3],[ox,oy-34,'180°',1.4]],null,t)});
+  A('arrows',()=>{if(S.ar)lastAR=S.ar;const t=reduce?9:(tsec%5);lastAR.forEach(([f,d],i)=>{const a=ease((t-.3-i*.8)/.6);if(a<=0)return;const x0=X(f),x1=X(f+d*a),h=.35*s;
+      g.strokeStyle=C.a;g.lineWidth=1.5;g.beginPath();g.ellipse((x0+X(f+d))/2,oy,Math.abs(X(f+d)-x0)/2,h,0,d>0?PI:TAU,d>0?PI+PI*a:TAU-PI*a,d<0);g.stroke();
+      dot(x0,oy,3,C.mute);dot(x1,oy-Math.sin(PI*a)*h,4.5,C.b);g.save();g.globalAlpha*=a;tx((d>0?'+':'−')+Math.abs(d),(x0+X(f+d))/2,oy-h-14,C.a,'center','14px '+sans);g.restore()})});
+  A('compare',()=>{if(S.cm)lastCM=S.cm;const mode=lastCM,t=reduce?9:tsec,yT=Y(1.45);
+    const row=(y,starts,f,col,e,lab,alpha,zero)=>{g.save();g.globalAlpha*=alpha;ln(0,y,W,y,C.mute);for(let n=0;n<=6;n++){ln(X(n),y-3,X(n),y+3,C.mute);tx(''+n,X(n),y+16,C.mute,'center','12px '+sans)}
+      tx(lab,10,y-40,col,'left','16px '+sans);
+      starts.forEach((p,j)=>{const q=f(p),x0=X(p),x1=X(p+(q-p)*e),ay=y-20-j*12;if(e>0){ln(x0,ay,x1,ay,col,1.5);if(x1-x0>8)arrowHead(x1,ay,1,0,col);
+          if(e>.95)tx('+'+(q-p),x1+14,ay,col,'left','12px '+sans)}
+        g.save();g.globalAlpha*=.5;dot(x0,y,2.5,C.mute);g.restore();apple(X(p+(q-p)*e),y-6,6,C.apple,1)});
+      if(zero){ring(X(0),y,8,col,1.25);tx('stays',X(0),y+30,col,'center','12px '+sans)}g.restore()};
+    const eA=mode==='add'?ease((t-.4)/1):1,eM=mode==='mul'?ease((t-.4)/1.2):0;
+    row(yT,[0,1,2],p=>p+2,C.a,eA,'+2',mode==='add'?1:.55,false);
+    if(mode==='mul')row(oy,[1,2,3],p=>2*p,C.b,eM,'×2',1,true)});
+  A('recap',()=>{const h=.4*s;g.setLineDash([2,4]);g.strokeStyle=C.a;g.lineWidth=1.5;g.beginPath();g.ellipse(X(2),oy,s,h,0,PI,TAU);g.stroke();g.setLineDash([]);
+    apple(X(1),oy-10,8,C.apple,1);apple(X(3),oy-10,8,C.apple,1);tx('+2',X(2),oy-h-14,C.a,'center','14px '+sans);
+    const yb=oy+24;for(const p of[.5,1]){ln(X(p),yb,X(2*p)-4,yb+(p===1?10:0),C.ink,1.25)}tx('×2',X(1.6),yb+24,C.ink,'center','14px '+sans);
+    g.strokeStyle=C.b;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,2*s,-PI*.05,-PI*.95,true);g.stroke();apple(X(-2),oy-10,8,C.apple,1);tx('×−1',ox,Y(2)-16,C.b,'center','14px '+sans);ring(ox,oy,7,C.ink,1.25)});
+  A('mtoy',()=>{const now=performance.now()/1000,e=reduce?1:ease((now-st.mt)/.7);ring(ox,oy,7,C.ink,1.25);
+    st.mp.forEach((p,i)=>{const f=st.mfrom[i];let x,y=0;
+      if(st.mk<0){const a=PI*e;x=f*Math.cos(a);y=f*Math.sin(a);if(e<1){const s0=f>=0?0:PI;g.strokeStyle=C.b;g.lineWidth=1.25;g.beginPath();g.arc(ox,oy,Math.abs(f)*s,s0,s0-PI*e,true);g.stroke()}}
+      else x=f+(p-f)*e;
+      dot(X(x),Y(y),i===1?6:4.5,i===1?C.b:C.ink);if(e>=1)tx(minus(+p.toFixed(3)),X(p),oy+(i===1?20:-20),i===1?C.b:C.mute,'center','14px '+sans)});
+    if(st.mlab){const a=1-ease((now-st.mt-.6)/.6);if(a>0){g.save();g.globalAlpha*=a;tx(st.mlab,W/2,24,C.ink,'center','17px '+sans);g.restore()}}});
+  /* gaps */
+  A('sq3',()=>{const t=reduce?9:tsec;g.strokeStyle=C.mute;g.lineWidth=1;
+    for(let r=0;r<3;r++){const a=ease((t-.3-r*.5)/.4);if(a<=0)continue;g.save();g.globalAlpha*=a;for(let c=0;c<3;c++){g.fillStyle=C.apple;g.globalAlpha=a*.18;g.fillRect(X(c)+1,Y(r+1)+1,s-2,s-2);g.globalAlpha=a;g.strokeRect(X(c),Y(r+1),s,s)}g.restore()}
+    g.strokeStyle=C.ink;g.lineWidth=1.5;g.strokeRect(X(0),Y(3),3*s,3*s);tx('3',X(1.5),Y(0)+16,C.ink,'center','14px '+sans);tx('3',X(0)-12,Y(1.5),C.ink,'right','14px '+sans);
+    floats([0,1,2].map(r=>[X(3)+24,Y(r+.5),'+3',.5+r*.5]),[X(3)+30,Y(1.5),'9',2.2,C.b],t);const q=ease((t-2.6)/.4);if(q>0){g.save();g.globalAlpha*=q;tx('3²',X(1.5),Y(3)-18,C.b,'center',serif(20));g.restore()}});
+  A('sqback',()=>{const t=reduce?9:tsec;const sqr=(v,col,t0,lab,dash)=>{const a=ease((t-t0)/.4);if(a<=0)return;g.save();g.globalAlpha*=a;if(dash)g.setLineDash([3,4]);g.strokeStyle=col;g.lineWidth=1.5;g.strokeRect(X(0),Y(v),v*s,v*s);g.setLineDash([]);
+      tx(lab,X(v)-8,Y(v)+14,col,'right','14px '+sans);g.restore()};
+    sqr(3,C.mute,.2,'9');sqr(2,C.ink,.7,'4');sqr(R2,C.b,1.4,'2',true);
+    const a=ease((t-1.4)/.4);if(a>0){g.save();g.globalAlpha*=a;tx('?',X(R2/2),Y(0)+16,C.b,'center',serif(20,1));tx('2',X(1),Y(0)+16,C.ink,'center','13px '+sans);g.restore()}
+    tx('3',X(3)-6,Y(0)+16,C.mute,'right','13px '+sans)});
+  A('dbl',()=>{const t=reduce?9:tsec,P=(x,y)=>[X(x),Y(y)];const T=[[[0,0],[1,1],[0,1]],[[0,1],[1,1],[0,2]],[[0,1],[0,2],[-1,1]],[[0,1],[-1,1],[0,0]]];
+    g.strokeStyle=C.mute;g.lineWidth=1;g.strokeRect(X(0),Y(1),s,s);
+    T.forEach((tr,i)=>{const a=ease((t-.4-i*.45)/.4);if(a<=0)return;g.save();g.globalAlpha*=a;g.fillStyle=C.a;g.globalAlpha=a*.16;g.beginPath();tr.forEach(([x,y],j)=>j?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y)));g.closePath();g.fill();g.restore()});
+    g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();[[0,0],[1,1],[0,2],[-1,1]].forEach(([x,y],j)=>j?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y)));g.closePath();g.stroke();
+    g.setLineDash([2,4]);ln(X(-1),Y(1),X(1),Y(1),C.mute);ln(X(0),Y(0),X(0),Y(2),C.mute);g.setLineDash([]);
+    tx('1',X(.5),Y(0)+14,C.ink,'center','13px '+sans);
+    floats(T.map((tr,i)=>{const cx=(tr[0][0]+tr[1][0]+tr[2][0])/3,cy=(tr[0][1]+tr[1][1]+tr[2][1])/3;return[X(cx),Y(cy),'½',.6+i*.45]}),[X(0),Y(1),'2',2.8,C.b],t)});
+  A('ybc',()=>{g.save();g.globalAlpha*=.35;dot(X(.5),Y(.5),1.05*s,C.flesh);g.restore();g.strokeStyle=C.ink;g.lineWidth=1.25;g.strokeRect(X(0),Y(1),s,s);
+    ln(X(0),Y(0),X(1),Y(1),C.a,1.5);ln(X(0),Y(1),X(1),Y(0),C.mute,1);tx('1',X(.5),Y(1)-12,C.ink,'center','13px '+sans);
+    const a=ease((tsec-.4)/.5);g.save();g.globalAlpha*=a;g.translate(X(.5),Y(.5));g.rotate(-PI/4);tx('1.41421296',0,-12,C.a,'center',serif(16));g.restore()});
+  A('th',()=>{if(S.th)lastTH=S.th;const{k,n}=lastTH,ak=Math.abs(k),per=1.1,cyc=n*per+2.2,t=reduce?cyc:(tsec%cyc),done=Math.min(n,Math.floor(t/per)),fr=done<n?ease((t-done*per)/per):0;
+    const P=v=>{const r=Math.pow(ak,v),a=v*PI;return[X(r*Math.cos(a)),Y(r*Math.sin(a))]};ring(ox,oy,7,C.ink,1.25);dot(X(1),oy,3.5,C.mute);
+    g.strokeStyle=C.b;g.lineWidth=1.75;g.beginPath();const end=done+fr;for(let v=0;v<=end+1e-6;v+=.02){const[x,y]=P(Math.min(v,end));v?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
+    const[px,py]=P(end);dot(px,py,6,C.b);const lab='×'+minus(k);
+    floats(Array.from({length:n},(_,j)=>{const r=Math.pow(ak,j+.5)+.35/ (s/80),a=(j+.5)*PI;return[X(r*Math.cos(a)),Y(r*Math.sin(a)),lab,(j+.45)*per]}),[P(n)[0],oy-22,'×'+Math.pow(k,n),n*per+.15,C.b],t);
+    if(t>n*per+.2){g.save();g.globalAlpha*=ease((t-n*per-.2)/.4);tx(''+Math.pow(k,n),P(n)[0],oy+20,C.b,'center','15px '+sans);g.restore()}});
+  A('sqland',()=>{const t=reduce?9:tsec;g.save();g.fillStyle=C.a;g.globalAlpha*=.06;g.fillRect(ox,0,W-ox,H);g.restore();ring(ox,oy,7,C.ink,1.25);
+    [[2,4],[-2,4],[.5,.25],[-1,1],[-.5,.25]].forEach(([b,q],i)=>{const t0=.3+i*.6,e=ease((t-t0)/.7);if(e<=0)return;const x0=X(b),x1=X(q),rx=Math.abs(x1-x0)/2,ry=Math.min(H*.35,rx*.6),cx=(x0+x1)/2;
+      const Pt=th=>[x0+(x1-x0)*(1-Math.cos(PI*th))/2,oy-ry*Math.sin(PI*th)];g.save();g.globalAlpha*=.6;g.strokeStyle=b<0?C.b:C.a;g.lineWidth=1.25;g.beginPath();
+      for(let th=0;th<=e+1e-6;th+=.03){const[p,q2]=Pt(Math.min(th,e));th?g.lineTo(p,q2):g.moveTo(p,q2)}g.stroke();g.restore();const[xx,yy]=Pt(e);
+      dot(X(b),oy,2.5,C.mute);dot(xx,yy,4.5,b<0?C.b:C.ink);
+      if(e>=1)tx(q===.25?'¼':''+q,x1,oy+18+(i===4?14:0)*(q===.25?1:0),C.ink,'center','13px '+sans)});
+    if(stage==='sqland'){const a=ease((t-3.6)/.5);if(a>0){g.save();g.globalAlpha*=a;g.setLineDash([2,4]);ring(X(-1),oy,8,C.b,1.25);g.setLineDash([]);tx('?',X(-1),oy-24,C.b,'center',serif(22,1));g.restore()}}});
+  A('names',()=>{const t=reduce?9:tsec,x=X(.5);floats([[X(.05),Y(.7),'½',.2],[X(.3),Y(1),'0.5',.5],[X(.72),Y(1),'2/4',.8],[X(.95),Y(.7),'50%',1.1]],[x,Y(.42),'½',2.2,C.b],t);
+    const a=ease((t-2.4)/.4);dot(x,oy,3+3*a,C.b);if(a>0){g.save();g.globalAlpha*=a;ln(x,oy,x,Y(.33),C.b,1);g.restore()}});
+  A('dec',()=>{const t=reduce?9:tsec;floats([[X(.5),Y(.62),'0.5',.2]],[X(.5),Y(.62),'5/10',1.2,C.b],t);floats([[X(.25),Y(.9),'0.25',.6]],[X(.25),Y(.9),'25/100',1.6,C.b],t);
+    dot(X(.5),oy,5,C.b);dot(X(.25),oy,4,C.ink)});
+  A('third',()=>{const t=reduce?99:tsec,n=Math.floor(t*6);g.font=serif(20);g.textAlign='left';g.textBaseline='middle';g.fillStyle=C.ink;g.fillText('0.'+'3'.repeat(Math.min(n,80)),16,26);
+    const x=X(1/3);dot(x,oy,5,C.b);tx('⅓',x,oy-24,C.b,'center',serif(20))});
+  A('between',()=>{for(let n=0;n<=3;n++)dot(X(n),oy,4.5,C.ink);const y=Y(.55),r=.28*s,b=reduce?0:Math.sin(time*2)*3;
+    halfApple(X(.5)+r*.4,y+b,r,-1);
+    g.setLineDash([2,4]);ring(X(.5),oy,7,C.mute);g.setLineDash([]);tx('?',X(.5)+r*.9,y+b-r*.6,C.mute,'center',serif(20,1))});
+  A('pizza',()=>{const r=.3*s,y=Y(.6),cut=ease((tsec-.4)/.3),sp=ease((tsec-.9)/1);
+    for(let n=0;n<=2;n++)dot(X(n),oy,3.5,C.ink);
+    if(cut<1){apple(X(1),y,r,C.apple,1);g.save();g.globalAlpha*=cut*(1-cut)*4;ln(X(1),y-r*1.5,X(1),y+r*1.3,C.ink,1.5);g.restore()}
+    else{halfApple(X(1-.5*sp)-2,y,r,-1);halfApple(X(1)+2,y,r,1);
+      const ly=y-r-18;floats([[X(1-.5*sp)-r*.5,ly,'½',1.6],[X(1)+r*.5,ly,'½',1.9]],[X(.75),ly,'1',2.9],tsec)}
+    const q=ease((tsec-2)/.5);if(q>0){g.save();g.globalAlpha*=q;dot(X(.5),oy,5,C.b);tx('½',X(.5),oy+18,C.b,'center','14px '+sans);g.restore()}});
+  A('halve',()=>{const per=.9,cyc=2*per+2,t=reduce?cyc:(tsec%cyc),k2=Math.min(2,t/per),kk=Math.floor(k2)+(k2<2?ease(k2%1):0),f=Math.pow(.5,kk);
+    ring(ox,oy,7,C.ink,1.25);for(const n of[1,2,3]){const r=Math.max(2,.24*s*f);apple(X(n*f),oy-r-3,r,C.apple,f>.3?1:0);g.save();g.globalAlpha*=.5;dot(X(n),oy,2.5,C.mute);g.restore()}
+    const ly=Y(.75);floats([[X(1.5),ly,'×½',.45],[X(.9),ly,'×½',per+.45]],[X(1.1),ly-4,'×¼',2*per+.2],t);
+    if(t>2*per)tx('¼',X(.25),oy+18,C.b,'center','14px '+sans);tx('½',X(.5),oy+18,C.mute,'center','14px '+sans)});
+  A('halve',()=>{const per=.9,cyc=2*per+2,t=reduce?cyc:(tsec%cyc),k2=Math.min(2,t/per),x=Math.pow(.5,Math.floor(k2)+ease(k2%1)*(k2<2?1:0));
+    const xs=[1,.5,.25];dot(X(1),oy,3,C.mute);for(let j=0;j<Math.floor(k2);j++){g.setLineDash([2,4]);g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();g.ellipse(X((xs[j]+xs[j+1])/2),oy,(xs[j]-xs[j+1])/2*s,.22*s,0,PI,TAU);g.stroke();g.setLineDash([])}
+    dot(X(x),oy-Math.sin(PI*(k2%1))*.22*s*(k2<2?1:0),6,C.b);
+    const ly=Y(.3)-6;floats([[X(.75),ly,'×½',.45],[X(.375),ly,'×½',per+.45]],[X(.55),ly-4,'×¼',2*per+.2],t);
+    if(t>2*per)tx('¼',X(.25),oy+18,C.b,'center','14px '+sans);tx('½',X(.5),oy+18,C.mute,'center','14px '+sans)});
+  A('frac',()=>{const x0=cam.cx-W/2/s,x1=cam.cx+W/2/s,w=x1-x0;let q=Math.floor(Math.sqrt(5000/w));if(stage==='frac')q=Math.min(q,1+Math.floor((reduce?60:tsec)*5),40);else if(stage==='square')q=Math.min(q,40);
+    g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();
+    for(let d=1;d<=q;d++)for(let p=Math.ceil(x0*d);p<=Math.floor(x1*d);p++){if(gcd(Math.abs(p),d)!==1)continue;const v=p/d;if(v<0&&L.neg<.5)continue;const h=3+24/Math.sqrt(d);g.moveTo(X(v),oy);g.lineTo(X(v),oy-h)}
+    g.stroke();if(stage==='frac'){g.globalAlpha=L.frac;tx('1/'+q,W-14,22,C.mute,'right','14px '+sans);
+      [2,3,5,7].forEach((d,i)=>{const a=ease(((reduce?60:tsec)-.2-i*.5)/.4);if(a<=0)return;g.save();g.globalAlpha=L.frac*a;const r=d<5?8:6,yy=oy-34-i*17;
+        for(let p=1;p<3*d;p++){if(gcd(p,d)!==1)continue;const v=p/d;if(v<x0||v>x1)continue;wedge(X(v),yy+r*.5,r,d)}g.restore()})}});
+  A('square',()=>{const sw=stage==='plot'?0:stage==='square'?ease((tsec-.5)/1.4):1;if(stage==='plot'){const f=(tsec%2.6)/2.2;if(f<=1)dot(X(f),Y(f),5,C.b)}g.strokeStyle=C.mute;g.lineWidth=1;g.strokeRect(X(0),Y(1),s,s);
+    const a=PI/4*(1-sw);ln(ox,oy,ox+R2*s*Math.cos(a),oy-R2*s*Math.sin(a),C.a,1.5);
+    g.setLineDash([2,5]);g.strokeStyle=C.a;g.beginPath();g.arc(ox,oy,R2*s,-PI/4,-a);g.stroke();g.setLineDash([]);
+    if(sw>.98&&L.zoom<.5){dot(X(R2),oy,4.5,C.b);tx('?',X(R2),oy+18,C.b,'center',serif(17,1))}});
+  A('zoom',()=>{if(S.ap)lastZ=S;const Z=lastZ,t=reduce?7:tsec,zx=X(Z.zt);ln(zx,oy+8,zx,oy-50,C.b,1.5);tx(Z.zl,zx+6,oy-58,C.b,'left',serif(16));
+    const ap=Z.ap;
+    ap.forEach(([l,v,t0],i)=>{const a=ease((t-t0)/.4);if(a<=0)return;const x=X(v);if(x<-60)return;const nx=ap[i+1],f=nx?1-.8*ease((t-nx[2])/.4):1;
+      g.save();g.globalAlpha*=a*f;ln(x,oy,x,oy-30,C.ink,1.5);if(f>.5||!nx)tx(l,x,oy+18-(1-a)*8,C.ink,'center','13px '+sans);g.restore()})});
+
+  /* quarter turn */
+  A('ask',()=>{dot(X(-1),oy,5.5,C.b);floats([[X(-1.6),Y(.75),'+ × + = +',.2],[X(.6),Y(.75),'− × − = +',.8]],null,tsec,C.mute);tx('x × x = −1 ?',X(-1),Y(.35),C.ink,'center',serif(19,1))});
+  A('flip2',()=>{const frs=S.frs||[1],fr=Math.max(...frs),per=4.6,t=reduce?per:(tsec%per),a=PI*(ease((t-.2)/1.1)+ease((t-1.7)/1.1));ring(ox,oy,7,C.ink,1.25);
+    for(const f of frs){const rr=f*s;g.setLineDash([2,5]);ring(ox,oy,rr,C.mute);g.setLineDash([]);g.strokeStyle=C.b;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,rr,0,-a,true);g.stroke();dot(ox+rr*Math.cos(a),oy-rr*Math.sin(a),f===fr?6:4.5,f===fr?C.b:C.ink)}
+    floats([[ox,Y(fr)-18,'×−1',.4],[ox,Y(-fr)+18,'×−1',1.9]],[X(fr)+30,oy-16,'×1',3],t)});
+  A('turnq',()=>{const T=S.turn||[PI,0],tot=T[0],per=tot/(PI/2)*1.1+1.6,t=reduce?per:(tsec%per),a=tot*ease(Math.min(1,t/(per-1.6)));
+    g.setLineDash([2,5]);g.strokeStyle=C.line;g.lineWidth=1;g.beginPath();g.arc(ox,oy,s,0,-PI,true);g.stroke();g.setLineDash([]);
+    g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,s,0,-a,true);g.stroke();if(T[1]>=1)dot(X(0),Y(1),3.5,C.a);
+    dot(X(1),oy,3,C.ink);dot(ox+s*Math.cos(a),oy-s*Math.sin(a),6,C.b);
+    if(T[1]===0){g.setLineDash([2,5]);ring(X(0),Y(1),9,C.mute);g.setLineDash([]);tx('?',X(0),Y(1)-22,C.mute,'center',serif(18,1))}
+    if(T[1]===2){const r1=1.38,r2=.5;floats([[X(r1*Math.cos(PI/4)),Y(r1*Math.sin(PI/4)),'×i',.6],[X(r1*Math.cos(3*PI/4)),Y(r1*Math.sin(3*PI/4)),'×i',1.7]],[X(-1.25),Y(.38),'×−1',2.6,C.b],t);
+      floats([[X(r2*Math.cos(PI/4)),Y(r2*Math.sin(PI/4)),'+90°',.8],[X(r2*Math.cos(3*PI/4)),Y(r2*Math.sin(3*PI/4)),'+90°',1.9]],[ox,Y(.3),'+180°',2.8],t,C.mute)}});
+  A('imark',()=>{dot(X(0),Y(1),5,C.a);dot(X(-1),oy,4,C.b);dot(X(1),oy,3.5,C.ink)});
+  const tri=(p,q,col)=>{g.save();g.fillStyle=col;g.globalAlpha*=.12;g.beginPath();g.moveTo(ox,oy);g.lineTo(X(p.x),Y(p.y));g.lineTo(X(q.x),Y(q.y));g.closePath();g.fill();g.restore();
+    g.strokeStyle=col;g.lineWidth=1.25;g.beginPath();g.moveTo(ox,oy);g.lineTo(X(p.x),Y(p.y));g.lineTo(X(q.x),Y(q.y));g.closePath();g.stroke()};
+  A('qi2',()=>{const t=reduce?9:(tsec%3.6),a=PI/2*ease((t-.5)/1),r=2*s;g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,r,0,-a,true);g.stroke();
+    dot(X(2),oy,3,C.mute);tx('2',X(2),oy+18,C.mute,'center','14px '+sans);dot(ox+r*Math.cos(a),oy-r*Math.sin(a),6,C.b);
+    floats([[X(2.35*Math.SQRT1_2),Y(2.35*Math.SQRT1_2),'×i',.2]],null,t);const q=ease((t-1.6)/.4);if(q>0){g.save();g.globalAlpha*=q;tx('2i',X(0)-12,Y(2),C.b,'right',serif(17,1));g.restore()}});
+  A('q2i',()=>{const t=reduce?9:(tsec%4.6),e1=ease((t-.4)/.8),e2=ease((t-1.5)/.9),r=(1+e1)*s,a=PI/2*e2;
+    if(e2>0){g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,2*s,0,-a,true);g.stroke()}ln(X(1),oy,X(1+e1),oy,C.a,1.75);
+    dot(X(1),oy,3.5,C.ink);tx('1',X(1),oy+18,C.mute,'center','14px '+sans);dot(ox+r*Math.cos(a),oy-r*Math.sin(a),6,C.b);
+    floats([[X(1.5),oy-24,'×2',.3],[X(2.35*Math.SQRT1_2),Y(2.35*Math.SQRT1_2),'+90°',1.4]],[X(.9),Y(2.3),'×2i',2.8],t)});
+  A('qtri',()=>{const e=stage==='qtri'?(reduce?1:ease((tsec-.4)/1)):1,b={x:1+(QB.x-1)*e,y:QB.y*e};tri({x:1,y:0},b,C.a);
+    dot(X(1),oy,5,C.ink);tx('1',X(1)+4,oy+18,C.ink,'center','14px '+sans);dot(X(b.x),Y(b.y),6,C.a);if(e>.9)tx('b',X(b.x)+12,Y(b.y)-12,C.a,'left',serif(17,1))});
+  A('qmul',()=>{const e=reduce?1:ease((tsec-.5)/1.4),at={x:1+(QA.x-1)*e,y:QA.y*e},p=cm(at,QB);
+    dot(X(QA.x),Y(QA.y),6,C.ink);tx('a',X(QA.x)+12,Y(QA.y)+10,C.ink,'left',serif(17,1));tri(at,p,C.b);dot(X(p.x),Y(p.y),5.5,C.b);
+    if(e>.95)tx('ab',X(p.x)+12,Y(p.y)-10,C.b,'left',serif(17,1))});
+  A('cx',()=>{if(drag!==st.A){st.A.x+=(st.AT.x-st.A.x)*ka;st.A.y+=(st.AT.y-st.A.y)*ka}const a=st.A,b=st.B,P=cm(a,b),ang=p=>{let t=Math.atan2(p.y,p.x);return t<0?t+TAU:t},ta=ang(a),tb=ang(b);
+    tri({x:1,y:0},b,C.a);tri(a,P,C.b);
+    g.lineWidth=1.5;g.strokeStyle=C.ink;g.beginPath();g.arc(ox,oy,20,0,-ta,true);g.stroke();g.strokeStyle=C.a;g.beginPath();g.arc(ox,oy,20,-ta,-ta-tb,true);g.stroke();
+    dot(X(1),oy,4,C.ink);tx('1',X(1)+4,oy+18,C.ink,'center','14px '+sans);
+    const lab=(p,col,l,r)=>{const x=X(p.x),y=Y(p.y);dot(x,y,r,col);const Ln=Math.hypot(p.x,p.y)||1;tx(l,x+p.x/Ln*18,y-p.y/Ln*18,col,'center',serif(17,1))};
+    lab(P,C.b,'ab',5);lab(a,C.ink,'a',7);lab(b,C.a,'b',7);
+    const deg=t=>Math.round(t*180/PI);$('o-cx').textContent=`|a| × |b| = |ab|: ${Math.hypot(a.x,a.y).toFixed(2)} × ${Math.hypot(b.x,b.y).toFixed(2)} = ${Math.hypot(P.x,P.y).toFixed(2)}\n∠a + ∠b = ∠ab: ${deg(ta)}° + ${deg(tb)}° = ${deg(ta)+deg(tb)}°`});
+
+  /* ladder */
+  A('ladder',()=>{const R=S.rung??4;for(let j=0;j<Math.min(R,4);j++){const r=RUNGS[j];if(r.y&&L.imag<.3)continue;dot(X(r.x),Y(r.y),3.5,C.ink);tx(r.l,X(r.x)+(r.y?12:0),Y(r.y)+(r.y?-10:16),C.mute,r.y?'left':'center',r.l==='i'?serif(15,1):'13px '+sans)}
+    if(R<4){const r=RUNGS[R],d=ease((tsec-1)/.5),x=X(r.x),y=Y(r.y);eqText(r.eq);
+      g.save();g.globalAlpha*=1-d;tx('?',x,y-26,C.mute,'center',serif(22,1));g.setLineDash([2,4]);ring(x,y,7,C.mute);g.setLineDash([]);g.restore();
+      if(d>0){dot(x,y-(1-d)*40,6,C.b);g.save();g.globalAlpha*=d;tx(r.l,x+(r.y?14:0),y+(r.y?-14:18),C.b,r.y?'left':'center',r.l==='i'?serif(17,1):'15px '+sans);g.restore()}}});
+  A('harder',()=>{const H2=hard(),per=1.4,t=reduce?9:tsec,cur=Math.min(2,Math.floor(t/per));eqText(H2[cur].eq);
+    H2.forEach((h,gi)=>h.r.forEach(([x,y],j)=>{const a=ease((t-gi*per-j*.12)/.3);if(a<=0)return;dot(X(x),Y(y)-(1-a)*12,gi===cur?5:3.5,gi===cur?C.b:C.ink)}))});
+  A('roots',()=>{const n=st.n;g.strokeStyle=C.a;g.lineWidth=1;g.beginPath();for(let j=0;j<=n;j++){const t=TAU*j/n,x=ox+s*Math.cos(t),y=oy-s*Math.sin(t);j?g.lineTo(x,y):g.moveTo(x,y)}if(n>1)g.stroke();
+    for(let j=0;j<n;j++){const t=TAU*j/n;dot(ox+s*Math.cos(t),oy-s*Math.sin(t),j?4.5:5.5,j?C.ink:C.b)}});
+
+  /* forever */
+  A('recipe',()=>{eqText('x³ − 2x + 1');g.strokeStyle=C.a;g.lineWidth=1.5;g.beginPath();let on=false;
+    for(let px=0;px<=W;px+=2){const x=cam.cx+(px-W/2)/s,y=x*x*x-2*x+1,py=Y(y);if(py<-50||py>H+50){on=false;continue}on?g.lineTo(px,py):g.moveTo(px,py);on=true}g.stroke();
+    const ops=['×x','×x','−2x','+1'];floats(ops.map((o,j)=>[W-150+j*36,22,o,.3+j*.35]),[W-40,22,'4',2],tsec,C.mute);
+    for(const[x,y]of dk([1,-2,0,1]))if(Math.abs(y)<1e-9)dot(X(x),oy,4.5,C.b)});
+  A('series',()=>{ln(X(E),oy+7,X(E),oy-9,C.b,1.5);tx('e',X(E),oy+19,C.b,'center',serif(16,1));
+    const per=.75,N=9,cyc=N*per+2,t=reduce?cyc:(tsec%cyc),done=Math.min(N,Math.floor(t/per)),fr=done<N?(t-done*per)/per:0;let sm=0;
+    const lab=j=>j<2?'+1':j===2?'+½':j===3?'+⅙':'+1/'+fact(j);
+    for(let j=0;j<=Math.min(done,N-1);j++){const tt=1/fact(j),x0=X(sm),x1=X(sm+tt),w=x1-x0,h=Math.min(H*.3,w*.5),part=j<done?1:ease(fr);
+      g.strokeStyle=j===done?C.ink:C.mute;g.lineWidth=j===done?1.5:1;g.beginPath();g.ellipse((x0+x1)/2,oy,w/2,h,0,PI,PI+PI*part);g.stroke();
+      if(w>18){const a=j<done?Math.max(0,1-(t-(j+1)*per)/.6):part;if(a>0){g.save();g.globalAlpha*=a;tx(lab(j),(x0+x1)/2,oy-h-12,C.mute,'center','13px '+sans);g.restore()}}
+      sm+=tt*(j<done?1:ease(fr))}
+    dot(X(sm),oy,5,C.b);tx(sm.toFixed(3),X(sm),oy-22,C.ink,'center','15px '+sans)});
+  A('deriv',()=>{const T=['1','x','x²/2','x³/6','x⁴/24','x⁵/120','x⁶/720'],sw=Math.min(78,(W-40)/4.6),y=H*.48,x0=24,per=3.2,t=reduce?0:(tsec%per),m=ease((t-1)/1.2);
+    tx('d/dx',x0,y-46,C.mute,'left','13px '+sans);
+    for(let j=0;j<6;j++){const x=x0+(j-m)*sw+sw/2;if(x>W+20)continue;const a=j===0?1-m:1;if(a<=0)continue;g.save();g.globalAlpha*=a;
+      tx(T[j],x,y+(j===0?m*30:0),C.ink,'center',serif(20,1));if(j===0&&m>.1)tx('0',x,y+m*30+22,C.mute,'center','13px '+sans);g.restore();
+      if(j<5){g.save();g.globalAlpha*=.6;tx('+',x+sw/2,y,C.mute,'center',serif(18));g.restore()}}
+    tx('…',x0+(5.6-m)*sw,y,C.mute,'center',serif(20))});
+  A('orbit',()=>{const per=7,t=reduce?per:(tsec%per);
+    for(const[cr,ci,col,nmax]of[[-.12,.75,C.a,30],[.4,.4,C.b,12]]){let x=0,y=0;const pts=[[0,0]];for(let n=0;n<nmax;n++){const tt=x*x-y*y+cr;y=2*x*y+ci;x=tt;pts.push([x,y]);if(x*x+y*y>16)break}
+      const shown=Math.min(pts.length-1,Math.floor(t/.42));g.strokeStyle=col;g.lineWidth=1;g.globalAlpha=L.orbit*.6;g.beginPath();
+      for(let j=0;j<=shown;j++){const[px,py]=pts[j];j?g.lineTo(X(px),Y(py)):g.moveTo(X(px),Y(py))}g.stroke();g.globalAlpha=L.orbit;
+      for(let j=1;j<=shown;j++){const[px,py]=pts[j];dot(X(px),Y(py),j===shown?5:2.5,col);if(j<=3)tx('z'+'₀₁₂₃'[j],X(px)+10,Y(py)-10,col,'left','13px '+sans)}
+      ring(X(cr),Y(ci),7,col,1.25);tx('c',X(cr)-12,Y(ci),col,'right',serif(15,1))}});
+  A('mandel',()=>{const im=mbImage();if(im){g.imageSmoothingEnabled=true;g.drawImage(im,X(MB.x0),Y(MB.y1),(MB.x1-MB.x0)*s,(MB.y1-MB.y0)*s)}});
+  A('halves',()=>{const t=reduce?6:(tsec%13),kk=Math.min(12,t),n=Math.floor(kk),fr=kk-n,x=Math.pow(.5,n+ease(fr));
+    ln(ox,oy-6,ox,oy+6,C.ink,1.5);tx('0',ox,oy+18,C.ink,'center','14px '+sans);dot(X(x),oy-Math.sin(PI*ease(fr))*x*.25*s,6,C.b);
+    tx('1/'+Math.pow(2,n+(fr>.5?1:0)),X(x),oy-24,C.ink,'center','14px '+sans);
+    g.save();g.globalAlpha*=1-ease((fr-.6)/.4);tx('×½',X(x*.75),oy-x*.3*s-14,C.mute,'center','14px '+sans);g.restore()});
+
+  /* beyond roots */
+  A('algline',()=>{const ar=algReal(),grow=stage==='algline'?ease(tsec/2.2):1;g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();
+    ar.forEach(([x,dg],i)=>{if(rnd(i)>grow)return;const h=dg===1?14:dg===2?10:7;g.moveTo(X(x),oy);g.lineTo(X(x),oy-h)});g.stroke();
+    if(stage==='algline')floats([[X(R2),Y(.55),'√2',.6],[X(1.618),Y(.55),'φ',1],[X(1.26),Y(.8),'∛2',1.4],[X(.5),Y(.55),'½',1.8]],null,tsec)});
+  A('liou',()=>{const D='0.110001000000000000000001',n=Math.min(D.length,Math.floor((reduce?99:tsec)*7));
+    g.font=serif(19);g.textAlign='left';g.textBaseline='middle';let x=16;const cw=Math.min(13,(W-40)/(D.length+1));
+    for(let j=0;j<n;j++){g.fillStyle=D[j]==='1'&&j>1?C.b:C.ink;g.fillText(D[j],x,24);x+=j<2?cw*.7:cw}if(n===D.length){g.fillStyle=C.mute;g.fillText('…',x,24)}
+    dot(X(.110001),oy,5.5,C.b)});
+  A('drop',()=>{if(S.dl)lastDL=S.dl;for(const l of lastDL){const v=l==='e'?E:PI,it=l==='e',d=ease((tsec-.3)/.8),x=X(v),y=oy-(1-d)*H*.5;
+      g.save();g.globalAlpha*=Math.min(1,d*3);ln(x,y-10,x,y+8,C.b,2);tx(l,x,y-22,C.b,'center',serif(19,it));g.restore()}});
+  A('piwalk',()=>{const t=reduce?9:(tsec%6.5),e=ease((t-.4)/3),x=PI*e,r=.5,cx=X(x),cy=Y(.5),ang=-PI/2-x/r;ln(X(0),oy,X(x),oy,C.b,2.5);
+    ring(cx,cy,r*s,C.a,1.5);const mx=X(x+r*Math.cos(ang)),my=Y(.5+r*Math.sin(ang));ln(cx,cy,mx,my,C.a,1);dot(mx,my,4.5,C.b);dot(X(0),oy,3,C.ink);
+    tx('1',cx,cy,C.mute,'center','12px '+sans);
+    if(e>=.999){ln(X(PI),oy-8,X(PI),oy+8,C.b,2);tx('π ≈ 3.14159',X(PI),Y(1.25),C.b,'center',serif(18))}});
+  A('dz',()=>{const T=1.2817361,x0=cam.cx-W/2/s,x1=cam.cx+W/2/s,w=x1-x0;g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();
+    for(let d=1;d<=40;d++)for(let p=Math.ceil(x0*d);p<=Math.floor(x1*d);p++){if(gcd(Math.abs(p),d)!==1)continue;const h=3+20/Math.sqrt(d);g.moveTo(X(p/d),oy);g.lineTo(X(p/d),oy-h)}
+    for(const[v]of algReal())if(v>x0&&v<x1){g.moveTo(X(v),oy);g.lineTo(X(v),oy-8)}g.stroke();
+    const xT=X(T);ln(xT,oy-22,xT,oy,C.b,2);dot(xT,oy,4,C.b);const z=1.4/((x1-x0)/2);if(z>2)tx('×'+Math.round(z).toLocaleString('en-US'),W-14,22,C.mute,'right','14px '+sans)});
+  A('alg',()=>{const im=algImage();g.drawImage(im,X(AL.x0),Y(AL.y1),(AL.x1-AL.x0)*s,(AL.y1-AL.y0)*s)});
+  A('epi',()=>{for(const[v,l,it]of[[E,'e',1],[PI,'π',0]]){const x=X(v);ln(x,oy-8,x,oy+8,C.b,1.75);tx(l,x,oy-20,C.b,'center',serif(18,it))}});
+  A('darts',()=>{const n=Math.min(40,Math.floor((reduce?99:tsec)/.35)),x0=cam.cx-W/2/s,x1=cam.cx+W/2/s;
+    for(let i=0;i<=n;i++){const v=x0+.05*(x1-x0)+rnd(i+7)*(x1-x0)*.9,d=i<n?1:ease(((reduce?99:tsec)-i*.35)/.35),x=X(v),y=oy-(1-d)*H*.45;ln(x,y-16,x,y,C.b,1.5);dot(x,y,2.5,C.b)}});
+  A('pie',()=>{const m=ease((tsec-1.4)/.7),xe=X(E),xp=X(PI),xs=X(PI+E),ly=Y(.55);
+    for(const[v,l,it]of[[E,'e',1],[PI,'π',0]]){const x=X(v);ln(x,oy-8,x,oy+8,C.b,1.75)}
+    g.save();g.globalAlpha*=1-m;tx('π',xp+(xs-xp)*m,ly,C.b,'center',serif(19));tx('e',xe+(xs-xe)*m,ly,C.b,'center',serif(19,1));g.restore();
+    if(m>0){g.save();g.globalAlpha*=m;tx('π + e',xs,ly,C.ink,'center',serif(19,1));ln(xs,oy-8,xs,oy+8,C.ink,1.75);g.restore()}
+    const q=ease((tsec-2.4)/.5);if(q>0){g.save();g.globalAlpha*=q;tx('?',xs,ly-28,C.b,'center',serif(26,1));g.restore()}});
+
+  /* growth turns */
+  A('mhop',()=>{if(S.mh)lastMH=S.mh;const M=lastMH,p=M.p,n=p.length-1,per=.7,cyc=n*per+2.2,t=reduce?cyc:(tsec%cyc),done=Math.min(n,Math.floor(t/per)),fr=done<n?(t-done*per)/per:0;
+    let hmax=0;const hh=j=>Math.min(.42,Math.abs(p[j+1]-p[j])*.5)*s;for(let j=0;j<n;j++)hmax=Math.max(hmax,hh(j));
+    g.setLineDash([2,4]);for(let j=0;j<done;j++){const x0=X(p[j]),x1=X(p[j+1]);g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();g.ellipse((x0+x1)/2,oy,Math.abs(x1-x0)/2,hh(j),0,PI,TAU);g.stroke()}g.setLineDash([]);
+    const j=Math.min(done,n-1),e=done<n?ease(fr):1,px=p[j]+(p[j+1]-p[j])*e,py=done<n?Math.sin(PI*e)*hh(j):0;dot(X(p[0]),oy,3,C.mute);dot(X(px),oy-py,6,C.b);
+    const ly=oy-hmax-22;floats(M.l.map((l,i)=>[X((p[i]+p[i+1])/2),ly,l,(i+.5)*per]),M.m?[X((p[0]+p[n])/2),ly,M.m,n*per+.15]:null,t);
+    if(M.k&&done>=1)tx(M.k[1],X(M.k[0]),oy+20,C.mute,'center','14px '+sans);
+    if(t>n*per+.1){g.save();g.globalAlpha*=ease((t-n*per-.1)/.4);tx(M.r,X(p[n]),oy+20,C.b,'center','15px '+sans);g.restore()}});
+  A('compn',()=>{const ns=[1,2,4,8,16,32,64,128,256,512,1024],t=reduce?99:tsec,cnt=Math.min(ns.length,1+Math.floor(t/.6));
+    g.setLineDash([2,4]);ln(X(E),oy+8,X(E),oy-34,C.mute);g.setLineDash([]);
+    for(let j=0;j<cnt;j++){const v=Math.pow(1+1/ns[j],ns[j]),a=ease((t-j*.6)/.3),cur=j===cnt-1,x=X(v);g.save();g.globalAlpha*=a*(cur?1:.45);ln(x,oy,x,oy-24,cur?C.b:C.ink,cur?2:1.25);
+      if(j<3)tx(v.toFixed(2),x,oy+18,C.mute,'center','13px '+sans);g.restore()}
+    const n=ns[cnt-1],v=Math.pow(1+1/n,n);eqText('n = '+n);tx(v.toFixed(4),W-16,22,C.b,'right','17px '+sans);
+    if(cnt===ns.length){const a=ease((t-cnt*.6)/.5);g.save();g.globalAlpha*=a;tx('e',X(E),oy-44,C.b,'center',serif(19,1));g.restore()}});
+  A('complete',()=>{const t=reduce?9:tsec,d=ease((t-1)/.6);
+    g.save();g.globalAlpha*=.35;for(const h of hard())for(const[x,y]of h.r)dot(X(x),Y(y),3,C.ink);g.restore();
+    for(const r of RUNGS){const x=X(r.x),y=Y(r.y);g.save();g.globalAlpha*=1-d;tx('?',x,y-26,C.mute,'center',serif(22,1));g.setLineDash([2,4]);ring(x,y,7,C.mute);g.setLineDash([]);g.restore();
+      if(d>0){dot(x,y-(1-d)*30,6,C.b);g.save();g.globalAlpha*=d;tx(r.l,x+(r.y?14:0),y+(r.y?-14:18),C.b,r.y?'left':'center',r.l==='i'?serif(17,1):'15px '+sans);g.restore()}}
+    const q=ease((t-1.8)/.6);if(q>0){g.save();g.globalAlpha*=q;g.strokeStyle=C.b;g.lineWidth=1.5;g.beginPath();g.arc(ox,oy,s,0,TAU);g.stroke();g.restore()}});
+  A('cubic',()=>{eqText('x³ = 15x + 4');const a=stage==='cubic'?ease((tsec-.6)/.5):1;g.save();g.globalAlpha*=a;dot(X(4),oy,6,C.b);tx('4',X(4),oy+20,C.b,'center','15px '+sans);g.restore()});
+  A('cubic2',()=>{const t=reduce?9:(tsec%6),f1=ease(t/1.2),f2=ease((t-1.3)/1.2),P1=[2*f1,f1],P2=[2+2*f2,1-f2];
+    g.setLineDash([3,4]);g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();g.moveTo(X(0),oy);g.lineTo(X(P1[0]),Y(P1[1]));if(f2>0)g.lineTo(X(P2[0]),Y(P2[1]));g.stroke();g.setLineDash([]);
+    dot(X(f2>0?P2[0]:P1[0]),Y(f2>0?P2[1]:P1[1]),5,C.a);tx('√−121',X(1.1),Y(1.25),C.mute,'center',serif(16));
+    floats([[X(1)-26,Y(.55),'2 + √−1',.6],[X(3)+26,Y(.55),'2 − √−1',1.9]],[X(4),Y(.45),'4',3,C.b],t)});
+  A('sqcirc',()=>{const cx=W/2,cy=H/2,r=Math.min(W,H)*.3,sd=r*Math.sqrt(PI),a=reduce?0:Math.sin(time*.6)*.15;
+    ring(cx,cy,r,C.a,1.5);g.save();g.translate(cx,cy);g.rotate(a);g.strokeStyle=C.ink;g.lineWidth=1.5;g.strokeRect(-sd/2,-sd/2,sd,sd);g.restore();
+    tx('?',cx,cy,C.b,'center',serif(30,1))});
+  A('fourier',()=>{const n=st.nf,R0=Math.min(W*.18,H*.28),cx0=W*.24,cy0=H/2,t=reduce?1:time*1.4;let x=cx0,y=cy0;
+    for(let j=0;j<n;j++){const k=2*j+1,r=R0*4/(PI*k),nx=x+r*Math.cos(k*t),ny=y-r*Math.sin(k*t);g.save();g.globalAlpha*=.5;ring(x,y,r,C.line);g.restore();ln(x,y,nx,ny,C.a,1.5);x=nx;y=ny}
+    dot(x,y,4.5,C.b);const x1=W*.52;g.save();g.globalAlpha*=.5;ln(x,y,x1,y,C.mute);g.restore();
+    st.tr.unshift(y);if(st.tr.length>400)st.tr.pop();g.strokeStyle=C.b;g.lineWidth=1.75;g.beginPath();st.tr.forEach((v,i)=>{const px=x1+i*1.2;if(px>W)return;i?g.lineTo(px,v):g.moveTo(px,v)});g.stroke()});
+  A('pidist',()=>{const per=4.4,t=reduce?per:(tsec%per),f=ease(Math.min(1,t/2.4)),a=PI*f;g.strokeStyle=C.b;g.lineWidth=2.5;g.beginPath();g.arc(ox,oy,s,0,-a,true);g.stroke();
+    dot(X(1),oy,3.5,C.ink);dot(ox+s*Math.cos(a),oy-s*Math.sin(a),6,C.b);const m=ease((t-2.7)/.5);
+    g.save();g.globalAlpha*=1-m;tx((PI*f).toFixed(2),ox+(s+24)*Math.cos(a),oy-(s+24)*Math.sin(a),C.ink,'center','15px '+sans);g.restore();
+    if(m>0){g.save();g.globalAlpha*=m;tx('π',ox,Y(1)-20,C.b,'center',serif(22));tx('3.14159…',ox,Y(1)-44,C.mute,'center','13px '+sans);g.restore()}});
+  A('shadow',()=>{const a=reduce?.9:(tsec*.6)%TAU,c=Math.cos(a),sn=Math.sin(a),px=ox+s*c,py=oy-s*sn;
+    g.setLineDash([2,4]);ln(px,py,px,oy,C.mute);ln(px,py,ox,py,C.mute);g.setLineDash([]);ln(ox,oy,px,py,C.line);
+    ln(ox,oy,px,oy,C.ink,3);ln(ox,oy,ox,py,C.a,3);g.strokeStyle=C.mute;g.lineWidth=1;g.beginPath();g.arc(ox,oy,20,0,-a,true);g.stroke();
+    tx('θ',ox+32*Math.cos(a/2),oy-32*Math.sin(a/2),C.mute,'center',serif(15,1));
+    tx('cos θ',(ox+px)/2,oy+(sn>=0?18:-14),C.ink,'center',serif(15));tx('sin θ',ox+(c>=0?-10:10),(oy+py)/2,C.a,c>=0?'right':'left',serif(15));dot(px,py,6,C.b)});
+  A('grow',()=>{const per=3.4,t=reduce?2:(tsec%per),x=Math.exp(-1.4+2.6*t/per);dot(X(0),oy,3,C.mute);
+    const px=X(x),ax=px+x*s*.4;ln(px,oy,ax,oy,C.a,2);arrowHead(ax,oy,1,0,C.a);dot(px,oy,6,C.b);
+    tx(x.toFixed(1),px,oy+20,C.b,'center','14px '+sans);tx('+'+x.toFixed(1),ax+4,oy-16,C.a,'center','14px '+sans)});
+  A('spin',()=>{const a=reduce?.9:(tsec*.9)%TAU,px=ox+s*Math.cos(a),py=oy-s*Math.sin(a);g.strokeStyle=C.b;g.lineWidth=2;g.beginPath();g.arc(ox,oy,s,-a,-a+1.1);g.stroke();
+    ln(ox,oy,px,py,C.line);const vx=-Math.sin(a),vy=Math.cos(a),L2=.55*s,ex=px+vx*L2,ey=py-vy*L2;ln(px,py,ex,ey,C.a,2);arrowHead(ex,ey,vx,-vy,C.a);dot(px,py,6,C.b);
+    tx('×i',ex+vx*20,ey-vy*20,C.a,'center',serif(16,1))});
+  A('euler',()=>{const pts=eulerPts();g.setLineDash([3,5]);g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();g.arc(ox,oy,s,0,-PI,true);g.stroke();g.setLineDash([]);
+    ring(X(-1),oy,8,C.a,1.25);tx('−1',X(-1)-12,oy+18,C.a,'right','13px '+sans);
+    if(st.mode==='steps'&&st.eN<=40){g.save();g.globalAlpha*=.6;for(const[x,y]of pts)ln(ox,oy,X(x),Y(y),C.line);g.restore()}
+    g.strokeStyle=C.ink;g.lineWidth=1.5;g.beginPath();pts.forEach(([x,y],j)=>j?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y)));g.stroke();
+    if(pts.length<=41)pts.forEach(([x,y])=>dot(X(x),Y(y),2.2,C.ink));const[lx,ly]=pts[pts.length-1];dot(X(lx),Y(ly),5.5,C.b);
+    if(st.mode==='steps'&&st.eN<=8)floats(pts.slice(1).map(([x,y],j)=>[X(x)+12,Y(y)-12,'×',j*.15]),null,tsec,C.mute);
+    $('o-e').innerHTML=st.mode==='steps'?`(1 + <i>i</i>π/${st.eN})<sup>${st.eN}</sup> = ${cfmt(lx,ly)}`:`${Math.min(st.eN,40)} term${st.eN>1?'s':''} = ${cfmt(lx,ly)}`});
+
+  /* sequency and simultaneity */
+  const trail=(P,t,len,col)=>{g.strokeStyle=col;g.lineWidth=2.25;g.beginPath();for(let j=0;j<=40;j++){const q=t-len*(1-j/40),[x,y]=P(q);j?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();const[x,y]=P(t);dot(x,y,5.5,col)};
+  A('arrow',()=>{const per=3,t=reduce?1:(tsec%per)-1.6,P=q=>[X(Math.exp(q*.9)),oy];ln(X(Math.exp(-1.44)),oy,W,oy,C.a,1.25);trail(P,t,1.2,C.b)});
+  A('circ',()=>{const t=reduce?1:time*1.1,P=q=>[ox+s*Math.cos(q),oy-s*Math.sin(q)];g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();g.arc(ox,oy,s,0,TAU);g.stroke();trail(P,t,1.3*PI,C.b)});
+  A('spiral',()=>{st.gs+=(st.g-st.gs)*ka;const kk=st.gs,lim=Math.hypot(W,H)/2+30,P=t=>{const r=s*Math.exp(kk*t);return[ox+r*Math.cos(t),oy-r*Math.sin(t),r]};
+    g.strokeStyle=C.a;g.lineWidth=1.25;g.beginPath();let on=false;const T=Math.abs(kk)<.004?TAU:6*PI;
+    for(let t=-T;t<=T;t+=.04){const[x,y,r]=P(t);if(r>lim||r<.4){on=false;continue}on?g.lineTo(x,y):g.moveTo(x,y);on=true}g.stroke();
+    const span=4*PI,t=reduce?1:((time*1.1)%span)-span/2;trail(P,t,1.3*PI,C.b);
+    floats([[W*.3,22,'eᵏᵗ',.3],[W*.7,22,'eⁱᵗ',.7]],[W/2,22,'e⁽ᵏ⁺ⁱ⁾ᵗ',1.6],tsec,C.mute)});
+  A('half',()=>{const per=3.4,t=reduce?per:(tsec%per),a=PI*ease(Math.min(1,t/2));g.strokeStyle=C.a;g.lineWidth=1.75;g.beginPath();g.arc(ox,oy,s,0,-a,true);g.stroke();
+    dot(X(1),oy,3.5,C.ink);tx('1',X(1),oy+18,C.mute);tx('−1',X(-1),oy+18,C.b);dot(ox+s*Math.cos(a),oy-s*Math.sin(a),6,C.b)});
+}
+requestAnimationFrame(frame);
+const vis=new Set();const iotl=new IntersectionObserver(es=>{const was=running;es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target));running=vis.size>0;if(running&&!was)stageT0=performance.now()});document.querySelectorAll('.stage').forEach(el=>iotl.observe(el));
+
+/* ---------- beats and scroll ---------- */
+const beats=[...document.querySelectorAll('.beat')],SECS=[...document.querySelectorAll('section.ch')],PROGS=SECS.map(x=>x.querySelector('.prog')),OLS=SECS.map(x=>x.querySelector('.beats'));
+beats.forEach(b=>{b._ch=+b.closest('section.ch').dataset.i});const firstOf=SECS.map((x,i)=>beats.find(b=>b._ch===i)),lastOf=SECS.map((x,i)=>[...beats].reverse().find(b=>b._ch===i));
+let curYear=-9999,lastY=-9999;beats.forEach(b=>{if(b.dataset.y)lastY=+b.dataset.y;b._y=lastY});
+let active=null,sq=0;
+function onScroll(){sq=0;const vh=innerHeight,wide=innerWidth>=900,line=wide?vh*.55:vh*.68;let cur=beats[0];
+  for(const b of beats){if(b.getBoundingClientRect().top<line)cur=b;else break}
+  let cc=0;SECS.forEach((x,i)=>{if(x.querySelector('.stage').getBoundingClientRect().top<vh*.92)cc=i});
+  const eff=cur._ch===cc?cur:(cc>cur._ch?firstOf[cc]:lastOf[cc]);
+  if(cur!==active){active&&active.classList.remove('on');cur.classList.add('on');active=cur}
+  if(CVS[cc]!==cv){useCanvas(CVS[cc]);stage='';}
+  if(eff.dataset.s!==stage){stage=eff.dataset.s;stageT0=performance.now()}
+  if(eff._y!==curYear||ovs.lastB!==eff){curYear=eff._y;ovs.lastB=eff;setOv(eff)}
+  OLS.forEach((ol,i)=>{const r=ol.getBoundingClientRect();PROGS[i].style.height=Math.max(0,Math.min(r.height,line-r.top))+'px'})}
+addEventListener('scroll',()=>{if(!sq)sq=requestAnimationFrame(onScroll)},{passive:true});
+addEventListener('resize',()=>{onScroll();sizeOv()});
+
+/* ---------- overview scale ---------- */
+const ov=$('ov'),og=ov.getContext('2d');let OW=0,OH=0;
+const nodes=beats.filter(b=>b.dataset.y).map(b=>({y:+b.dataset.y,d:b.dataset.d,el:b}));
+const FULL=[-2000,2026];
+const WIN=[];beats.forEach(b=>{const c=b._ch;if(b.dataset.y&&+b.dataset.y>-5000)(WIN[c]=WIN[c]||[]).push(+b.dataset.y)});
+const winOf=c=>{const ys=WIN[c];if(!ys)return FULL;const a=Math.min(...ys),z=Math.max(...ys),p=Math.max(120,(z-a)*.2);return[a-p,Math.min(FULL[1],z+p)]};
+const ovs={w0:FULL[0],w1:FULL[1],y:FULL[0],tw0:FULL[0],tw1:FULL[1],ty:FULL[0],q:0};
+const OL=110,ORm=18,xIn=(y,w0,w1)=>OL+(y-w0)/(w1-w0)*(OW-ORm-OL);
+const fmtY=y=>y<0?Math.round(-y)+' BC':''+Math.round(y);
+function setOv(b){const w=winOf(b._ch);ovs.tw0=w[0];ovs.tw1=w[1];ovs.ty=b._y<=-5000?w[0]:b._y;ovs.lab=b._y<=-5000?'counting':(nodes.find(n=>n.y===b._y)||{}).d||'';if(!ovs.q)ovs.q=requestAnimationFrame(ovTick)}
+function ovTick(){ovs.q=0;const k=reduce?1:.12;ovs.w0+=(ovs.tw0-ovs.w0)*k;ovs.w1+=(ovs.tw1-ovs.w1)*k;ovs.y+=(ovs.ty-ovs.y)*k;drawOv();
+  if(Math.abs(ovs.tw0-ovs.w0)+Math.abs(ovs.tw1-ovs.w1)+Math.abs(ovs.ty-ovs.y)>.05)ovs.q=requestAnimationFrame(ovTick)}
+function sizeOv(){const r=ov.getBoundingClientRect();if(!r.width)return;const d=Math.min(devicePixelRatio||1,2);OW=r.width;OH=r.height;ov.width=Math.round(OW*d);ov.height=Math.round(OH*d);og.setTransform(d,0,0,d,0,0);drawOv()}
+function drawOv(){if(!OW)return;const{w0,w1}=ovs,y=25,ym=40;og.clearRect(0,0,OW,OH);
+  og.fillStyle=C.ink;og.font=serif(17,1);og.textAlign='left';og.textBaseline='middle';og.fillText(ovs.lab||'',16,OH/2-2);
+  og.strokeStyle=C.mute;og.lineWidth=1;og.beginPath();og.moveTo(OL,y);og.lineTo(OW-ORm,y);og.stroke();
+  const span=w1-w0,px=OW-ORm-OL,steps=[1,2,5,10,20,25,50,100,200,250,500,1000];let st2=steps.find(v=>v/span*px>=62)||1000;
+  og.fillStyle=C.mute;og.font='12px '+sans;og.textAlign='center';
+  for(let v=Math.ceil(w0/st2)*st2;v<=w1;v+=st2){const x=xIn(v,w0,w1);og.fillRect(x-.5,y-3,1,6);og.fillText(fmtY(v),x,10)}
+  og.fillStyle=C.ink;for(const n of nodes){if(n.y<w0||n.y>w1)continue;og.fillRect(xIn(n.y,w0,w1)-.75,y-6,1.5,12)}
+  og.fillStyle=C.b;og.beginPath();og.arc(xIn(clamp(ovs.y,w0,w1),w0,w1),y,5,0,TAU);og.fill();
+  og.strokeStyle=C.line;og.beginPath();og.moveTo(OL,ym);og.lineTo(OW-ORm,ym);og.stroke();
+  const b0=xIn(w0,FULL[0],FULL[1]),b1=xIn(w1,FULL[0],FULL[1]);og.strokeStyle=C.ink;og.lineWidth=2.5;og.beginPath();og.moveTo(b0,ym);og.lineTo(Math.max(b1,b0+3),ym);og.stroke();
+  og.fillStyle=C.b;og.beginPath();og.arc(xIn(clamp(ovs.y,FULL[0],FULL[1]),FULL[0],FULL[1]),ym,2,0,TAU);og.fill()}
+const roov=new ResizeObserver(sizeOv);roov.observe(ov);
+const jumpTo=(el,frac)=>{const top=el.getBoundingClientRect().top+scrollY-frac;scrollTo({top,behavior:reduce?'auto':'smooth'})};
+ov.addEventListener('click',e=>{const r=ov.getBoundingClientRect(),x=e.clientX-r.left;let best=null,bd=1e9;for(const n of nodes){if(n.y<ovs.w0||n.y>ovs.w1)continue;const d=Math.abs(xIn(n.y,ovs.w0,ovs.w1)-x);if(d<bd){bd=d;best=n}}
+  if(best)jumpTo(best.el,innerHeight*(innerWidth>=900?.45:.6))});
+const chapOff=()=>46;
+document.querySelectorAll('.road a,.end .eq a').forEach(a=>a.addEventListener('click',e=>{const el=document.querySelector(a.getAttribute('href'));if(!el)return;e.preventDefault();jumpTo(el,chapOff())}));
+
+/* ---------- close: symbols light up, then e^iπ and +1 merge into 0 ---------- */
+const endEl=$('end'),mg=$('merge');let mT=[];
+const ioend=new IntersectionObserver(es=>{if(es[0].isIntersecting){endEl.classList.add('lit');mT.forEach(clearTimeout);mg.className='merge';
+  mT=[setTimeout(()=>mg.classList.add('s1'),reduce?0:2800),setTimeout(()=>mg.classList.add('s2'),reduce?0:4200)]}},{threshold:.5});ioend.observe(endEl);
+
+/* ---------- controls ---------- */
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readC();drawOv()});
+const mo=new MutationObserver(()=>{readC();drawOv()});mo.observe(root,{attributes:true,attributeFilter:['data-theme']});
+if(document.fonts)document.fonts.ready.then(()=>{themeV++;drawOv()});
+const mOut=$('o-m'),mRead=()=>{const lg=st.mlog.length>6?['…',...st.mlog.slice(-6)]:st.mlog;mOut.textContent=['2',...lg.map(k=>k==='…'?k:minus(k))].join(' × ')+(st.mlog.length?' = '+minus(+st.mp[1].toFixed(3)):'')};
+document.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click',()=>{const k=+b.dataset.m;if(Math.abs(st.mp[1]*k)>3000)return;st.mfrom=st.mp.slice();st.mp=st.mp.map(p=>p*k);st.mk=k;st.mt=performance.now()/1000;st.mlab='×'+minus(k);st.mlog.push(k);mRead()}));
+$('m-reset').addEventListener('click',()=>{st.mfrom=st.mp.slice();st.mp=[1,2];st.mk=1;st.mt=performance.now()/1000;st.mlab='';st.mlog=[];mRead()});
+document.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{const[x,y]=btn.dataset.b.split(',').map(Number);
+  if(Math.abs(st.B.x-x)<1e-6&&Math.abs(st.B.y-y)<1e-6){const p=cm(st.AT,st.B);if(Math.hypot(p.x,p.y)<60){st.AT.x=p.x;st.AT.y=p.y}}else{st.B.x=x;st.B.y=y}}));
+$('b-reset').addEventListener('click',()=>{st.AT.x=1.2;st.AT.y=.5;st.B.x=0;st.B.y=1});
+const bind=(id,key,out,fmt)=>{const el=$(id),f=()=>{st[key]=+el.value;if(out)$(out).innerHTML=fmt(st[key])};el.addEventListener('input',f);f()};
+bind('r-f','nf','o-f',v=>v);bind('r-n','n','o-n',v=>`<i>n</i> = ${v}`);bind('r-r','rep','o-r',v=>v);bind('r-d','deg');bind('r-e','eN');
+bind('r-g','g','o-g',v=>Math.abs(v)<.005?'0, a circle':minus(+v.toFixed(2)));
+const bSt=$('m-st'),bSr=$('m-sr'),setMode=m=>{st.mode=m;bSt.setAttribute('aria-pressed',m==='steps');bSr.setAttribute('aria-pressed',m==='series')};
+bSt.addEventListener('click',()=>setMode('steps'));bSr.addEventListener('click',()=>setMode('series'));
+onScroll();sizeOv();
+setTimeout(()=>{try{algReal();algImage()}catch(e){}},3000);
+}
+</script>
+</body>
+</html>
