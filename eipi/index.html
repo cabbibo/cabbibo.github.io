@@ -157,8 +157,13 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="appdiff"><p>No two apples are the same. Calling each one “one apple” ignores everything that makes it this apple.</p></li>
 <li class="beat" data-s="rod"><p class="wt">Wait.</p><p>Is anything in the world exactly 1? Measure a one-metre rod closely enough and it’s always a little off.</p></li>
 <li class="beat" data-s="rod"><p>1 is an idea we lay over things. That’s what makes it useful: every apple counts the same.</p></li>
-<li class="beat" data-s="appdiff" data-y="-300" data-d="~300 BC"><span class="yr">~300 BC</span><p>For Euclid, one wasn’t even a number. A number was a multitude made of units. The unit was what numbers were made from.</p>
+<li class="beat" data-s="unitnum" data-y="-300" data-d="~300 BC"><span class="yr">~300 BC</span><p>Euclid wrote two definitions. A unit is what makes each thing “one”. A number is a multitude made of units.</p></li>
+<li class="beat" data-s="unit2"><p>So a number meant many. 2 was the first number. One was what numbers were made of, not one of them.</p>
 <details class="who"><summary><b>Chrysippus</b> c. 280–207 BC</summary><div><p>A Stoic philosopher who argued that one is a number too. It took a long time for that to catch on.</p></div></details></li>
+<li class="beat" data-s="unitnum" data-y="630" data-d="~630"><span class="yr">~630</span><p>Centuries later, Isidore of Seville still wrote that one is the seed of number, but not a number.</p></li>
+<li class="beat" data-s="unit1" data-y="1585" data-d="1585"><span class="yr">1585</span><p>The Flemish engineer Simon Stevin said it flatly: the unit is a number.</p>
+<details class="who"><summary><b>Simon Stevin</b> 1548–1620</summary><div><p>He advised on windmills, locks and ports, tutored Prince Maurice of Nassau, and planned how to flood the lowlands in an invading army’s path by opening sluices. The same year he published a 29-page booklet that taught Europe decimal fractions, the 0.5 kind, written for surveyors, wine-gaugers and merchants.</p></div></details></li>
+<li class="beat" data-s="unit1"><p>One is the idea we lay over things. No wonder it was the last to be seen as a number.</p></li>
 <li class="beat" data-s="apples2"><p>Count by adding one at a time. +1, +1: two apples.</p></li>
 <li class="beat" data-s="apples4"><p>Two more: four.</p></li>
 <li class="beat" data-s="times1"><p>×1 is the move that changes nothing. Three apples, taken one time: still three.</p></li>
@@ -489,6 +494,9 @@ const STAGES={
   names:{cam:[.5,.4,1.05,.75],on:['axis','names']},
   dec:{cam:[.5,.4,1.05,.75],on:['axis','dec']},
   third:{cam:[.5,.4,1.05,.75],on:['axis','third']},
+  unitnum:{cam:[2.2,.7,3,1.4],on:['ground','unitnum']},
+  unit2:{cam:[1.5,.35,2,1],on:['axis','unit2']},
+  unit1:{cam:[1.5,.35,2,1],on:['axis','unit2'],lit1:1},
   apples1:{cam:[1.5,.6,2.2,1.1],on:['ground','apples'],apples:1},
   appdiff:{cam:[3,.6,3.2,1.3],on:['ground','appdiff']},
   rod:{cam:t=>{const hw=1.3*Math.exp(-.85*clamp(t-.8,0,6.5));return[1-hw*.2,hw*.25,hw,hw*.55]},on:['rod']},
@@ -760,6 +768,13 @@ function draw(time,dt){
     dot(X(.5),oy,5,C.b);dot(X(.25),oy,4,C.ink)});
   A('third',()=>{const t=reduce?99:tsec,n=Math.floor(t*6);g.font=serif(20);g.textAlign='left';g.textBaseline='middle';g.fillStyle=C.ink;g.fillText('0.'+'3'.repeat(Math.min(n,80)),16,26);
     const x=X(1/3);dot(x,oy,5,C.b);tx('⅓',x,oy-24,C.b,'center',serif(20))});
+  A('unitnum',()=>{const r=.24*s;apple(X(.6),Y(.3),r,C.apple,1);tx('unit',X(.6),oy+18,C.ink,'center',serif(16,1));
+    const P=[[2.6,.3],[3.15,.3],[3.7,.3],[2.88,.78],[3.42,.78],[3.15,1.26]],t=reduce?9:tsec;P.forEach(([x,y],i)=>{const a=ease((t-.3-i*.15)/.3);if(a<=0)return;g.save();g.globalAlpha*=a;apple(X(x),Y(y),r,C.apple,1);g.restore()});
+    tx('number',X(3.15),oy+18,C.ink,'center',serif(16,1))});
+  A('unit2',()=>{const t=reduce?9:tsec,l1=!!S.lit1;floats([[X(.6),Y(.6),'1',.2],[X(1.4),Y(.6),'+1',.5]],[X(2),Y(.6),'2',1.3,C.b],t);
+    const a=ease((t-1.5)/.4);dot(X(2),oy,3+3*a,a>0?C.b:C.mute);if(a>0){g.save();g.globalAlpha*=a;tx('number',X(2),oy-20,C.b,'center',serif(15,1));g.restore()}
+    if(l1){const b=ease((tsec-.4)/.5);dot(X(1),oy,3+3*b,C.b);g.save();g.globalAlpha*=b;tx('number',X(1),oy-20,C.b,'center',serif(15,1));g.restore()}
+    else{g.setLineDash([2,4]);ring(X(1),oy,7,C.mute);g.setLineDash([]);tx('unit',X(1),oy-20,C.mute,'center',serif(15,1))}});
   A('appdiff',()=>{const t=reduce?9:tsec,A=[[.7,.26,0],[1.9,.33,.2],[3,.22,-.25],[4.1,.3,.1],[5.2,.27,-.1]];
     A.forEach(([x,r,rot],i)=>{const a=ease((t-.2-i*.25)/.35);if(a<=0)return;g.save();g.globalAlpha*=a;g.translate(X(x),Y(.42));g.rotate(rot);apple(0,0,r*s,C.apple,1);g.restore()});
     const ly=Y(.42)-.4*s-18;floats(A.map(([x],i)=>[X(x),ly,'1',.4+i*.25]),stage==='appdiff'?[X(2.95),ly,'5',2.2]:null,t)});
