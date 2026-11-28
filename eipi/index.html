@@ -71,6 +71,11 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 .who summary b{font-weight:500;color:var(--ink)}
 .who div{background:var(--soft);border-radius:14px;padding:14px 16px;margin-top:8px;font-size:16px;line-height:1.5}
 .who div p+p{margin-top:8px}
+.who.word summary{border-style:dashed}
+.who.word summary b{font-weight:400;font-style:italic}
+.who.word summary::before{content:"Aa";font:italic 12px Newsreader,Georgia,serif;width:auto;color:var(--mute)}
+.who.word[open] summary::before{content:"Aa"}
+.who+.who{margin-top:6px}
 .road{margin:12px 0 0;display:grid;gap:4px;max-width:520px}
 .rp{display:grid;grid-template-columns:56px 1fr;align-items:baseline;border-top:1px solid var(--line);padding:8px 0}
 .rs{font-size:40px;line-height:1;font-weight:300;color:var(--ink);text-decoration:none}
@@ -172,7 +177,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <p>Books VII to IX are about numbers, including the proof that the primes never run out.</p>
 <p>A later story, told by Proclus some seven centuries on: a king asked for a shorter way into geometry, and Euclid said there is no royal road.</p></div></details></li>
 <li class="beat" data-s="unit2"><p>So a number meant many. 2 was the first number. One was what numbers were made of, not one of them.</p>
-<details class="who"><summary><b>Chrysippus</b> c. 280–207 BC</summary><div><p>A Stoic philosopher who argued that one is a number too. It took a long time for that to catch on.</p></div></details></li>
+<details class="who"><summary><b>Chrysippus</b> c. 280–207 BC</summary><div><p>A Stoic philosopher who argued that one is a number too. It took a long time for that to catch on.</p></div></details><details class="who word"><summary><b>arithmos</b></summary><div><p>Euclid’s Greek words were <i>monas</i>, unity, and <i>arithmos</i>, number. <i>Arithmos</i> gave us arithmetic: the art of numbers.</p></div></details></li>
 <li class="beat" data-s="unitnum" data-y="630" data-d="~630"><span class="yr">~630</span><p>Centuries later, Isidore of Seville still wrote that one is the seed of number, but not a number.</p></li>
 <li class="beat" data-s="unit1" data-y="1585" data-d="1585"><span class="yr">1585</span><p>The Flemish engineer Simon Stevin said it flatly: the unit is a number.</p>
 <details class="who"><summary><b>Simon Stevin</b> 1548–1620</summary><div><p>He advised on windmills, locks and ports, tutored Prince Maurice of Nassau, and planned how to flood the lowlands in an invading army’s path by opening sluices. The same year he published a 29-page booklet that taught Europe decimal fractions, the 0.5 kind, written for surveyors, wine-gaugers and merchants.</p></div></details></li>
@@ -184,7 +189,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="names3"><p>Three apples. Write it |||, or 3, or III, or 三. Say three, trois, drei.</p></li>
 <li class="beat" data-s="names3"><p>Every one of those names lands on the same three apples.</p></li>
 <li class="beat" data-s="g10"><p class="wt">Wait.</p><p>Then what does “10” mean?</p></li>
-<li class="beat" data-s="g10"><p>One group of ten, nothing left over. Thirteen apples are one ten and three: 13. We group by ten because we have ten fingers.</p></li>
+<li class="beat" data-s="g10"><p>One group of ten, nothing left over. Thirteen apples are one ten and three: 13. We group by ten because we have ten fingers.</p><details class="who word"><summary><b>digit</b></summary><div><p>From Latin <i>digitus</i>, finger. Numbers below ten were counted on fingers.</p></div></details></li>
 <li class="beat" data-s="g12"><p>Group by twelve instead, and the same pile is one dozen and one: written 11. Counting in twelves, you’d want single symbols for ten and eleven.</p></li>
 <li class="beat" data-s="g60"><p>Babylon counted in sixties, so thirteen fit in a single place. Our 60 minutes and 60 seconds come down from that habit.</p></li>
 <li class="beat" data-s="g2"><p>In twos, the same pile is 1101.</p></li>
@@ -193,7 +198,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <section class="ch" data-i="3" id="ch-unit"><header class="div"><p class="rn">III.</p><h2>The unit step</h2><p class="pv">One sets the size of every step.</p></header>
 <div class="tl"><div class="stage"><canvas></canvas></div>
 <ol class="beats"><div class="prog"></div>
-<li class="beat" data-s="apples2"><p>Count by adding one at a time. +1, +1: two apples.</p></li>
+<li class="beat" data-s="apples2"><p>Count by adding one at a time. +1, +1: two apples.</p><details class="who word"><summary><b>calculate</b></summary><div><p>From Latin <i>calculus</i>, a pebble. Pebbles were the counters on an abacus.</p></div></details></li>
 <li class="beat" data-s="apples4"><p>Two more: four.</p></li>
 <li class="beat" data-s="unitstep"><p class="wt">Wait.</p><p>How far is 3 from 0?</p></li>
 <li class="beat" data-s="unitstep"><p>Three steps. But how big is a step? That’s what 1 decides. Change the size of 1 and every number moves with it.</p></li>
@@ -214,11 +219,11 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <p>The shell’s main job was the calendar. The Long Count tallied days from a fixed starting day, and every place needed a mark, even an empty one. One quirk: the third place is 18 × 20 = 360, not 400, close to a year.</p>
 <p>Astronomers used it for long spans. The Dresden Codex tracks Venus returning to the same place every 584 days.</p>
 <p>The oldest Long Count date is from 36 BC, but the oldest surviving zero is a few centuries later, so exactly when it began is uncertain.</p>
-</div></details></li>
+</div></details><details class="who word"><summary><b>How do we know?</b></summary><div><p>Very little survives. In 1562, at Maní in Yucatán, the friar Diego de Landa burned twenty-seven Maya books as works of the devil. Only four Maya books are known today.</p></div></details></li>
 <li class="beat" data-s="zline" data-y="628" data-d="628"><span class="yr">628</span><p>In India, Brahmagupta treated zero as a number with rules. A number minus itself is zero. Anything times zero is zero. He wrote rules for fortunes and debts too.</p>
 <details class="who"><summary><b>Brahmagupta</b> 598–c. 668</summary><div><p>He also tried dividing by zero, and said zero divided by zero is zero. Nobody has made that work since. The rest of his rules are the ones we still use.</p></div></details></li>
 <li class="beat" data-s="digits" data-y="1202" data-d="1202"><span class="yr">1202</span><p>Leonardo of Pisa, known as Fibonacci, brought these numerals, zero included, to Europe in his <i>Liber Abaci</i>.</p>
-<details class="who"><summary><b>Fibonacci</b> c. 1170–c. 1250</summary><div><p>As a boy he went with his father, a merchant and customs official, to a trading post in Bugia, in what is now Algeria. That is where he first learned the numerals.</p></div></details></li>
+<details class="who"><summary><b>Fibonacci</b> c. 1170–c. 1250</summary><div><p>As a boy he went with his father, a merchant and customs official, to a trading post in Bugia, in what is now Algeria. That is where he first learned the numerals.</p></div></details><details class="who word"><summary><b>zero</b></summary><div><p>Sanskrit <i>śūnya</i>, empty place, was translated into Arabic as <i>ṣifr</i>, then into Latin as <i>zephirum</i>, and became Italian <i>zero</i>. <i>Ṣifr</i> also gave English “cipher”.</p></div></details></li>
 <li class="beat" data-s="digits" data-y="1299" data-d="1299"><span class="yr">1299</span><p>Not everyone trusted them. That year Florence’s bankers’ guild kept the new numerals out of its official records.</p></li>
 <li class="beat" data-s="zmove"><p>Add nothing, and nothing changes. +0 leaves every number where it was.</p></li>
 <li class="beat" data-s="born0"><p>Back to the line from the start, made of points. One point alone is just “here”.</p></li>
@@ -244,7 +249,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="negs"><p>Negative numbers build the other side of the line. Three from two is possible now: −1.</p></li>
 <li class="beat" data-s="plus2"><p>Here’s the shift promised at the start: a number can be a move, not just a place. +2 is two steps right, wherever you start.</p></li>
 <li class="beat" data-s="minus3"><p>−3 is three steps left.</p></li>
-<li class="beat" data-s="negs"><p>So that’s where negative numbers come from.</p></li>
+<li class="beat" data-s="negs"><p>So that’s where negative numbers come from.</p><details class="who word"><summary><b>negative</b></summary><div><p>From Latin <i>negare</i>, to deny.</p></div></details></li>
 <li class="beat" data-s="negs" data-y="1544" data-d="1544"><span class="yr">1544</span><p>Plenty of people hated this. Michael Stifel called them absurd numbers.</p>
 <details class="who"><summary><b>Michael Stifel</b> c. 1487–1567</summary><div><p>An Augustinian monk who took Luther’s side in the Reformation, a split in the church, not in mathematics. A pro-Luther poem in 1522 made things tense enough that he left his monastery. He also did “word calculations” on the letters of the Bible, and in 1532 announced that the world would end at 8 a.m. on 19 October 1533. It didn’t, and he made no more predictions.</p></div></details></li>
 <li class="beat" data-s="negs" data-y="1545" data-d="1545"><span class="yr">1545</span><p>Gerolamo Cardano used them in his great book of algebra, and called them fictitious.</p>
@@ -284,7 +289,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="between"><p>Half an apple has nowhere to go.</p></li>
 <li class="beat" data-s="pizza"><p>Cut an apple down the middle. Each half is ½. Now there’s a stop between 0 and 1.</p></li>
 <li class="beat" data-s="halve"><p>Halving is a move too: ×½ squeezes the whole apple line toward zero. Twice makes quarter apples.</p></li>
-<li class="beat" data-s="frac"><p>Cut apples into thirds, fifths, sevenths: new stops between the old ones. Fractions describe the in-between, which whole numbers couldn’t.</p></li>
+<li class="beat" data-s="frac"><p>Cut apples into thirds, fifths, sevenths: new stops between the old ones. Fractions describe the in-between, which whole numbers couldn’t.</p><details class="who word"><summary><b>fraction</b></summary><div><p>From Latin <i>frangere</i>, to break: the same root as fracture.</p></div></details></li>
 <li class="beat" data-s="frac" data-y="-1550" data-d="~1550 BC"><span class="yr">~1550 BC</span><p>Egyptian scribes used fractions all the time. The Rhind papyrus is full of them.</p>
 <details class="who"><summary><b>Ahmes</b> scribe, c. 1550 BC</summary><div><p>He copied the papyrus from an older text that is now lost. It writes fractions as sums of pieces of one, like 2/5 = 1/3 + 1/15, with a table of them for every odd number up to 101.</p></div></details></li>
 <li class="beat" data-s="frac" data-y="-375" data-d="~375 BC"><span class="yr">~375 BC</span><p>Greek mathematicians didn’t count them as numbers. A number was a count of whole units, and the one couldn’t be split. In Plato’s <i>Republic</i>, the experts mock anyone who tries.</p></li>
@@ -301,7 +306,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="frac"><p>Fractions seem to fill everything. Surely that’s every number.</p></li>
 <li class="beat" data-s="sq3"><p>Multiply a number by itself and you get a square. Sides of 3 hold 9 little squares: 3 × 3 = 9, written 3².</p></li>
 <li class="beat" data-s="sq3"><p>It’s the stretch move, used on itself.</p></li>
-<li class="beat" data-s="sqback"><p>Run it backwards. Which side gives an area of 4? 2. An area of 9? 3.</p></li>
+<li class="beat" data-s="sqback"><p>Run it backwards. Which side gives an area of 4? 2. An area of 9? 3.</p><details class="who word"><summary><b>√</b></summary><div><p>The sign first appeared in print in 1525, in Christoff Rudolff’s <i>Die Coss</i>. Euler thought it was a stretched <i>r</i>, for <i>radix</i>, root. Nobody knows for sure.</p></div></details></li>
 <li class="beat" data-s="sqback"><p>An area of 2? Which <i>x</i> gives <i>x</i>² = 2?</p></li>
 <li class="beat" data-s="dbl"><p>Draw a square with sides of 1, then the square on its diagonal. It’s made of four half-squares: area exactly 2.</p>
 <details class="who"><summary><b>Plato’s <i>Meno</i></b></summary><div><p>Socrates draws this in the sand for a boy who has never studied geometry and, only asking questions, leads him to it: the square twice as big is the square on the diagonal.</p></div></details></li>
@@ -314,7 +319,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="zoom"><p>Zoom in as far as you like. Two fractions on either side, and √2 always in the space between.</p></li>
 <li class="beat" data-s="zoom"><p>No fraction ever lands on it. You can walk that length, yet as a fraction it’s impossible. There’s a hole in the line.</p></li>
 <li class="beat" data-s="filled"><p>√2 fills the hole. So that’s where irrational numbers come from. They add no new move. They fill the holes.</p>
-<details class="who"><summary><b>Hippasus</b> 5th century BC</summary><div><p>Writers centuries later tell of a Pythagorean drowned at sea for giving away a secret. In some versions it was the irrational, in others a twelve-sided solid. The accounts disagree, and none is close to the time. Almost certainly a story.</p></div></details></li>
+<details class="who"><summary><b>Hippasus</b> 5th century BC</summary><div><p>Writers centuries later tell of a Pythagorean drowned at sea for giving away a secret. In some versions it was the irrational, in others a twelve-sided solid. The accounts disagree, and none is close to the time. Almost certainly a story.</p></div></details><details class="who word"><summary><b>irrational</b></summary><div><p>It translates the Greek <i>alogos</i>: not expressible as a ratio of whole numbers. In ordinary Greek the word also meant without reason.</p></div></details></li>
 <li class="beat" data-s="r2names"><p>“√2”, “1.41421356…”, “the diagonal of the unit square”: three names, one point.</p></li>
 <li class="beat" data-s="r2names"><p>1.414… isn’t more real than √2. It’s a name that never finishes, like 0.333… for ⅓.</p></li>
 <li class="beat" data-s="r2base"><p>And it depends on base ten. In twos, the digits read 1.0110101000…. The diagonal is the same length either way.</p></li>
@@ -372,7 +377,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="r2"><p>2<i>x</i> = 1 was impossible in whole numbers. Fractions: ½.</p></li>
 <li class="beat" data-s="r3"><p><i>x</i>² = 2 was impossible in fractions. √2.</p></li>
 <li class="beat" data-s="r4"><p><i>x</i>² = −1 was impossible on the line. <i>i</i>.</p></li>
-<li class="beat" data-s="recipe"><p>Each rung is a short recipe of multiplying and adding <i>x</i>. Mathematicians call these polynomials.</p></li>
+<li class="beat" data-s="recipe"><p>Each rung is a short recipe of multiplying and adding <i>x</i>. Mathematicians call these polynomials.</p><details class="who word"><summary><b>polynomial</b></summary><div><p>Many terms: <i>poly-</i> plus the ending of “binomial”, two terms. First recorded in the late 1600s.</p></div></details></li>
 <li class="beat" data-s="harder"><p>Try harder recipes. Every answer is already in the plane.</p></li>
 <li class="beat" data-s="harder" data-y="1799.5" data-d="1799"><span class="yr">1799</span><p>Carl Friedrich Gauss, at 22, argued that every polynomial has its answers in the plane. The ladder stops here.</p>
 <details class="who"><summary><b>Carl Friedrich Gauss</b> 1777–1855</summary><div><p>It was his doctoral thesis. The proof had a gap nobody closed until 1920. He kept coming back to the theorem and published his last proof of it in 1849, fifty years after the first.</p></div></details></li>
@@ -391,7 +396,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="algline"><p>Every number so far answers a polynomial. −2 answers <i>x</i> + 3 = 1. ½ answers 2<i>x</i> = 1. √2 answers <i>x</i>² = 2. <i>i</i> answers <i>x</i>² = −1.</p></li>
 <li class="beat" data-s="algline"><p>Scatter the answers of lots of polynomials on the line. They seem to be everywhere.</p></li>
 <li class="beat" data-s="algline"><p class="wt">Wait.</p><p>Is every number the answer to some polynomial?</p></li>
-<li class="beat" data-s="piwalk"><p>Here’s a suspect. Roll a circle of width 1 along the line. One full turn covers a distance called π, about 3.14.</p></li>
+<li class="beat" data-s="piwalk"><p>Here’s a suspect. Roll a circle of width 1 along the line. One full turn covers a distance called π, about 3.14.</p><details class="who word"><summary><b>π</b></summary><div><p>For <i>periphery</i>, the old word for the distance round a circle. William Jones first used π this way in 1706. It caught on after Euler used it.</p></div></details></li>
 <li class="beat" data-s="sqcirc"><p>Since ancient Greece, people tried to draw a square with exactly the area of a circle, using only ruler and compass. For over two thousand years, nobody managed it, and nobody could prove it impossible.</p></li>
 <li class="beat" data-s="liouville" data-y="1844" data-d="1844"><span class="yr">1844</span><p>Joseph Liouville built a number that answers no polynomial at all, by hand, with 1s further and further apart. Numbers like this are called transcendental.</p></li>
 <li class="beat" data-s="trword"><p>Leibniz first used the word in 1682, for what climbs beyond the reach of algebra. Euler later used it for numbers like these.</p></li>
@@ -414,7 +419,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <li class="beat" data-s="comp1"><p>Money earning interest grows out of itself. So does a population. A cooling cup of coffee shrinks the same way.</p></li>
 <li class="beat" data-s="comp1"><p>Grow 1 by 100% in one go: 2.</p></li>
 <li class="beat" data-s="comp2"><p>Grow in two halves instead, 50% and then 50% of that: 2.25. A bit more.</p></li>
-<li class="beat" data-s="compn"><p>Cut it into more and more steps. The total climbs, then stalls near 2.718. That number is <i>e</i>.</p></li>
+<li class="beat" data-s="compn"><p>Cut it into more and more steps. The total climbs, then stalls near 2.718. That number is <i>e</i>.</p><details class="who word"><summary><b>e</b></summary><div><p>Euler first wrote this number as <i>e</i> in a 1731 letter. Why <i>e</i>? Nobody knows. Probably not for “Euler”; maybe just the next free vowel.</p></div></details></li>
 <li class="beat" data-s="grow"><p>Keep growing like that for a time <i>x</i> and you reach <i>e<sup>x</sup></i>. Its speed at each moment, the arrow, equals its size.</p></li>
 <li class="beat" data-s="series"><p>A second road to <i>e</i>, also without end: 1 + 1 + ½ + ⅙ + 1/24 + … Each step divides by one more.</p></li>
 <li class="beat" data-s="hermite" data-y="1873" data-d="1873"><span class="yr">1873</span><p><i>e</i> turns out to be transcendental too, like π. Charles Hermite proved it.</p></li>
@@ -462,7 +467,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-of
 <div class="ctl"><div class="grow"><label for="r-g">growth</label><input id="r-g" type="range" min="-0.25" max="0.25" step="0.01" value="0.12"></div><output id="o-g"></output></div></li>
 <li class="beat" data-s="spiral"><p>A rhyme, not physics.</p></li>
 <li class="beat" data-s="half"><p>Halfway round the circle from 1 is −1.</p></li>
-<li class="beat recap" data-s="half"><div class="rc"><p class="rk">This opened</p><p>Calculus and analysis, the maths of change. Logarithms (John Napier, 1614), differential equations, and the bell curve of probability.</p></div></li>
+<li class="beat recap" data-s="half"><div class="rc"><p class="rk">This opened</p><p>Calculus and analysis, the maths of change. Logarithms (John Napier, 1614), differential equations, and the bell curve of probability.</p><details class="who word"><summary><b>logarithm</b></summary><div><p>Napier’s own coinage, from Greek <i>logos</i>, ratio, and <i>arithmos</i>, number: roughly “ratio-number”.</p></div></details></div></li>
 </ol></div></section>
 
 
